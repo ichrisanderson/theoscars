@@ -6,4 +6,7 @@
     <string name="filter_title">Filter</string>
     <string name="categories_title">Categories</string>
     <string name="apply_filter_cta">Apply</string>
+    <string name="clear_filter_cta">Clear All</string>
+    <string name="empty_movies_results_title">No movies found</string>
+    <string name="empty_movies_results_subtitle">Please try a different filter…</string>
 </resources>

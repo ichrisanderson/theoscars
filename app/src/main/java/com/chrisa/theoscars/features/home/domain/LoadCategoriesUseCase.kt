@@ -17,7 +17,6 @@
 package com.chrisa.theoscars.features.home.domain
 
 import com.chrisa.theoscars.core.util.coroutines.CoroutineDispatchers
-import com.chrisa.theoscars.features.home.data.HomeDataRepository
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -59,7 +58,7 @@ class LoadCategoriesUseCase @Inject constructor(
             // Effects
             "Production Design",
             "Visual Effects",
-            "Film Editing"
+            "Film Editing",
         )
     }
 }

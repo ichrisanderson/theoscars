@@ -22,7 +22,6 @@ https://user-images.githubusercontent.com/272168/224362450-99c9ceef-96ad-4a1a-8a
 - Kotlin coroutines
 - Room
 - Dagger Hilt
-- AndroidX DataStore
 - Jetpack Compose
 
 By Chris Anderson (https://github.com/ichrisanderson)

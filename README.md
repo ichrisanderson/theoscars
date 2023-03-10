@@ -4,7 +4,14 @@ Project built using Jetpack Compose to browse Oscar nominations.
 
 WIP. More features to come.
 
+# Features
+
+- View nominations and open trailers
 https://user-images.githubusercontent.com/272168/224086232-6867bee2-5a66-4bf1-b943-062f60ee77b7.mp4
+
+- Apply filters 
+https://user-images.githubusercontent.com/272168/224362450-99c9ceef-96ad-4a1a-8a3c-b91525a5d0c3.mp4
+
 
 # Built using
 

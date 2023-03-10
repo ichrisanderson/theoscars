@@ -3,4 +3,7 @@
     <string name="empty_screen_title">Coming Soon</string>
     <string name="empty_screen_subtitle">Under Construction</string>
     <string name="nominations_title">Nominations</string>
+    <string name="filter_title">Filter</string>
+    <string name="categories_title">Categories</string>
+    <string name="apply_filter_cta">Apply</string>
 </resources>

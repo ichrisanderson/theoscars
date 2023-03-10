@@ -19,7 +19,9 @@ package com.chrisa.theoscars.features.home.presentation
 import androidx.lifecycle.ViewModel
 import com.chrisa.theoscars.core.util.coroutines.CloseableCoroutineScope
 import com.chrisa.theoscars.core.util.coroutines.CoroutineDispatchers
+import com.chrisa.theoscars.features.home.domain.FilterMoviesUseCase
 import com.chrisa.theoscars.features.home.domain.InitializeDataUseCase
+import com.chrisa.theoscars.features.home.domain.LoadCategoriesUseCase
 import com.chrisa.theoscars.features.home.domain.LoadMoviesUseCase
 import com.chrisa.theoscars.features.home.domain.models.MovieSummaryModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,10 +33,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    dispatchers: CoroutineDispatchers,
-    coroutineScope: CloseableCoroutineScope,
+    private val dispatchers: CoroutineDispatchers,
+    private val coroutineScope: CloseableCoroutineScope,
     private val initializeDataUseCase: InitializeDataUseCase,
     private val loadMoviesUseCase: LoadMoviesUseCase,
+    private val filterMoviesUseCase: FilterMoviesUseCase,
+    private val loadCategoriesUseCase: LoadCategoriesUseCase,
 ) : ViewModel(coroutineScope) {
 
     private val _viewState = MutableStateFlow(ViewState.default())
@@ -50,11 +54,28 @@ class HomeViewModel @Inject constructor(
 
     private suspend fun loadMovies() {
         val movies = loadMoviesUseCase.execute()
+        val categories = loadCategoriesUseCase.execute()
         _viewState.update {
             it.copy(
                 isLoading = false,
                 movies = movies,
+                categories = categories,
+                selectedCategories = categories,
             )
+        }
+    }
+
+    fun setSelectedCategories(selectedCategories: List<String>) {
+        coroutineScope.launch(dispatchers.io) {
+            _viewState.update { vs ->
+
+                val filteredMovies = filterMoviesUseCase.execute(selectedCategories)
+
+                vs.copy(
+                    movies = filteredMovies,
+                    selectedCategories = selectedCategories,
+                )
+            }
         }
     }
 }
@@ -62,12 +83,16 @@ class HomeViewModel @Inject constructor(
 data class ViewState(
     val isLoading: Boolean,
     val movies: List<MovieSummaryModel>,
+    val categories: List<String>,
+    val selectedCategories: List<String>,
 ) {
 
     companion object {
         fun default() = ViewState(
             isLoading = false,
             movies = emptyList(),
+            categories = emptyList(),
+            selectedCategories = emptyList(),
         )
     }
 }

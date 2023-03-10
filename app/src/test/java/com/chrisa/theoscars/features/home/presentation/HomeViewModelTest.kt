@@ -24,9 +24,12 @@ import com.chrisa.theoscars.core.data.db.FakeAssetFileManager
 import com.chrisa.theoscars.core.util.coroutines.CloseableCoroutineScope
 import com.chrisa.theoscars.core.util.coroutines.TestCoroutineDispatchersImpl
 import com.chrisa.theoscars.features.home.data.HomeDataRepository
+import com.chrisa.theoscars.features.home.domain.FilterMoviesUseCase
 import com.chrisa.theoscars.features.home.domain.InitializeDataUseCase
+import com.chrisa.theoscars.features.home.domain.LoadCategoriesUseCase
 import com.chrisa.theoscars.features.home.domain.LoadMoviesUseCase
 import com.chrisa.theoscars.features.home.domain.models.MovieSummaryModel
+import com.chrisa.theoscars.features.movie.domain.models.NominationModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -63,15 +66,22 @@ class HomeViewModelTest {
 
     private fun homeViewModel(): HomeViewModel {
         return HomeViewModel(
-            dispatchers,
-            CloseableCoroutineScope(),
-            InitializeDataUseCase(
+            dispatchers = dispatchers,
+            coroutineScope = CloseableCoroutineScope(),
+            initializeDataUseCase = InitializeDataUseCase(
                 dispatchers,
                 bootstrapper,
             ),
-            LoadMoviesUseCase(
+            loadMoviesUseCase = LoadMoviesUseCase(
                 dispatchers,
                 HomeDataRepository(appDatabase),
+            ),
+            filterMoviesUseCase = FilterMoviesUseCase(
+                dispatchers,
+                HomeDataRepository(appDatabase),
+            ),
+            loadCategoriesUseCase = LoadCategoriesUseCase(
+                dispatchers,
             ),
         )
     }
@@ -100,6 +110,53 @@ class HomeViewModelTest {
                 backdropImagePath = "/mqsPyyeDCBAghXyjbw4TfEYwljw.jpg",
                 overview = "Paul Baumer and his friends Albert and Muller, egged on by romantic dreams of heroism, voluntarily enlist in the German army. Full of excitement and patriotic fervour, the boys enthusiastically march into a war they believe in. But once on the Western Front, they discover the soul-destroying horror of World War I.",
                 title = "All Quiet on the Western Front",
+                nominations = listOf(
+                    NominationModel(
+                        category = "Cinematography",
+                        name = "James Friend",
+                        winner = null,
+                    ),
+                    NominationModel(
+                        category = "International Feature Film",
+                        name = "Germany",
+                        winner = null,
+                    ),
+                    NominationModel(
+                        category = "Makeup and Hairstyling",
+                        name = "Heike Merker and Linda Eisenhamerová",
+                        winner = null,
+                    ),
+                    NominationModel(
+                        category = "Music (Original Score)",
+                        name = "Volker Bertelmann",
+                        winner = null,
+                    ),
+                    NominationModel(
+                        category = "Best Picture",
+                        name = "Malte Grunert, Producer",
+                        winner = null,
+                    ),
+                    NominationModel(
+                        category = "Production Design",
+                        name = "Production Design: Christian M. Goldbeck; Set Decoration: Ernestine Hipper",
+                        winner = null,
+                    ),
+                    NominationModel(
+                        category = "Sound",
+                        name = "Viktor Prášil, Frank Kruse, Markus Stemler, Lars Ginzel and Stefan Korte",
+                        winner = null,
+                    ),
+                    NominationModel(
+                        category = "Visual Effects",
+                        name = "Frank Petzold, Viktor Müller, Markus Frank and Kamil Jafar",
+                        winner = null,
+                    ),
+                    NominationModel(
+                        category = "Writing (Adapted Screenplay)",
+                        name = "Screenplay - Edward Berger, Lesley Paterson & Ian Stokell",
+                        winner = null,
+                    ),
+                ),
             ),
         )
         assertThat(sut.viewState.value.movies.last()).isEqualTo(
@@ -108,6 +165,13 @@ class HomeViewModelTest {
                 backdropImagePath = "/alfv8yO5jUS7HOsuu7v21hDUo1t.jpg",
                 overview = "A cold night in December. Ebba waits for the tram to go home after a party, but the ride takes an unexpected turn.",
                 title = "Night Ride",
+                nominations = listOf(
+                    NominationModel(
+                        category = "Short Film (Live Action)",
+                        name = "Eirik Tveiten and Gaute Lid Larssen",
+                        winner = null,
+                    ),
+                ),
             ),
         )
     }
@@ -117,5 +181,39 @@ class HomeViewModelTest {
         val sut = homeViewModel()
 
         assertThat(sut.viewState.value.isLoading).isFalse()
+    }
+
+    @Test
+    fun `WHEN initialised THEN all categories are selected`() {
+        val sut = homeViewModel()
+
+        assertThat(sut.viewState.value.selectedCategories).containsAtLeastElementsIn(sut.viewState.value.categories)
+    }
+
+    @Test
+    fun `WHEN selected categories updated THEN viewState updated`() {
+        val sut = homeViewModel()
+        val newSelection = sut.viewState.value.selectedCategories.drop(2)
+
+        sut.setSelectedCategories(newSelection)
+
+        assertThat(sut.viewState.value.selectedCategories).isEqualTo(newSelection)
+    }
+
+    @Test
+    fun `WHEN filter applied THEN viewState updated with selected movies`() {
+        val sut = homeViewModel()
+        val selection = listOf("Actress in a Supporting Role")
+
+        sut.setSelectedCategories(selection)
+
+        assertThat(sut.viewState.value.movies.map { it.title }).isEqualTo(
+            listOf(
+                "Black Panther: Wakanda Forever",
+                "Everything Everywhere All at Once",
+                "The Banshees of Inisherin",
+                "The Whale",
+            ),
+        )
     }
 }

@@ -30,7 +30,7 @@ class FakeNominationDao : NominationDao {
     }
 
     override fun allCategoriesForCeremony(ceremonyYear: Int): List<String> {
-        return nominations.filter { it.ceremonyYear == ceremonyYear }.map { it.category }
+        return nominations.filter { it.ceremonyYear == ceremonyYear }.map { it.category }.distinct()
     }
 
     override fun allCeremonyNominationsWithMovieTitle(film: String, ceremonyYear: Int): List<NominationEntity> {
@@ -42,6 +42,6 @@ class FakeNominationDao : NominationDao {
     }
 
     override fun allNamesForCeremony(ceremonyYear: Int): List<String> {
-        return nominations.filter { it.ceremonyYear == ceremonyYear }.map { it.name }
+        return nominations.filter { it.ceremonyYear == ceremonyYear }.map { it.name }.distinct()
     }
 }

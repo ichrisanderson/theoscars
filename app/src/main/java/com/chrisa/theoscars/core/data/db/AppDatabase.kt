@@ -105,10 +105,10 @@ interface NominationDao {
     @Query("SELECT DISTINCT category FROM nomination WHERE ceremonyYear = :ceremonyYear")
     fun allCategoriesForCeremony(ceremonyYear: Int): List<String>
 
-    @Query("SELECT DISTINCT * FROM nomination WHERE film = :film AND ceremonyYear = :ceremonyYear")
+    @Query("SELECT * FROM nomination WHERE film = :film AND ceremonyYear = :ceremonyYear")
     fun allCeremonyNominationsWithMovieTitle(film: String, ceremonyYear: Int): List<NominationEntity>
 
-    @Query("SELECT DISTINCT * FROM nomination WHERE ceremonyYear = :ceremonyYear")
+    @Query("SELECT * FROM nomination WHERE ceremonyYear = :ceremonyYear")
     fun allNominationsForCeremony(ceremonyYear: Int): List<NominationEntity>
 
     @Query("SELECT DISTINCT name FROM nomination WHERE ceremonyYear = :ceremonyYear")

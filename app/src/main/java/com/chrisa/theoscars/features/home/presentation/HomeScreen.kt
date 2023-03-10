@@ -16,6 +16,8 @@
 
 package com.chrisa.theoscars.features.home.presentation
 
+import android.annotation.SuppressLint
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateFloat
@@ -25,17 +27,33 @@ import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.IconButton
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetState
+import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -45,6 +63,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -59,13 +80,21 @@ import coil.compose.AsyncImage
 import com.chrisa.theoscars.R
 import com.chrisa.theoscars.core.ui.theme.OscarsTheme
 import com.chrisa.theoscars.features.home.domain.models.MovieSummaryModel
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
     onMovieClick: (Long) -> Unit,
 ) {
     val viewState by viewModel.viewState.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
+    val modalSheetState = rememberModalBottomSheetState(
+        initialValue = ModalBottomSheetValue.Hidden,
+        confirmStateChange = { it != ModalBottomSheetValue.HalfExpanded },
+        skipHalfExpanded = true,
+    )
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -88,9 +117,29 @@ fun HomeScreen(
             modifier = Modifier.alpha(contentAlpha),
             topPadding = contentTopPadding,
             movies = viewState.movies,
+            onFilterClick = {
+                coroutineScope.launch {
+                    modalSheetState.animateTo(ModalBottomSheetValue.Expanded)
+                }
+            },
             onMovieClick = onMovieClick,
         )
     }
+
+    BackHandler(modalSheetState.isVisible) {
+        coroutineScope.launch { modalSheetState.hide() }
+    }
+    FilterSheet(
+        modalSheetState = modalSheetState,
+        categories = viewState.categories,
+        selectedCategories = viewState.selectedCategories,
+        onApplySelection = {
+            coroutineScope.launch {
+                modalSheetState.hide()
+                viewModel.setSelectedCategories(it)
+            }
+        },
+    )
 }
 
 @Composable
@@ -98,11 +147,12 @@ private fun HomeContent(
     modifier: Modifier = Modifier,
     topPadding: Dp = 0.dp,
     movies: List<MovieSummaryModel>,
+    onFilterClick: () -> Unit,
     onMovieClick: (Long) -> Unit,
 ) {
     Column(modifier = modifier) {
-        Spacer(Modifier.padding(top = topPadding))
-        AppBar()
+        Spacer(modifier = Modifier.padding(top = topPadding))
+        AppBar(onFilterClick = onFilterClick)
         LazyColumn(modifier = Modifier.padding(bottom = 16.dp)) {
             items(items = movies, key = { it.id }) { movie ->
                 MovieCard(
@@ -117,6 +167,7 @@ private fun HomeContent(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppBar(
+    onFilterClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     TopAppBar(
@@ -135,6 +186,15 @@ fun AppBar(
                 painter = painterResource(R.drawable.ic_oscar),
                 contentDescription = "",
             )
+        },
+        actions = {
+            IconButton(onClick = onFilterClick) {
+                Icon(
+                    imageVector = Icons.Default.Tune,
+                    contentDescription = "",
+                    tint = MaterialTheme.colorScheme.onSurface,
+                )
+            }
         },
     )
 }
@@ -188,6 +248,106 @@ fun MovieCard(
     }
 }
 
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun FilterSheet(
+    modalSheetState: ModalBottomSheetState,
+    categories: List<String>,
+    selectedCategories: List<String>,
+    onApplySelection: (List<String>) -> Unit,
+) {
+    ModalBottomSheetLayout(
+        sheetState = modalSheetState,
+        content = { },
+        sheetContent = {
+            Surface {
+                FilterContent(categories, selectedCategories, onApplySelection)
+            }
+        },
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FilterContent(
+    categories: List<String>,
+    selectedCategories: List<String>,
+    onApplySelection: (List<String>) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val selectedCategoriesStateList = remember(categories) { selectedCategories.toMutableStateList() }
+
+    Column(
+        modifier = modifier
+            .statusBarsPadding()
+            .navigationBarsPadding(),
+    ) {
+        Text(
+            text = stringResource(id = R.string.filter_title),
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 8.dp),
+        )
+        Divider(
+            modifier = Modifier
+                .padding(bottom = 8.dp),
+        )
+        Text(
+            text = stringResource(id = R.string.categories_title),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .padding(vertical = 8.dp),
+        )
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            categories.forEach { category ->
+                item {
+                    FilterChip(
+                        selected = selectedCategoriesStateList.contains(category),
+                        onClick = {
+                            if (selectedCategoriesStateList.contains(category)) {
+                                selectedCategoriesStateList.remove(category)
+                            } else {
+                                selectedCategoriesStateList.add(category)
+                            }
+                        },
+                        label = {
+                            Text(
+                                text = category,
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        },
+                    )
+                }
+            }
+        }
+        Divider(
+            modifier = Modifier
+                .padding(top = 8.dp)
+                .alpha(0.6f),
+        )
+        Button(
+            onClick = { onApplySelection(selectedCategoriesStateList) },
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .widthIn(128.dp)
+                .padding(vertical = 16.dp),
+        ) {
+            Text(
+                text = stringResource(id = R.string.apply_filter_cta),
+                style = MaterialTheme.typography.labelLarge,
+            )
+        }
+    }
+}
+
 @Preview
 @Composable
 fun HomeContentPreview() {
@@ -200,14 +360,17 @@ fun HomeContentPreview() {
                         backdropImagePath = null,
                         overview = "Paul Baumer and his friends Albert and Muller, egged on by romantic dreams of heroism, voluntarily enlist in the German army. Full of excitement and patriotic fervour, the boys enthusiastically march into a war they believe in. But once on the Western Front, they discover the soul-destroying horror of World War I.",
                         title = "All Quiet on the Western Front",
+                        nominations = emptyList(),
                     ),
                     MovieSummaryModel(
                         id = 1043141,
                         backdropImagePath = null,
                         overview = "A cold night in December. Ebba waits for the tram to go home after a party, but the ride takes an unexpected turn.",
                         title = "Night Ride",
+                        nominations = emptyList(),
                     ),
                 ),
+                onFilterClick = { },
                 onMovieClick = { },
             )
         }
@@ -225,9 +388,25 @@ fun MovieCardPreview() {
                     backdropImagePath = null,
                     overview = "Paul Baumer and his friends Albert and Muller, egged on by romantic dreams of heroism, voluntarily enlist in the German army.",
                     title = "All Quiet on the Western Front",
+                    nominations = emptyList(),
                 ),
                 onMovieClick = { },
                 modifier = Modifier.padding(8.dp),
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Preview
+@Composable
+fun FilterDialogPreview() {
+    OscarsTheme {
+        Surface {
+            FilterContent(
+                categories = listOf("Best Picture", "Best Short Film", "Best Actor"),
+                selectedCategories = listOf("Best Short Film", "Best Actor"),
+                onApplySelection = { },
             )
         }
     }

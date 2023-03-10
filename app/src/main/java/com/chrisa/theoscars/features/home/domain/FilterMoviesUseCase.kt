@@ -23,11 +23,14 @@ import com.chrisa.theoscars.features.movie.domain.models.NominationModel
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class LoadMoviesUseCase @Inject constructor(
+class FilterMoviesUseCase @Inject constructor(
     private val coroutineDispatchers: CoroutineDispatchers,
     private val homeDataRepository: HomeDataRepository,
 ) {
-    suspend fun execute(year: Int = 2023): List<MovieSummaryModel> = withContext(coroutineDispatchers.io) {
+    suspend fun execute(
+        selectedCategories: List<String>,
+        year: Int = 2023,
+    ): List<MovieSummaryModel> = withContext(coroutineDispatchers.io) {
         val nominations = homeDataRepository.allNominationsForCeremony(year)
         val nominationsFilmMap = mutableMapOf<String, MutableList<NominationModel>>()
         nominations.forEach { nomination ->
@@ -42,7 +45,7 @@ class LoadMoviesUseCase @Inject constructor(
                 ),
             )
         }
-        homeDataRepository.allMoviesForCeremony(year)
+        val movies = homeDataRepository.allMoviesForCeremony(year)
             .map {
                 MovieSummaryModel(
                     id = it.id,
@@ -52,5 +55,9 @@ class LoadMoviesUseCase @Inject constructor(
                     nominations = nominationsFilmMap.getOrDefault(it.title, emptyList<NominationModel>()),
                 )
             }
+        val selectedCategoriesSet = selectedCategories.toSet()
+        return@withContext movies.filter { m ->
+            m.nominations.any { nomination -> selectedCategoriesSet.contains(nomination.category) }
+        }
     }
 }

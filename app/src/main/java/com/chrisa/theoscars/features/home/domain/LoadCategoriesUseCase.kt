@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-package com.chrisa.theoscars.features.home.domain.models
+package com.chrisa.theoscars.features.home.domain
 
-import com.chrisa.theoscars.features.movie.domain.models.NominationModel
+import com.chrisa.theoscars.core.util.coroutines.CoroutineDispatchers
+import com.chrisa.theoscars.features.home.data.HomeDataRepository
+import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-data class MovieSummaryModel(
-    val id: Long,
-    val backdropImagePath: String?,
-    val overview: String,
-    val title: String,
-    val nominations: List<NominationModel>,
-)
-
-data class NominationModel(
-    val category: String,
-    val name: String,
-    val winner: Boolean?,
-)
+class LoadCategoriesUseCase @Inject constructor(
+    private val coroutineDispatchers: CoroutineDispatchers,
+    private val homeDataRepository: HomeDataRepository,
+) {
+    suspend fun execute(): List<String> = withContext(coroutineDispatchers.io) {
+        return@withContext homeDataRepository.allCategoriesForCeremony(2023)
+    }
+}

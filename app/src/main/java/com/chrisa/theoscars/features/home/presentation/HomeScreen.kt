@@ -36,6 +36,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -47,6 +48,7 @@ import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Button
@@ -54,6 +56,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -73,6 +76,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -132,7 +136,7 @@ fun HomeScreen(
     FilterSheet(
         modalSheetState = modalSheetState,
         categories = viewState.categories,
-        selectedCategories = viewState.selectedCategories,
+        selectedCategories = viewState.selectedCategories.toList(),
         onApplySelection = {
             coroutineScope.launch {
                 modalSheetState.hide()
@@ -153,14 +157,44 @@ private fun HomeContent(
     Column(modifier = modifier) {
         Spacer(modifier = Modifier.padding(top = topPadding))
         AppBar(onFilterClick = onFilterClick)
-        LazyColumn(modifier = Modifier.padding(bottom = 16.dp)) {
-            items(items = movies, key = { it.id }) { movie ->
-                MovieCard(
-                    movie = movie,
-                    onMovieClick = onMovieClick,
-                )
+        if (movies.isEmpty()) {
+            EmptyMovies()
+        } else {
+            LazyColumn(modifier = Modifier.padding(bottom = 16.dp)) {
+                items(items = movies, key = { it.id }) { movie ->
+                    MovieCard(
+                        movie = movie,
+                        onMovieClick = onMovieClick,
+                    )
+                }
             }
         }
+    }
+}
+
+@Composable
+fun EmptyMovies(
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            modifier = Modifier.padding(8.dp),
+            text = stringResource(id = R.string.empty_movies_results_title),
+            style = MaterialTheme.typography.titleLarge,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.primary,
+        )
+        Text(
+            modifier = Modifier.padding(horizontal = 8.dp),
+            text = stringResource(id = R.string.empty_movies_results_subtitle),
+            style = MaterialTheme.typography.bodySmall,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.outline,
+        )
     }
 }
 
@@ -262,21 +296,23 @@ fun FilterSheet(
         content = { },
         sheetContent = {
             Surface {
-                FilterContent(categories, selectedCategories, onApplySelection)
+                FilterContent(modalSheetState.isVisible, categories, selectedCategories, onApplySelection)
             }
         },
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun FilterContent(
+    isOpen: Boolean,
     categories: List<String>,
     selectedCategories: List<String>,
     onApplySelection: (List<String>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val selectedCategoriesStateList = remember(categories) { selectedCategories.toMutableStateList() }
+    val selectedCategoriesStateList =
+        remember(isOpen) { selectedCategories.toMutableStateList() }
 
     Column(
         modifier = modifier
@@ -307,6 +343,31 @@ fun FilterContent(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
+            item {
+                FilterChip(
+                    selected = false,
+                    onClick = { selectedCategoriesStateList.clear() },
+                    colors = FilterChipDefaults.filterChipColors(
+                        containerColor = Color.Transparent,
+                    ),
+                    border = FilterChipDefaults.filterChipBorder(
+                        borderWidth = 1.dp,
+                    ),
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Clear,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                        )
+                    },
+                    label = {
+                        Text(
+                            text = stringResource(id = R.string.clear_filter_cta),
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    },
+                )
+            }
             categories.forEach { category ->
                 item {
                     FilterChip(
@@ -379,6 +440,20 @@ fun HomeContentPreview() {
 
 @Preview
 @Composable
+fun HomeContentEmptyMoviesPreview() {
+    OscarsTheme {
+        Surface {
+            HomeContent(
+                movies = emptyList(),
+                onFilterClick = { },
+                onMovieClick = { },
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
 fun MovieCardPreview() {
     OscarsTheme {
         Surface {
@@ -404,6 +479,7 @@ fun FilterDialogPreview() {
     OscarsTheme {
         Surface {
             FilterContent(
+                true,
                 categories = listOf("Best Picture", "Best Short Film", "Best Actor"),
                 selectedCategories = listOf("Best Short Film", "Best Actor"),
                 onApplySelection = { },

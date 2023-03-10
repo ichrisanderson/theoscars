@@ -82,7 +82,6 @@ class HomeViewModelTest {
             ),
             loadCategoriesUseCase = LoadCategoriesUseCase(
                 dispatchers,
-                HomeDataRepository(appDatabase),
             ),
         )
     }
@@ -192,7 +191,7 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun `WHEN selected categories updated THEN viewstate updated`() {
+    fun `WHEN selected categories updated THEN viewState updated`() {
         val sut = homeViewModel()
         val newSelection = sut.viewState.value.selectedCategories.drop(2)
 
@@ -202,7 +201,7 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun `WHEN filter applied THEN viewstate updated with selected movies`() {
+    fun `WHEN filter applied THEN viewState updated with selected movies`() {
         val sut = homeViewModel()
         val selection = listOf("Actress in a Supporting Role")
 

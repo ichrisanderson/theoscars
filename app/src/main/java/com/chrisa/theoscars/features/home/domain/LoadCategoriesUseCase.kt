@@ -23,9 +23,43 @@ import javax.inject.Inject
 
 class LoadCategoriesUseCase @Inject constructor(
     private val coroutineDispatchers: CoroutineDispatchers,
-    private val homeDataRepository: HomeDataRepository,
 ) {
     suspend fun execute(): List<String> = withContext(coroutineDispatchers.io) {
-        return@withContext homeDataRepository.allCategoriesForCeremony(2023)
+        return@withContext categoryOrderMap
+    }
+
+    companion object {
+        // TODO: Update these if adding more years
+        private val categoryOrderMap = listOf(
+            // Feature films
+            "Best Picture",
+            "International Feature Film",
+            "Animated Feature Film",
+            "Cinematography",
+            "Documentary Feature Film",
+            // Actors/Directors/Writers
+            "Actor in a Leading Role",
+            "Actress in a Leading Role",
+            "Actor in a Supporting Role",
+            "Actress in a Supporting Role",
+            "Directing",
+            "Writing (Adapted Screenplay)",
+            "Writing (Original Screenplay)",
+            // Short movies
+            "Documentary Short Film",
+            "Short Film (Animated)",
+            "Short Film (Live Action)",
+            // Sound
+            "Sound",
+            "Music (Original Score)",
+            "Music (Original Song)",
+            // Makeup/Costume
+            "Makeup and Hairstyling",
+            "Costume Design",
+            // Effects
+            "Production Design",
+            "Visual Effects",
+            "Film Editing"
+        )
     }
 }

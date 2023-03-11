@@ -30,6 +30,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -49,6 +50,7 @@ import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Button
@@ -66,8 +68,8 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -100,6 +102,8 @@ fun HomeScreen(
         skipHalfExpanded = true,
     )
 
+    var selectedCategoriesStateList = viewState.selectedCategories.toMutableStateList()
+
     Surface(
         modifier = Modifier.fillMaxSize(),
     ) {
@@ -116,27 +120,26 @@ fun HomeScreen(
         ) { vs ->
             if (vs.isLoading) 100.dp else 0.dp
         }
-
         HomeContent(
             modifier = Modifier.alpha(contentAlpha),
             topPadding = contentTopPadding,
             movies = viewState.movies,
             onFilterClick = {
                 coroutineScope.launch {
+                    selectedCategoriesStateList = viewState.selectedCategories.toMutableStateList()
                     modalSheetState.animateTo(ModalBottomSheetValue.Expanded)
                 }
             },
             onMovieClick = onMovieClick,
         )
     }
-
     BackHandler(modalSheetState.isVisible) {
         coroutineScope.launch { modalSheetState.hide() }
     }
     FilterSheet(
         modalSheetState = modalSheetState,
         categories = viewState.categories,
-        selectedCategories = viewState.selectedCategories.toList(),
+        selectedCategories = selectedCategoriesStateList,
         onApplySelection = {
             coroutineScope.launch {
                 modalSheetState.hide()
@@ -146,6 +149,7 @@ fun HomeScreen(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HomeContent(
     modifier: Modifier = Modifier,
@@ -288,7 +292,7 @@ fun MovieCard(
 fun FilterSheet(
     modalSheetState: ModalBottomSheetState,
     categories: List<String>,
-    selectedCategories: List<String>,
+    selectedCategories: SnapshotStateList<String>,
     onApplySelection: (List<String>) -> Unit,
 ) {
     ModalBottomSheetLayout(
@@ -296,7 +300,11 @@ fun FilterSheet(
         content = { },
         sheetContent = {
             Surface {
-                FilterContent(modalSheetState.isVisible, categories, selectedCategories, onApplySelection)
+                FilterContent(
+                    categories,
+                    selectedCategories,
+                    onApplySelection,
+                )
             }
         },
     )
@@ -305,15 +313,11 @@ fun FilterSheet(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun FilterContent(
-    isOpen: Boolean,
     categories: List<String>,
-    selectedCategories: List<String>,
+    selectedCategoriesStateList: SnapshotStateList<String>,
     onApplySelection: (List<String>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val selectedCategoriesStateList =
-        remember(isOpen) { selectedCategories.toMutableStateList() }
-
     Column(
         modifier = modifier
             .statusBarsPadding()
@@ -330,12 +334,62 @@ fun FilterContent(
             modifier = Modifier
                 .padding(bottom = 8.dp),
         )
-        Text(
-            text = stringResource(id = R.string.categories_title),
-            style = MaterialTheme.typography.titleMedium,
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = stringResource(id = R.string.categories_selected_title_format, selectedCategoriesStateList.size),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .padding(vertical = 8.dp),
+            )
+            FilterChip(
+                selected = false,
+                onClick = { selectedCategoriesStateList.clear() },
+                colors = FilterChipDefaults.filterChipColors(
+                    containerColor = Color.Transparent,
+                ),
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Clear,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                    )
+                },
+                label = {
+                    Text(
+                        text = stringResource(id = R.string.clear_filter_cta),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                },
+            )
+            FilterChip(
+                selected = false,
+                onClick = { selectedCategoriesStateList.addAll(categories) },
+                colors = FilterChipDefaults.filterChipColors(
+                    containerColor = Color.Transparent,
+                ),
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.SelectAll,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                    )
+                },
+                label = {
+                    Text(
+                        text = stringResource(id = R.string.select_all_filter_cta),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                },
+                modifier = Modifier.padding(start = 8.dp),
+            )
+        }
+        Divider(
             modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .padding(vertical = 8.dp),
+                .padding(top = 8.dp)
+                .alpha(0.3f),
         )
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -343,31 +397,6 @@ fun FilterContent(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
-            item {
-                FilterChip(
-                    selected = false,
-                    onClick = { selectedCategoriesStateList.clear() },
-                    colors = FilterChipDefaults.filterChipColors(
-                        containerColor = Color.Transparent,
-                    ),
-                    border = FilterChipDefaults.filterChipBorder(
-                        borderWidth = 1.dp,
-                    ),
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Clear,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp),
-                        )
-                    },
-                    label = {
-                        Text(
-                            text = stringResource(id = R.string.clear_filter_cta),
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                    },
-                )
-            }
             categories.forEach { category ->
                 item {
                     FilterChip(
@@ -391,8 +420,7 @@ fun FilterContent(
         }
         Divider(
             modifier = Modifier
-                .padding(top = 8.dp)
-                .alpha(0.6f),
+                .alpha(0.3f),
         )
         Button(
             onClick = { onApplySelection(selectedCategoriesStateList) },
@@ -479,9 +507,8 @@ fun FilterDialogPreview() {
     OscarsTheme {
         Surface {
             FilterContent(
-                true,
                 categories = listOf("Best Picture", "Best Short Film", "Best Actor"),
-                selectedCategories = listOf("Best Short Film", "Best Actor"),
+                selectedCategoriesStateList = listOf("Best Short Film", "Best Actor").toMutableStateList(),
                 onApplySelection = { },
             )
         }

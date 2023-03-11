@@ -16,7 +16,6 @@
 
 package com.chrisa.theoscars.features.home.presentation
 
-import android.annotation.SuppressLint
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDp
@@ -32,44 +31,43 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.IconButton
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetState
-import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -88,7 +86,6 @@ import com.chrisa.theoscars.core.ui.theme.OscarsTheme
 import com.chrisa.theoscars.features.home.domain.models.MovieSummaryModel
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
@@ -96,60 +93,49 @@ fun HomeScreen(
 ) {
     val viewState by viewModel.viewState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
-    val modalSheetState = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden,
-        confirmStateChange = { it != ModalBottomSheetValue.HalfExpanded },
-        skipHalfExpanded = true,
-    )
+    var openBottomSheet by rememberSaveable { mutableStateOf(false) }
 
-    var selectedCategoriesStateList = viewState.selectedCategories.toMutableStateList()
-
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-    ) {
-        val transition = updateTransition(viewState, label = "splashTransition")
-        val contentAlpha by transition.animateFloat(
-            transitionSpec = { tween(durationMillis = 300) },
-            label = "contentAlpha",
-        ) { vs ->
-            if (vs.isLoading) 0f else 1f
-        }
-        val contentTopPadding by transition.animateDp(
-            transitionSpec = { spring(stiffness = Spring.StiffnessLow) },
-            label = "contentTopPadding",
-        ) { vs ->
-            if (vs.isLoading) 100.dp else 0.dp
-        }
-        HomeContent(
-            modifier = Modifier.alpha(contentAlpha),
-            topPadding = contentTopPadding,
-            movies = viewState.movies,
-            onFilterClick = {
-                coroutineScope.launch {
-                    selectedCategoriesStateList = viewState.selectedCategories.toMutableStateList()
-                    modalSheetState.animateTo(ModalBottomSheetValue.Expanded)
-                }
-            },
-            onMovieClick = onMovieClick,
-        )
+    val transition = updateTransition(viewState, label = "splashTransition")
+    val contentAlpha by transition.animateFloat(
+        transitionSpec = { tween(durationMillis = 300) },
+        label = "contentAlpha",
+    ) { vs ->
+        if (vs.isLoading) 0f else 1f
     }
-    BackHandler(modalSheetState.isVisible) {
-        coroutineScope.launch { modalSheetState.hide() }
+    val contentTopPadding by transition.animateDp(
+        transitionSpec = { spring(stiffness = Spring.StiffnessLow) },
+        label = "contentTopPadding",
+    ) { vs ->
+        if (vs.isLoading) 100.dp else 0.dp
     }
-    FilterSheet(
-        modalSheetState = modalSheetState,
-        categories = viewState.categories,
-        selectedCategories = selectedCategoriesStateList,
-        onApplySelection = {
+    HomeContent(
+        modifier = Modifier.alpha(contentAlpha),
+        topPadding = contentTopPadding,
+        movies = viewState.movies,
+        onFilterClick = {
             coroutineScope.launch {
-                modalSheetState.hide()
-                viewModel.setSelectedCategories(it)
+                openBottomSheet = true
             }
         },
+        onMovieClick = onMovieClick,
     )
+    if (openBottomSheet) {
+        BackHandler {
+            openBottomSheet = false
+        }
+        FilterSheet(
+            categories = viewState.categories,
+            selectedCategories = viewState.selectedCategories,
+            onDismissRequest = {
+                openBottomSheet = false
+            },
+        ) {
+            openBottomSheet = false
+            viewModel.setSelectedCategories(it)
+        }
+    }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HomeContent(
     modifier: Modifier = Modifier,
@@ -164,7 +150,7 @@ private fun HomeContent(
         if (movies.isEmpty()) {
             EmptyMovies()
         } else {
-            LazyColumn(modifier = Modifier.padding(bottom = 16.dp)) {
+            LazyColumn {
                 items(items = movies, key = { it.id }) { movie ->
                     MovieCard(
                         movie = movie,
@@ -209,7 +195,8 @@ fun AppBar(
     modifier: Modifier = Modifier,
 ) {
     TopAppBar(
-        modifier = modifier.statusBarsPadding(),
+        modifier = modifier,
+        windowInsets = WindowInsets(top = 0.dp),
         colors = TopAppBarDefaults.smallTopAppBarColors(
             containerColor = MaterialTheme.colorScheme.secondaryContainer,
         ),
@@ -286,42 +273,42 @@ fun MovieCard(
     }
 }
 
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FilterSheet(
-    modalSheetState: ModalBottomSheetState,
     categories: List<String>,
-    selectedCategories: SnapshotStateList<String>,
+    selectedCategories: List<String>,
+    onDismissRequest: () -> Unit,
     onApplySelection: (List<String>) -> Unit,
 ) {
-    ModalBottomSheetLayout(
-        sheetState = modalSheetState,
-        content = { },
-        sheetContent = {
-            Surface {
-                FilterContent(
-                    categories,
-                    selectedCategories,
-                    onApplySelection,
-                )
-            }
-        },
+    val skipPartiallyExpanded by remember { mutableStateOf(false) }
+    val bottomSheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = skipPartiallyExpanded,
     )
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        sheetState = bottomSheetState,
+    ) {
+        FilterContent(
+            categories,
+            selectedCategories,
+            onApplySelection,
+        )
+    }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FilterContent(
     categories: List<String>,
-    selectedCategoriesStateList: SnapshotStateList<String>,
+    selectedCategories: List<String>,
     onApplySelection: (List<String>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val selectedCategoriesStateList = remember { selectedCategories.toMutableStateList() }
+
     Column(
-        modifier = modifier
-            .statusBarsPadding()
-            .navigationBarsPadding(),
+        modifier = modifier,
     ) {
         Text(
             text = stringResource(id = R.string.filter_title),
@@ -344,54 +331,37 @@ fun FilterContent(
                 ),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier
-                    .padding(horizontal = 8.dp)
+                    .padding(start = 16.dp)
                     .padding(vertical = 8.dp),
             )
             Spacer(modifier = Modifier.weight(1f))
-            FilterChip(
-                selected = false,
-                onClick = { selectedCategoriesStateList.clear() },
-                colors = FilterChipDefaults.filterChipColors(
-                    containerColor = Color.Transparent,
+            FilledIconButton(
+                colors = IconButtonDefaults.filledIconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
                 ),
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Clear,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp),
-                    )
+                onClick = {
+                    selectedCategoriesStateList.clear()
                 },
-                label = {
-                    Text(
-                        text = stringResource(id = R.string.clear_filter_cta),
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                },
-            )
-            FilterChip(
-                selected = false,
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Clear,
+                    contentDescription = stringResource(id = R.string.clear_filter_cta),
+                )
+            }
+            FilledIconButton(
+                colors = IconButtonDefaults.filledIconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                ),
                 onClick = {
                     selectedCategoriesStateList.clear()
                     selectedCategoriesStateList.addAll(categories)
                 },
-                colors = FilterChipDefaults.filterChipColors(
-                    containerColor = Color.Transparent,
-                ),
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.SelectAll,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp),
-                    )
-                },
-                label = {
-                    Text(
-                        text = stringResource(id = R.string.select_all_filter_cta),
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                },
-                modifier = Modifier.padding(horizontal = 8.dp),
-            )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.SelectAll,
+                    contentDescription = stringResource(id = R.string.select_all_filter_cta),
+                )
+            }
         }
         Divider(
             modifier = Modifier
@@ -507,7 +477,6 @@ fun MovieCardPreview() {
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Preview
 @Composable
 fun FilterDialogPreview() {
@@ -515,10 +484,10 @@ fun FilterDialogPreview() {
         Surface {
             FilterContent(
                 categories = listOf("Best Picture", "Best Short Film", "Best Actor"),
-                selectedCategoriesStateList = listOf(
+                selectedCategories = listOf(
                     "Best Short Film",
                     "Best Actor",
-                ).toMutableStateList(),
+                ),
                 onApplySelection = { },
             )
         }

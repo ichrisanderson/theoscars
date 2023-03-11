@@ -21,9 +21,8 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Scaffold
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -60,28 +59,28 @@ class MainActivity : ComponentActivity() {
     @Composable
     private fun OscarsApp(navController: NavHostController) {
         Scaffold { innerPaddingModifier ->
-            NavGraph(navController, innerPaddingModifier)
+            NavGraph(navController, Modifier.padding(innerPaddingModifier))
         }
     }
 
     @Composable
     private fun NavGraph(
         navController: NavHostController,
-        innerPaddingModifier: PaddingValues,
+        modifier: Modifier = Modifier,
     ) {
         NavHost(
             navController = navController,
-            startDestination = "home",
-            modifier = Modifier.padding(innerPaddingModifier),
+            startDestination = AppDestinations.HOME,
+            modifier = modifier,
         ) {
-            composable("home") {
+            composable(AppDestinations.HOME) {
                 val viewModel = hiltViewModel<HomeViewModel>()
                 HomeScreen(viewModel = viewModel) { movieId ->
                     navController.navigate("movie/$movieId")
                 }
             }
             composable(
-                "movie/{movieId}",
+                AppDestinations.MOVIE_DETAIL,
                 arguments = listOf(navArgument("movieId") { type = NavType.LongType }),
             ) {
                 val viewModel = hiltViewModel<MovieViewModel>()
@@ -102,4 +101,9 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+}
+
+private object AppDestinations {
+    const val HOME = "home"
+    const val MOVIE_DETAIL = "movie/{movieId}"
 }

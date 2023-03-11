@@ -338,12 +338,16 @@ fun FilterContent(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = stringResource(id = R.string.categories_selected_title_format, selectedCategoriesStateList.size),
+                text = stringResource(
+                    id = R.string.categories_selected_title_format,
+                    selectedCategoriesStateList.size,
+                ),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 8.dp)
                     .padding(vertical = 8.dp),
             )
+            Spacer(modifier = Modifier.weight(1f))
             FilterChip(
                 selected = false,
                 onClick = { selectedCategoriesStateList.clear() },
@@ -360,13 +364,16 @@ fun FilterContent(
                 label = {
                     Text(
                         text = stringResource(id = R.string.clear_filter_cta),
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodySmall,
                     )
                 },
             )
             FilterChip(
                 selected = false,
-                onClick = { selectedCategoriesStateList.addAll(categories) },
+                onClick = {
+                    selectedCategoriesStateList.clear()
+                    selectedCategoriesStateList.addAll(categories)
+                },
                 colors = FilterChipDefaults.filterChipColors(
                     containerColor = Color.Transparent,
                 ),
@@ -380,10 +387,10 @@ fun FilterContent(
                 label = {
                     Text(
                         text = stringResource(id = R.string.select_all_filter_cta),
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodySmall,
                     )
                 },
-                modifier = Modifier.padding(start = 8.dp),
+                modifier = Modifier.padding(horizontal = 8.dp),
             )
         }
         Divider(
@@ -508,7 +515,10 @@ fun FilterDialogPreview() {
         Surface {
             FilterContent(
                 categories = listOf("Best Picture", "Best Short Film", "Best Actor"),
-                selectedCategoriesStateList = listOf("Best Short Film", "Best Actor").toMutableStateList(),
+                selectedCategoriesStateList = listOf(
+                    "Best Short Film",
+                    "Best Actor",
+                ).toMutableStateList(),
                 onApplySelection = { },
             )
         }

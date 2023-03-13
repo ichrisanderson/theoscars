@@ -40,6 +40,7 @@ import com.chrisa.theoscars.features.home.presentation.HomeViewModel
 import com.chrisa.theoscars.features.movie.presentation.MovieScreen
 import com.chrisa.theoscars.features.movie.presentation.MovieViewModel
 import com.chrisa.theoscars.features.search.presentation.SearchScreen
+import com.chrisa.theoscars.features.search.presentation.SearchViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -107,7 +108,12 @@ class MainActivity : ComponentActivity() {
                 )
             }
             composable(AppDestinations.SEARCH) {
+                val viewModel = hiltViewModel<SearchViewModel>()
                 SearchScreen(
+                    viewModel,
+                    onMovieClick = { movieId ->
+                        navController.navigate("movie/$movieId")
+                    },
                     onClose = {
                         navController.popBackStack()
                     },

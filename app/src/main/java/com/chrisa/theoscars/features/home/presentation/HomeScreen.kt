@@ -205,7 +205,7 @@ fun AppBar(
     TopAppBar(
         modifier = modifier,
         windowInsets = WindowInsets(top = 0.dp),
-        colors = TopAppBarDefaults.smallTopAppBarColors(
+        colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.secondaryContainer,
         ),
         title = {

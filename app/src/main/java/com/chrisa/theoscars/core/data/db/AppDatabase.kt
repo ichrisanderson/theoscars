@@ -106,7 +106,10 @@ interface NominationDao {
     fun allCategoriesForCeremony(ceremonyYear: Int): List<String>
 
     @Query("SELECT * FROM nomination WHERE film = :film AND ceremonyYear = :ceremonyYear")
-    fun allCeremonyNominationsWithMovieTitle(film: String, ceremonyYear: Int): List<NominationEntity>
+    fun allCeremonyNominationsWithMovieTitle(
+        film: String,
+        ceremonyYear: Int,
+    ): List<NominationEntity>
 
     @Query("SELECT * FROM nomination WHERE ceremonyYear = :ceremonyYear")
     fun allNominationsForCeremony(ceremonyYear: Int): List<NominationEntity>
@@ -135,6 +138,9 @@ interface MovieDao {
 
     @Query("SELECT * FROM movie")
     fun allMovies(): List<MovieEntity>
+
+    @Query("SELECT * FROM movie WHERE title LIKE :query")
+    fun searchMovies(query: String): List<MovieEntity>
 }
 
 @Entity(

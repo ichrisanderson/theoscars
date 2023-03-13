@@ -16,6 +16,11 @@ https://user-images.githubusercontent.com/272168/224086232-6867bee2-5a66-4bf1-b9
 
 https://user-images.githubusercontent.com/272168/224362450-99c9ceef-96ad-4a1a-8a3c-b91525a5d0c3.mp4
 
+<br/>
+
+- Search
+
+https://user-images.githubusercontent.com/272168/224774934-29276df9-46ad-4d94-9b53-a9513bf080f5.mp4
 
 # Built using
 

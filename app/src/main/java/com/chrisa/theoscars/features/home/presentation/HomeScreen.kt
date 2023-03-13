@@ -42,6 +42,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Button
@@ -90,6 +91,7 @@ import kotlinx.coroutines.launch
 fun HomeScreen(
     viewModel: HomeViewModel,
     onMovieClick: (Long) -> Unit,
+    onSearchClick: () -> Unit,
 ) {
     val viewState by viewModel.viewState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
@@ -109,15 +111,16 @@ fun HomeScreen(
         if (vs.isLoading) 100.dp else 0.dp
     }
     HomeContent(
-        modifier = Modifier.alpha(contentAlpha),
-        topPadding = contentTopPadding,
         movies = viewState.movies,
+        onMovieClick = onMovieClick,
+        onSearchClick = onSearchClick,
         onFilterClick = {
             coroutineScope.launch {
                 openBottomSheet = true
             }
         },
-        onMovieClick = onMovieClick,
+        modifier = Modifier.alpha(contentAlpha),
+        topPadding = contentTopPadding,
     )
     if (openBottomSheet) {
         BackHandler {
@@ -138,15 +141,19 @@ fun HomeScreen(
 
 @Composable
 private fun HomeContent(
+    movies: List<MovieSummaryModel>,
+    onMovieClick: (Long) -> Unit,
+    onSearchClick: () -> Unit,
+    onFilterClick: () -> Unit,
     modifier: Modifier = Modifier,
     topPadding: Dp = 0.dp,
-    movies: List<MovieSummaryModel>,
-    onFilterClick: () -> Unit,
-    onMovieClick: (Long) -> Unit,
 ) {
     Column(modifier = modifier) {
         Spacer(modifier = Modifier.padding(top = topPadding))
-        AppBar(onFilterClick = onFilterClick)
+        AppBar(
+            onSearchClick = onSearchClick,
+            onFilterClick = onFilterClick,
+        )
         if (movies.isEmpty()) {
             EmptyMovies()
         } else {
@@ -191,13 +198,14 @@ fun EmptyMovies(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppBar(
+    onSearchClick: () -> Unit,
     onFilterClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     TopAppBar(
         modifier = modifier,
         windowInsets = WindowInsets(top = 0.dp),
-        colors = TopAppBarDefaults.smallTopAppBarColors(
+        colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.secondaryContainer,
         ),
         title = {
@@ -213,10 +221,17 @@ fun AppBar(
             )
         },
         actions = {
+            IconButton(onClick = onSearchClick) {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurface,
+                )
+            }
             IconButton(onClick = onFilterClick) {
                 Icon(
                     imageVector = Icons.Default.Tune,
-                    contentDescription = "",
+                    contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurface,
                 )
             }
@@ -436,8 +451,9 @@ fun HomeContentPreview() {
                         nominations = emptyList(),
                     ),
                 ),
-                onFilterClick = { },
                 onMovieClick = { },
+                onSearchClick = { },
+                onFilterClick = { },
             )
         }
     }
@@ -451,6 +467,7 @@ fun HomeContentEmptyMoviesPreview() {
             HomeContent(
                 movies = emptyList(),
                 onFilterClick = { },
+                onSearchClick = { },
                 onMovieClick = { },
             )
         }

@@ -10,4 +10,7 @@
     <string name="select_all_filter_cta">Select All</string>
     <string name="empty_movies_results_title">No movies found</string>
     <string name="empty_movies_results_subtitle">Please try a different filter…</string>
+    <string name="search_placeholder">Search for movies</string>
+    <string name="empty_search_results_title">No movies found</string>
+    <string name="empty_search_results_subtitle">Please try a different search query…</string>
 </resources>

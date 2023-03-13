@@ -39,6 +39,8 @@ import com.chrisa.theoscars.features.home.presentation.HomeScreen
 import com.chrisa.theoscars.features.home.presentation.HomeViewModel
 import com.chrisa.theoscars.features.movie.presentation.MovieScreen
 import com.chrisa.theoscars.features.movie.presentation.MovieViewModel
+import com.chrisa.theoscars.features.search.presentation.SearchScreen
+import com.chrisa.theoscars.features.search.presentation.SearchViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -75,9 +77,15 @@ class MainActivity : ComponentActivity() {
         ) {
             composable(AppDestinations.HOME) {
                 val viewModel = hiltViewModel<HomeViewModel>()
-                HomeScreen(viewModel = viewModel) { movieId ->
-                    navController.navigate("movie/$movieId")
-                }
+                HomeScreen(
+                    viewModel = viewModel,
+                    onMovieClick = { movieId ->
+                        navController.navigate("movie/$movieId")
+                    },
+                    onSearchClick = {
+                        navController.navigate(AppDestinations.SEARCH)
+                    },
+                )
             }
             composable(
                 AppDestinations.MOVIE_DETAIL,
@@ -99,6 +107,18 @@ class MainActivity : ComponentActivity() {
                     },
                 )
             }
+            composable(AppDestinations.SEARCH) {
+                val viewModel = hiltViewModel<SearchViewModel>()
+                SearchScreen(
+                    viewModel,
+                    onMovieClick = { movieId ->
+                        navController.navigate("movie/$movieId")
+                    },
+                    onClose = {
+                        navController.popBackStack()
+                    },
+                )
+            }
         }
     }
 }
@@ -106,4 +126,5 @@ class MainActivity : ComponentActivity() {
 private object AppDestinations {
     const val HOME = "home"
     const val MOVIE_DETAIL = "movie/{movieId}"
+    const val SEARCH = "search"
 }

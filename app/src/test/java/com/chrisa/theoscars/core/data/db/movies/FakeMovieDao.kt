@@ -44,4 +44,10 @@ class FakeMovieDao : MovieDao {
     override fun allMovies(): List<MovieEntity> {
         return movies
     }
+
+    override fun searchMovies(query: String): List<MovieEntity> {
+        val queryText = query.substring(1, query.lastIndex)
+        val regex = Regex("^.*?$queryText.*?\$", RegexOption.IGNORE_CASE)
+        return movies.filter { it.title.matches(regex) }
+    }
 }

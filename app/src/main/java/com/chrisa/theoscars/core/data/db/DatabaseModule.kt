@@ -18,10 +18,14 @@ package com.chrisa.theoscars.core.data.db
 
 import android.content.Context
 import android.content.res.AssetManager
-import com.chrisa.theoscars.core.data.db.movies.MovieAssetDataSource
-import com.chrisa.theoscars.core.data.db.movies.MovieDataSource
-import com.chrisa.theoscars.core.data.db.nominations.NominationAssetDataSource
-import com.chrisa.theoscars.core.data.db.nominations.NominationDataSource
+import com.chrisa.theoscars.core.data.db.category.CategoryAssetDataSource
+import com.chrisa.theoscars.core.data.db.category.CategoryDataSource
+import com.chrisa.theoscars.core.data.db.genre.GenreAssetDataSource
+import com.chrisa.theoscars.core.data.db.genre.GenreDataSource
+import com.chrisa.theoscars.core.data.db.movie.MovieAssetDataSource
+import com.chrisa.theoscars.core.data.db.movie.MovieDataSource
+import com.chrisa.theoscars.core.data.db.nomination.NominationAssetDataSource
+import com.chrisa.theoscars.core.data.db.nomination.NominationDataSource
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -52,4 +56,12 @@ internal object DatabaseModule {
     @Provides
     fun provideNominationDataSource(nominationAssetDataSource: NominationAssetDataSource): NominationDataSource =
         nominationAssetDataSource
+
+    @Provides
+    fun provideCategoryAssetDataSource(categoryAssetDataSource: CategoryAssetDataSource): CategoryDataSource =
+        categoryAssetDataSource
+
+    @Provides
+    fun provideGenreAssetDataSource(genreAssetDataSource: GenreAssetDataSource): GenreDataSource =
+        genreAssetDataSource
 }

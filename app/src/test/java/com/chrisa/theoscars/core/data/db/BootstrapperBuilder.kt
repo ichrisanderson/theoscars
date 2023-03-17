@@ -18,10 +18,14 @@ package com.chrisa.theoscars.core.data.db
 
 import com.chrisa.theoscars.core.data.LocalDateJsonAdapter
 import com.chrisa.theoscars.core.data.LocalDateTimeJsonAdapter
-import com.chrisa.theoscars.core.data.db.movies.MovieAssetDataSource
-import com.chrisa.theoscars.core.data.db.movies.MovieHelper
-import com.chrisa.theoscars.core.data.db.nominations.NominationAssetDataSource
-import com.chrisa.theoscars.core.data.db.nominations.NominationHelper
+import com.chrisa.theoscars.core.data.db.category.CategoryAssetDataSource
+import com.chrisa.theoscars.core.data.db.category.CategoryHelper
+import com.chrisa.theoscars.core.data.db.genre.GenreAssetDataSource
+import com.chrisa.theoscars.core.data.db.genre.GenreHelper
+import com.chrisa.theoscars.core.data.db.movie.MovieAssetDataSource
+import com.chrisa.theoscars.core.data.db.movie.MovieHelper
+import com.chrisa.theoscars.core.data.db.nomination.NominationAssetDataSource
+import com.chrisa.theoscars.core.data.db.nomination.NominationHelper
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 
@@ -35,7 +39,18 @@ class BootstrapperBuilder {
             .build()
 
         return DefaultBootstrapper(
-            nominationHelper = NominationHelper(appDatabase, NominationAssetDataSource(moshi, assetFileManager)),
+            categoryHelper = CategoryHelper(
+                appDatabase,
+                CategoryAssetDataSource(moshi, assetFileManager),
+            ),
+            genreHelper = GenreHelper(
+                appDatabase,
+                GenreAssetDataSource(moshi, assetFileManager),
+            ),
+            nominationHelper = NominationHelper(
+                appDatabase,
+                NominationAssetDataSource(moshi, assetFileManager),
+            ),
             movieHelper = MovieHelper(
                 appDatabase,
                 MovieAssetDataSource(moshi, assetFileManager),

@@ -14,20 +14,8 @@
  * limitations under the License.
  */
 
-package com.chrisa.theoscars.core.data.db.movies
+package com.chrisa.theoscars.core.data.db.category
 
-import com.squareup.moshi.JsonClass
-
-@JsonClass(generateAdapter = true)
-data class MovieData(
-    val id: Long,
-    val backdropImagePath: String,
-    val posterImagePath: String,
-    val overview: String,
-    val title: String,
-    val nominationYear: Int,
-    val releaseDate: Long,
-    val youTubeVideoKey: String,
-    val imdbId: String,
-    val genreIds: String,
-)
+interface CategoryDataSource {
+    fun getCategories(): List<CategorySeedDataModel>
+}

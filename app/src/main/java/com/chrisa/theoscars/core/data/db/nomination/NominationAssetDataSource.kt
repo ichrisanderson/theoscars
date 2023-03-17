@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-package com.chrisa.theoscars.core.data.db.nominations
+package com.chrisa.theoscars.core.data.db.nomination
 
 import com.chrisa.theoscars.core.data.db.AssetFileManager
+import com.chrisa.theoscars.core.data.db.AssetFileManager.Companion.openFileAsList
 import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
-import okio.buffer
-import okio.source
-import java.io.InputStream
 import javax.inject.Inject
 
 class NominationAssetDataSource @Inject constructor(
@@ -29,12 +26,6 @@ class NominationAssetDataSource @Inject constructor(
     private val assetFileManager: AssetFileManager,
 ) : NominationDataSource {
 
-    override fun getNominations(): List<NominationData> {
-        val type = Types.newParameterizedType(List::class.java, NominationData::class.java)
-        val adapter = moshi.adapter<List<NominationData>>(type)
-        return adapter.fromJson(assetFile().source().buffer())!!
-    }
-
-    private fun assetFile(): InputStream =
-        assetFileManager.openFile("nominations.json")
+    override fun getNominations(): List<NominationSeedDataModel> =
+        assetFileManager.openFileAsList("nominations.json", moshi, NominationSeedDataModel::class.java)
 }

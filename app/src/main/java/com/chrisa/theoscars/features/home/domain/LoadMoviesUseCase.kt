@@ -19,7 +19,6 @@ package com.chrisa.theoscars.features.home.domain
 import com.chrisa.theoscars.core.util.coroutines.CoroutineDispatchers
 import com.chrisa.theoscars.features.home.data.HomeDataRepository
 import com.chrisa.theoscars.features.home.domain.models.MovieSummaryModel
-import com.chrisa.theoscars.features.movie.domain.models.NominationModel
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -28,20 +27,6 @@ class LoadMoviesUseCase @Inject constructor(
     private val homeDataRepository: HomeDataRepository,
 ) {
     suspend fun execute(year: Int = 2023): List<MovieSummaryModel> = withContext(coroutineDispatchers.io) {
-        val nominations = homeDataRepository.allNominationsForCeremony(year)
-        val nominationsFilmMap = mutableMapOf<String, MutableList<NominationModel>>()
-        nominations.forEach { nomination ->
-            if (!nominationsFilmMap.containsKey(nomination.film)) {
-                nominationsFilmMap[nomination.film] = mutableListOf()
-            }
-            nominationsFilmMap[nomination.film]!!.add(
-                NominationModel(
-                    category = nomination.category,
-                    name = nomination.name,
-                    winner = nomination.winner,
-                ),
-            )
-        }
         homeDataRepository.allMoviesForCeremony(year)
             .map {
                 MovieSummaryModel(
@@ -49,7 +34,6 @@ class LoadMoviesUseCase @Inject constructor(
                     backdropImagePath = it.backdropImagePath,
                     title = it.title,
                     overview = it.overview,
-                    nominations = nominationsFilmMap.getOrDefault(it.title, emptyList<NominationModel>()),
                 )
             }
     }

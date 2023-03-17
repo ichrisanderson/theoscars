@@ -84,6 +84,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.chrisa.theoscars.R
 import com.chrisa.theoscars.core.ui.theme.OscarsTheme
+import com.chrisa.theoscars.features.home.domain.models.CategoryModel
 import com.chrisa.theoscars.features.home.domain.models.MovieSummaryModel
 import kotlinx.coroutines.launch
 
@@ -291,10 +292,10 @@ fun MovieCard(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FilterSheet(
-    categories: List<String>,
-    selectedCategories: List<String>,
+    categories: List<CategoryModel>,
+    selectedCategories: List<CategoryModel>,
     onDismissRequest: () -> Unit,
-    onApplySelection: (List<String>) -> Unit,
+    onApplySelection: (List<CategoryModel>) -> Unit,
 ) {
     val skipPartiallyExpanded by remember { mutableStateOf(false) }
     val bottomSheetState = rememberModalBottomSheetState(
@@ -315,9 +316,9 @@ fun FilterSheet(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FilterContent(
-    categories: List<String>,
-    selectedCategories: List<String>,
-    onApplySelection: (List<String>) -> Unit,
+    categories: List<CategoryModel>,
+    selectedCategories: List<CategoryModel>,
+    onApplySelection: (List<CategoryModel>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val selectedCategoriesStateList = remember { selectedCategories.toMutableStateList() }
@@ -402,7 +403,7 @@ fun FilterContent(
                         },
                         label = {
                             Text(
-                                text = category,
+                                text = category.name,
                                 style = MaterialTheme.typography.bodyMedium,
                             )
                         },
@@ -441,14 +442,12 @@ fun HomeContentPreview() {
                         backdropImagePath = null,
                         overview = "Paul Baumer and his friends Albert and Muller, egged on by romantic dreams of heroism, voluntarily enlist in the German army. Full of excitement and patriotic fervour, the boys enthusiastically march into a war they believe in. But once on the Western Front, they discover the soul-destroying horror of World War I.",
                         title = "All Quiet on the Western Front",
-                        nominations = emptyList(),
                     ),
                     MovieSummaryModel(
                         id = 1043141,
                         backdropImagePath = null,
                         overview = "A cold night in December. Ebba waits for the tram to go home after a party, but the ride takes an unexpected turn.",
                         title = "Night Ride",
-                        nominations = emptyList(),
                     ),
                 ),
                 onMovieClick = { },
@@ -485,7 +484,6 @@ fun MovieCardPreview() {
                     backdropImagePath = null,
                     overview = "Paul Baumer and his friends Albert and Muller, egged on by romantic dreams of heroism, voluntarily enlist in the German army.",
                     title = "All Quiet on the Western Front",
-                    nominations = emptyList(),
                 ),
                 onMovieClick = { },
                 modifier = Modifier.padding(8.dp),
@@ -499,12 +497,14 @@ fun MovieCardPreview() {
 fun FilterDialogPreview() {
     OscarsTheme {
         Surface {
+            val categories = listOf(
+                CategoryModel(name = "Best Picture", ids = listOf(48, 67, 127, 43, 8, 16)),
+                CategoryModel(name = "International Feature Film", ids = listOf(9, 56, 111, 123)),
+                CategoryModel(name = "Animated Feature Film", ids = listOf(106, 116)),
+            )
             FilterContent(
-                categories = listOf("Best Picture", "Best Short Film", "Best Actor"),
-                selectedCategories = listOf(
-                    "Best Short Film",
-                    "Best Actor",
-                ),
+                categories = categories,
+                selectedCategories = categories.drop(1),
                 onApplySelection = { },
             )
         }

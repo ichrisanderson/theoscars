@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-package com.chrisa.theoscars.core.data.db.nominations
+package com.chrisa.theoscars.core.data.db.movie
 
-import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
+import androidx.room.Entity
 
-@JsonClass(generateAdapter = true)
-data class NominationData(
-    val ceremony: Int,
-    @Json(name = "year_ceremony")
-    val ceremonyYear: Int,
-    val category: String,
-    val film: String,
-    @Json(name = "year_film")
-    val filmYear: Int,
-    val name: String,
-    val winner: Boolean?,
+@Entity(
+    tableName = "movieGenre",
+    primaryKeys = ["movieId", "genreId"],
+)
+data class MovieGenreEntity(
+    val movieId: Long,
+    val genreId: Long,
 )

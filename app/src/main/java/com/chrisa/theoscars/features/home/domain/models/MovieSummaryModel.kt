@@ -16,14 +16,16 @@
 
 package com.chrisa.theoscars.features.home.domain.models
 
-import com.chrisa.theoscars.features.movie.domain.models.NominationModel
-
 data class MovieSummaryModel(
     val id: Long,
     val backdropImagePath: String?,
     val overview: String,
     val title: String,
-    val nominations: List<NominationModel>,
+)
+
+data class CategoryModel(
+    val ids: List<Long>,
+    val name: String,
 )
 
 data class NominationModel(

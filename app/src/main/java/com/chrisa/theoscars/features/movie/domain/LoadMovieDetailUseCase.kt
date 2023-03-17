@@ -29,10 +29,10 @@ class LoadMovieDetailUseCase @Inject constructor(
 ) {
     suspend fun execute(id: Long): MovieDetailModel? = withContext(coroutineDispatchers.io) {
         val movie = movieDataRepository.loadMovie(id) ?: return@withContext null
-        val nominations = movieDataRepository.loadNominations(movie.title, movie.ceremonyYear).map {
+        val nominations = movieDataRepository.loadNominations(movie.id).map {
             NominationModel(
                 category = it.category,
-                name = it.name,
+                name = it.nomination,
                 winner = it.winner,
             )
         }

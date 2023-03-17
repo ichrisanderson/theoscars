@@ -23,6 +23,7 @@ import com.chrisa.theoscars.features.home.domain.FilterMoviesUseCase
 import com.chrisa.theoscars.features.home.domain.InitializeDataUseCase
 import com.chrisa.theoscars.features.home.domain.LoadCategoriesUseCase
 import com.chrisa.theoscars.features.home.domain.LoadMoviesUseCase
+import com.chrisa.theoscars.features.home.domain.models.CategoryModel
 import com.chrisa.theoscars.features.home.domain.models.MovieSummaryModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -65,7 +66,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun setSelectedCategories(selectedCategories: List<String>) {
+    fun setSelectedCategories(selectedCategories: List<CategoryModel>) {
         coroutineScope.launch(dispatchers.io) {
             _viewState.update { vs ->
 
@@ -83,8 +84,8 @@ class HomeViewModel @Inject constructor(
 data class ViewState(
     val isLoading: Boolean,
     val movies: List<MovieSummaryModel>,
-    val categories: List<String>,
-    val selectedCategories: List<String>,
+    val categories: List<CategoryModel>,
+    val selectedCategories: List<CategoryModel>,
 ) {
 
     companion object {

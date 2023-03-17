@@ -17,8 +17,8 @@
 package com.chrisa.theoscars.features.movie.data
 
 import com.chrisa.theoscars.core.data.db.AppDatabase
-import com.chrisa.theoscars.core.data.db.MovieEntity
-import com.chrisa.theoscars.core.data.db.NominationEntity
+import com.chrisa.theoscars.core.data.db.movie.MovieEntity
+import com.chrisa.theoscars.core.data.db.nomination.NominationCategory
 import javax.inject.Inject
 
 class MovieDataRepository @Inject constructor(
@@ -30,8 +30,8 @@ class MovieDataRepository @Inject constructor(
         return dao.loadMovie(id)
     }
 
-    fun loadNominations(title: String, ceremonyYear: Int): List<NominationEntity> {
+    fun loadNominations(movieId: Long): List<NominationCategory> {
         val dao = appDatabase.nominationDao()
-        return dao.allCeremonyNominationsWithMovieTitle(title, ceremonyYear)
+        return dao.allNominationsCategoriesForMovie(movieId)
     }
 }

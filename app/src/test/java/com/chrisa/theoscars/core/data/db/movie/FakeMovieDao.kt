@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package com.chrisa.theoscars.core.data.db.movies
-
-import com.chrisa.theoscars.core.data.db.MovieDao
-import com.chrisa.theoscars.core.data.db.MovieEntity
+package com.chrisa.theoscars.core.data.db.movie
 
 class FakeMovieDao : MovieDao {
 
     private var movies = mutableListOf<MovieEntity>()
+    private var moviesGenres = mutableListOf<MovieGenreEntity>()
 
     override fun countAll(): Int = movies.size
 
@@ -29,16 +27,8 @@ class FakeMovieDao : MovieDao {
         movies.add(item)
     }
 
-    override fun findMoviesForCeremony(title: String, ceremonyYear: Int): List<MovieEntity> {
-        return movies.filter { it.title == title && it.ceremonyYear == ceremonyYear }
-    }
-
     override fun loadMovie(id: Long): MovieEntity? {
         return movies.firstOrNull { it.id == id }
-    }
-
-    override fun allMoviesForCeremony(ceremonyYear: Int): List<MovieEntity> {
-        return movies.filter { it.ceremonyYear == ceremonyYear }
     }
 
     override fun allMovies(): List<MovieEntity> {
@@ -49,5 +39,9 @@ class FakeMovieDao : MovieDao {
         val queryText = query.substring(1, query.lastIndex)
         val regex = Regex("^.*?$queryText.*?\$", RegexOption.IGNORE_CASE)
         return movies.filter { it.title.matches(regex) }
+    }
+
+    override fun insertMovieGenres(items: List<MovieGenreEntity>) {
+        moviesGenres.addAll(items)
     }
 }

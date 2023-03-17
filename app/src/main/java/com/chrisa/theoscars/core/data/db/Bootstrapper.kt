@@ -16,8 +16,10 @@
 
 package com.chrisa.theoscars.core.data.db
 
-import com.chrisa.theoscars.core.data.db.movies.MovieHelper
-import com.chrisa.theoscars.core.data.db.nominations.NominationHelper
+import com.chrisa.theoscars.core.data.db.category.CategoryHelper
+import com.chrisa.theoscars.core.data.db.genre.GenreHelper
+import com.chrisa.theoscars.core.data.db.movie.MovieHelper
+import com.chrisa.theoscars.core.data.db.nomination.NominationHelper
 import javax.inject.Inject
 
 interface Bootstrapper {
@@ -25,11 +27,15 @@ interface Bootstrapper {
 }
 
 class DefaultBootstrapper @Inject constructor(
+    private val categoryHelper: CategoryHelper,
+    private val genreHelper: GenreHelper,
     private val nominationHelper: NominationHelper,
     private val movieHelper: MovieHelper,
 ) : Bootstrapper {
     override fun insertData() {
-        nominationHelper.insertData()
+        categoryHelper.insertData()
+        genreHelper.insertData()
         movieHelper.insertData()
+        nominationHelper.insertData()
     }
 }

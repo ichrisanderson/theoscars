@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Chris Anderson.
+ * Copyright 2021 Chris Anderson.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package com.chrisa.theoscars.features.search.data
+package com.chrisa.theoscars.core.data.db.movie
 
-import com.chrisa.theoscars.core.data.db.AppDatabase
-import com.chrisa.theoscars.core.data.db.movie.MovieEntity
+import com.chrisa.theoscars.core.data.db.AssetFileManager
+import com.chrisa.theoscars.core.data.db.AssetFileManager.Companion.openFileAsList
+import com.squareup.moshi.Moshi
 import javax.inject.Inject
 
-class SearchDataRepository @Inject constructor(
-    private val appDatabase: AppDatabase,
-) {
+class MovieAssetDataSource @Inject constructor(
+    private val moshi: Moshi,
+    private val assetFileManager: AssetFileManager,
+) : MovieDataSource {
 
-    fun searchMovies(query: String): List<MovieEntity> {
-        val dao = appDatabase.movieDao()
-        return dao.searchMovies(query)
-    }
+    override fun getMovies(): List<MovieSeedDataModel> =
+        assetFileManager.openFileAsList("movies.json", moshi, MovieSeedDataModel::class.java)
 }

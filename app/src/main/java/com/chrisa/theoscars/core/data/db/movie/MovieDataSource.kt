@@ -14,18 +14,8 @@
  * limitations under the License.
  */
 
-package com.chrisa.theoscars.features.search.data
+package com.chrisa.theoscars.core.data.db.movie
 
-import com.chrisa.theoscars.core.data.db.AppDatabase
-import com.chrisa.theoscars.core.data.db.movie.MovieEntity
-import javax.inject.Inject
-
-class SearchDataRepository @Inject constructor(
-    private val appDatabase: AppDatabase,
-) {
-
-    fun searchMovies(query: String): List<MovieEntity> {
-        val dao = appDatabase.movieDao()
-        return dao.searchMovies(query)
-    }
+interface MovieDataSource {
+    fun getMovies(): List<MovieSeedDataModel>
 }

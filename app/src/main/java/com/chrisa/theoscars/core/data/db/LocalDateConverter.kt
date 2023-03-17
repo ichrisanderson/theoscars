@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-package com.chrisa.theoscars.features.search.data
+package com.chrisa.theoscars.core.data.db
 
-import com.chrisa.theoscars.core.data.db.AppDatabase
-import com.chrisa.theoscars.core.data.db.movie.MovieEntity
+import androidx.room.TypeConverter
+import java.time.LocalDate
 import javax.inject.Inject
 
-class SearchDataRepository @Inject constructor(
-    private val appDatabase: AppDatabase,
-) {
+class LocalDateConverter @Inject constructor() {
+    @TypeConverter
+    fun fromTimestamp(value: Long?): LocalDate? {
+        return value?.let { LocalDate.ofEpochDay(it) }
+    }
 
-    fun searchMovies(query: String): List<MovieEntity> {
-        val dao = appDatabase.movieDao()
-        return dao.searchMovies(query)
+    @TypeConverter
+    fun dateToTimestamp(date: LocalDate?): Long? {
+        return date?.toEpochDay()
     }
 }

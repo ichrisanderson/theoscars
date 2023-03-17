@@ -16,8 +16,10 @@
 
 package com.chrisa.theoscars.core.data.db
 
-import com.chrisa.theoscars.core.data.db.movies.MovieSeedData
-import com.chrisa.theoscars.core.data.db.nominations.NominationSeedData
+import com.chrisa.theoscars.core.data.db.category.CategorySeedData
+import com.chrisa.theoscars.core.data.db.genre.GenreSeedData
+import com.chrisa.theoscars.core.data.db.movie.MovieSeedData
+import com.chrisa.theoscars.core.data.db.nomination.NominationSeedData
 import java.io.InputStream
 
 class FakeAssetFileManager : AssetFileManager {
@@ -25,6 +27,8 @@ class FakeAssetFileManager : AssetFileManager {
         return when (fileName) {
             "movies.json" -> MovieSeedData.movies2022.byteInputStream()
             "nominations.json" -> NominationSeedData.nominations2022.byteInputStream()
+            "categories.json" -> CategorySeedData.categories2022.byteInputStream()
+            "genres.json" -> GenreSeedData.genres.byteInputStream()
             else -> "".byteInputStream()
         }
     }

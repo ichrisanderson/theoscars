@@ -32,9 +32,9 @@ class NominationAssetDataSource @Inject constructor(
     override fun getNominations(): List<NominationData> {
         val type = Types.newParameterizedType(List::class.java, NominationData::class.java)
         val adapter = moshi.adapter<List<NominationData>>(type)
-        return adapter.fromJson(nominationFile().source().buffer())!!
+        return adapter.fromJson(assetFile().source().buffer())!!
     }
 
-    private fun nominationFile(): InputStream =
-        assetFileManager.openFile("nominations-2023.json")
+    private fun assetFile(): InputStream =
+        assetFileManager.openFile("nominations.json")
 }

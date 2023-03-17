@@ -23,8 +23,8 @@ import java.io.InputStream
 class FakeAssetFileManager : AssetFileManager {
     override fun openFile(fileName: String): InputStream {
         return when (fileName) {
-            "movies-2023.json" -> MovieSeedData.movies2022.byteInputStream()
-            "nominations-2023.json" -> NominationSeedData.nominations2022.byteInputStream()
+            "movies.json" -> MovieSeedData.movies2022.byteInputStream()
+            "nominations.json" -> NominationSeedData.nominations2022.byteInputStream()
             else -> "".byteInputStream()
         }
     }

@@ -32,10 +32,9 @@ class MovieAssetDataSource @Inject constructor(
     override fun getMovies(): List<MovieData> {
         val type = Types.newParameterizedType(List::class.java, MovieData::class.java)
         val adapter = moshi.adapter<List<MovieData>>(type)
-        val result = adapter.fromJson(nominationFile().source().buffer())!!
-        return result
+        return adapter.fromJson(assetFile().source().buffer())!!
     }
 
-    private fun nominationFile(): InputStream =
-        assetFileManager.openFile("movies-2023.json")
+    private fun assetFile(): InputStream =
+        assetFileManager.openFile("movies.json")
 }

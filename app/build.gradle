@@ -20,8 +20,12 @@ android {
         buildConfigField "String", "MOVIE_DB_KEY", "\"$movieDbKey\""
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary true
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments << ["room.schemaLocation": "$projectDir/schemas".toString()]
+                arguments << ['room.incremental': 'true']
+            }
         }
     }
 

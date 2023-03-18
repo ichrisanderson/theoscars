@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-package com.chrisa.theoscars.features.search.data
+package com.chrisa.theoscars.core.data.db.genre
 
-import com.chrisa.theoscars.core.data.db.AppDatabase
-import com.chrisa.theoscars.core.data.db.movie.MovieEntity
-import javax.inject.Inject
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 
-class SearchDataRepository @Inject constructor(
-    private val appDatabase: AppDatabase,
-) {
-
-    fun searchMovies(query: String): List<MovieEntity> {
-        val dao = appDatabase.movieDao()
-        return dao.searchMovies(query)
-    }
-}
+@Entity(
+    tableName = "genre",
+)
+data class GenreEntity(
+    @PrimaryKey
+    val id: Long,
+    val name: String,
+)

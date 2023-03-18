@@ -14,36 +14,24 @@
  * limitations under the License.
  */
 
-package com.chrisa.theoscars.core.data.db.nominations
+package com.chrisa.theoscars.core.data.db.genre
 
 import com.chrisa.theoscars.core.data.db.AppDatabase
-import com.chrisa.theoscars.core.data.db.NominationEntity
 import javax.inject.Inject
 
-class NominationHelper @Inject constructor(
+class GenreHelper @Inject constructor(
     appDatabase: AppDatabase,
-    private val dataSource: NominationDataSource,
+    private val dataSource: GenreAssetDataSource,
 ) {
-    private val dao = appDatabase.nominationDao()
+    private val dao = appDatabase.genreDao()
 
     fun insertData() {
         val items = dao.countAll()
         if (items > 0) return
 
-        val dataSourceItems = dataSource.getNominations()
+        val entities = dataSource.getGenres()
+            .map { GenreEntity(id = it.id, name = it.name) }
 
-        dataSourceItems.forEach {
-            dao.insert(
-                NominationEntity(
-                    ceremony = it.ceremony,
-                    ceremonyYear = it.ceremonyYear,
-                    category = it.category,
-                    film = it.film,
-                    filmYear = it.filmYear,
-                    name = it.name,
-                    winner = it.winner,
-                ),
-            )
-        }
+        dao.insertAll(entities)
     }
 }

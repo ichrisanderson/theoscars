@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package com.chrisa.theoscars.core.data.db.movies
+package com.chrisa.theoscars.core.data.db.movie
 
 import com.chrisa.theoscars.core.data.db.AppDatabase
 import com.chrisa.theoscars.core.data.db.LocalDateConverter
-import com.chrisa.theoscars.core.data.db.MovieEntity
 import javax.inject.Inject
 
 class MovieHelper @Inject constructor(
@@ -26,29 +25,39 @@ class MovieHelper @Inject constructor(
     private val dataSource: MovieDataSource,
     private val localDateConverter: LocalDateConverter,
 ) {
-    private val dao = appDatabase.movieDao()
+    private val movieDao = appDatabase.movieDao()
 
     fun insertData() {
-        val items = dao.countAll()
+        val items = movieDao.countAll()
         if (items > 0) return
 
         val dataSourceItems = dataSource.getMovies()
 
         dataSourceItems.forEach { movie ->
-
-            dao.insert(
+            movieDao.insert(
                 MovieEntity(
                     id = movie.id,
                     backdropImagePath = movie.backdropImagePath,
                     posterImagePath = movie.posterImagePath,
                     overview = movie.overview,
                     title = movie.title,
-                    ceremonyYear = movie.nominationYear,
-                    releaseDate = localDateConverter.fromTimestamp(movie.releaseDate)!!,
+                    releaseYear = movie.releaseYear,
                     youTubeVideoKey = movie.youTubeVideoKey,
-                    genreIds = movie.genreIds,
+                    imdbId = movie.imdbId,
+                    originalLanguage = movie.originalLanguage,
+                    spokenLanguages = movie.spokenLanguages,
+                    originalTitle = movie.originalTitle,
+                    displayTitle = movie.displayTitle,
+                    metadata = movie.metadata,
+                    runtime = movie.runtime,
                 ),
             )
+            val movieGenres = movie.genreIds.split(",")
+                .filter { it.trim().isNotEmpty() }
+                .map {
+                    MovieGenreEntity(movieId = movie.id, genreId = it.trim().toLong(10))
+                }
+            movieDao.insertMovieGenres(movieGenres)
         }
     }
 }

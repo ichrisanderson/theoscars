@@ -17,10 +17,26 @@
 package com.chrisa.theoscars.core.data.db
 
 import android.content.res.AssetManager
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
+import okio.buffer
+import okio.source
 import java.io.InputStream
 
 interface AssetFileManager {
     fun openFile(fileName: String): InputStream
+
+    companion object {
+        fun <T> AssetFileManager.openFileAsList(
+            fileName: String,
+            moshi: Moshi,
+            itemType: Class<T>,
+        ): List<T> {
+            val type = Types.newParameterizedType(List::class.java, itemType)
+            val adapter = moshi.adapter<List<T>>(type)
+            return adapter.fromJson(openFile(fileName).source().buffer())!!
+        }
+    }
 }
 
 class AndroidAssetFileManager(private val assetManager: AssetManager) : AssetFileManager {

@@ -17,24 +17,20 @@
 package com.chrisa.theoscars.features.home.data
 
 import com.chrisa.theoscars.core.data.db.AppDatabase
-import com.chrisa.theoscars.core.data.db.MovieEntity
-import com.chrisa.theoscars.core.data.db.NominationEntity
+import com.chrisa.theoscars.core.data.db.nomination.MovieSummary
 import javax.inject.Inject
 
 class HomeDataRepository @Inject constructor(
     private val appDatabase: AppDatabase,
 ) {
-    fun allNominationsForCeremony(year: Int): List<NominationEntity> {
-        val dao = appDatabase.nominationDao()
-        return dao.allNominationsForCeremony(year)
-    }
 
-    fun allMoviesForCeremony(year: Int): List<MovieEntity> {
-        val dao = appDatabase.movieDao()
+    fun allMoviesForCeremony(year: Int): List<MovieSummary> {
+        val dao = appDatabase.nominationDao()
         return dao.allMoviesForCeremony(year)
     }
-    fun allCategoriesForCeremony(year: Int): List<String> {
+
+    fun allMoviesForCeremonyWithFilter(categories: List<Long>, year: Int): List<MovieSummary> {
         val dao = appDatabase.nominationDao()
-        return dao.allCategoriesForCeremony(year)
+        return dao.allMoviesForCeremonyWithFilter(categories, year)
     }
 }

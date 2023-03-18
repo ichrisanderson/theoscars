@@ -14,8 +14,25 @@
  * limitations under the License.
  */
 
-package com.chrisa.theoscars.core.data.db.movies
+package com.chrisa.theoscars.core.data.db.category
 
-interface MovieDataSource {
-    fun getMovies(): List<MovieData>
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+
+@Dao
+interface CategoryDao {
+
+    @Query("SELECT COUNT(id) FROM category")
+    fun countAll(): Int
+
+    @Query("SELECT * FROM category ORDER BY name")
+    fun allCategories(): List<CategoryEntity>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insert(category: CategoryEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertAll(categories: List<CategoryEntity>)
 }

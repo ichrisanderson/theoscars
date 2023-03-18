@@ -16,15 +16,25 @@
 
 package com.chrisa.theoscars.core.data.db
 
-import com.chrisa.theoscars.core.data.db.movies.FakeMovieDao
-import com.chrisa.theoscars.core.data.db.nominations.FakeNominationDao
+import com.chrisa.theoscars.core.data.db.category.CategoryDao
+import com.chrisa.theoscars.core.data.db.category.FakeCategoryDao
+import com.chrisa.theoscars.core.data.db.genre.FakeGenreDao
+import com.chrisa.theoscars.core.data.db.genre.GenreDao
+import com.chrisa.theoscars.core.data.db.movie.FakeMovieDao
+import com.chrisa.theoscars.core.data.db.movie.MovieDao
+import com.chrisa.theoscars.core.data.db.nomination.FakeNominationDao
+import com.chrisa.theoscars.core.data.db.nomination.NominationDao
 
 class FakeAppDatabase(
-    private val nominationDao: NominationDao = FakeNominationDao(),
+    private val categoryDao: CategoryDao = FakeCategoryDao(),
+    private val genreDao: GenreDao = FakeGenreDao(),
     private val movieDao: MovieDao = FakeMovieDao(),
+    private val nominationDao: NominationDao = FakeNominationDao(categoryDao, movieDao),
 ) : AppDatabase {
 
     override fun nominationDao(): NominationDao = nominationDao
 
     override fun movieDao(): MovieDao = movieDao
+    override fun categoryDao(): CategoryDao = categoryDao
+    override fun genreDao(): GenreDao = genreDao
 }

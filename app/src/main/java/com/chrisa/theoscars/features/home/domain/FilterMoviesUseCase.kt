@@ -18,8 +18,8 @@ package com.chrisa.theoscars.features.home.domain
 
 import com.chrisa.theoscars.core.util.coroutines.CoroutineDispatchers
 import com.chrisa.theoscars.features.home.data.HomeDataRepository
+import com.chrisa.theoscars.features.home.domain.models.CategoryModel
 import com.chrisa.theoscars.features.home.domain.models.MovieSummaryModel
-import com.chrisa.theoscars.features.movie.domain.models.NominationModel
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -28,36 +28,18 @@ class FilterMoviesUseCase @Inject constructor(
     private val homeDataRepository: HomeDataRepository,
 ) {
     suspend fun execute(
-        selectedCategories: List<String>,
+        selectedCategories: List<CategoryModel>,
         year: Int = 2023,
     ): List<MovieSummaryModel> = withContext(coroutineDispatchers.io) {
-        val nominations = homeDataRepository.allNominationsForCeremony(year)
-        val nominationsFilmMap = mutableMapOf<String, MutableList<NominationModel>>()
-        nominations.forEach { nomination ->
-            if (!nominationsFilmMap.containsKey(nomination.film)) {
-                nominationsFilmMap[nomination.film] = mutableListOf()
-            }
-            nominationsFilmMap[nomination.film]!!.add(
-                NominationModel(
-                    category = nomination.category,
-                    name = nomination.name,
-                    winner = nomination.winner,
-                ),
-            )
-        }
-        val movies = homeDataRepository.allMoviesForCeremony(year)
+        val movies = homeDataRepository.allMoviesForCeremonyWithFilter(selectedCategories.flatMap { it.ids }, year)
             .map {
                 MovieSummaryModel(
                     id = it.id,
                     backdropImagePath = it.backdropImagePath,
                     title = it.title,
                     overview = it.overview,
-                    nominations = nominationsFilmMap.getOrDefault(it.title, emptyList<NominationModel>()),
                 )
             }
-        val selectedCategoriesSet = selectedCategories.toSet()
-        return@withContext movies.filter { m ->
-            m.nominations.any { nomination -> selectedCategoriesSet.contains(nomination.category) }
-        }
+        return@withContext movies
     }
 }

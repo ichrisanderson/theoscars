@@ -14,8 +14,23 @@
  * limitations under the License.
  */
 
-package com.chrisa.theoscars.core.data.db.nominations
+package com.chrisa.theoscars.core.data.db.category
 
-interface NominationDataSource {
-    fun getNominations(): List<NominationData>
+class FakeCategoryDao : CategoryDao {
+
+    private val categoryList = mutableListOf<CategoryEntity>()
+
+    override fun countAll(): Int = categoryList.size
+
+    override fun allCategories(): List<CategoryEntity> {
+        return categoryList
+    }
+
+    override fun insert(category: CategoryEntity) {
+        categoryList.add(category)
+    }
+
+    override fun insertAll(categories: List<CategoryEntity>) {
+        categoryList.addAll(categories)
+    }
 }

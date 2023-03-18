@@ -234,12 +234,12 @@ fun MovieContentPreview() {
                         NominationModel(
                             category = "Cinematography",
                             name = "James Friend",
-                            winner = null,
+                            winner = false,
                         ),
                         NominationModel(
                             category = "International Feature Film",
                             name = "Germany",
-                            winner = null,
+                            winner = false,
                         ),
                     ),
                 ),

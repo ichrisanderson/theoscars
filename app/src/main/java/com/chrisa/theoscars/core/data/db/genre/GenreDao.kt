@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-package com.chrisa.theoscars.features.search.data
+package com.chrisa.theoscars.core.data.db.genre
 
-import com.chrisa.theoscars.core.data.db.AppDatabase
-import com.chrisa.theoscars.core.data.db.movie.MovieEntity
-import javax.inject.Inject
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
 
-class SearchDataRepository @Inject constructor(
-    private val appDatabase: AppDatabase,
-) {
+@Dao
+interface GenreDao {
 
-    fun searchMovies(query: String): List<MovieEntity> {
-        val dao = appDatabase.movieDao()
-        return dao.searchMovies(query)
-    }
+    @Query("SELECT COUNT(id) FROM genre")
+    fun countAll(): Int
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insert(genre: GenreEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertAll(genres: List<GenreEntity>)
 }

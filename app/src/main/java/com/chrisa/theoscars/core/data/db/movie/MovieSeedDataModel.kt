@@ -14,19 +14,25 @@
  * limitations under the License.
  */
 
-package com.chrisa.theoscars.features.movie.domain.models
+package com.chrisa.theoscars.core.data.db.movie
 
-data class MovieDetailModel(
+import com.squareup.moshi.JsonClass
+
+@JsonClass(generateAdapter = true)
+data class MovieSeedDataModel(
     val id: Long,
     val backdropImagePath: String?,
+    val posterImagePath: String?,
     val overview: String,
     val title: String,
+    val releaseYear: Int,
     val youTubeVideoKey: String?,
-    val nominations: List<NominationModel>,
-)
-
-data class NominationModel(
-    val category: String,
-    val name: String,
-    val winner: Boolean,
+    val genreIds: String,
+    val imdbId: String? = null,
+    val originalLanguage: String? = null,
+    val spokenLanguages: String? = null,
+    val originalTitle: String? = null,
+    val displayTitle: String? = null,
+    val metadata: String? = null,
+    val runtime: Int? = null,
 )

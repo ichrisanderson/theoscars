@@ -28,8 +28,8 @@ import com.chrisa.theoscars.features.home.domain.FilterMoviesUseCase
 import com.chrisa.theoscars.features.home.domain.InitializeDataUseCase
 import com.chrisa.theoscars.features.home.domain.LoadCategoriesUseCase
 import com.chrisa.theoscars.features.home.domain.LoadMoviesUseCase
+import com.chrisa.theoscars.features.home.domain.models.CategoryModel
 import com.chrisa.theoscars.features.home.domain.models.MovieSummaryModel
-import com.chrisa.theoscars.features.movie.domain.models.NominationModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -110,68 +110,14 @@ class HomeViewModelTest {
                 backdropImagePath = "/mqsPyyeDCBAghXyjbw4TfEYwljw.jpg",
                 overview = "Paul Baumer and his friends Albert and Muller, egged on by romantic dreams of heroism, voluntarily enlist in the German army. Full of excitement and patriotic fervour, the boys enthusiastically march into a war they believe in. But once on the Western Front, they discover the soul-destroying horror of World War I.",
                 title = "All Quiet on the Western Front",
-                nominations = listOf(
-                    NominationModel(
-                        category = "Cinematography",
-                        name = "James Friend",
-                        winner = null,
-                    ),
-                    NominationModel(
-                        category = "International Feature Film",
-                        name = "Germany",
-                        winner = null,
-                    ),
-                    NominationModel(
-                        category = "Makeup and Hairstyling",
-                        name = "Heike Merker and Linda Eisenhamerová",
-                        winner = null,
-                    ),
-                    NominationModel(
-                        category = "Music (Original Score)",
-                        name = "Volker Bertelmann",
-                        winner = null,
-                    ),
-                    NominationModel(
-                        category = "Best Picture",
-                        name = "Malte Grunert, Producer",
-                        winner = null,
-                    ),
-                    NominationModel(
-                        category = "Production Design",
-                        name = "Production Design: Christian M. Goldbeck; Set Decoration: Ernestine Hipper",
-                        winner = null,
-                    ),
-                    NominationModel(
-                        category = "Sound",
-                        name = "Viktor Prášil, Frank Kruse, Markus Stemler, Lars Ginzel and Stefan Korte",
-                        winner = null,
-                    ),
-                    NominationModel(
-                        category = "Visual Effects",
-                        name = "Frank Petzold, Viktor Müller, Markus Frank and Kamil Jafar",
-                        winner = null,
-                    ),
-                    NominationModel(
-                        category = "Writing (Adapted Screenplay)",
-                        name = "Screenplay - Edward Berger, Lesley Paterson & Ian Stokell",
-                        winner = null,
-                    ),
-                ),
             ),
         )
         assertThat(sut.viewState.value.movies.last()).isEqualTo(
             MovieSummaryModel(
-                id = 1043141,
-                backdropImagePath = "/alfv8yO5jUS7HOsuu7v21hDUo1t.jpg",
-                overview = "A cold night in December. Ebba waits for the tram to go home after a party, but the ride takes an unexpected turn.",
-                title = "Night Ride",
-                nominations = listOf(
-                    NominationModel(
-                        category = "Short Film (Live Action)",
-                        name = "Eirik Tveiten and Gaute Lid Larssen",
-                        winner = null,
-                    ),
-                ),
+                id = 1042171,
+                backdropImagePath = "/572w5U3T7CiyAswyshiS48vO7uR.jpg",
+                overview = "Ivalu is gone. Her little sister is desperate to find her and her father does not care. The vast Greenlandic nature holds secrets. Where is Ivalu?",
+                title = "Ivalu",
             ),
         )
     }
@@ -203,7 +149,9 @@ class HomeViewModelTest {
     @Test
     fun `WHEN filter applied THEN viewState updated with selected movies`() {
         val sut = homeViewModel()
-        val selection = listOf("Actress in a Supporting Role")
+        val selection = listOf(
+            CategoryModel(name = "Actress in a Supporting Role", ids = listOf(28, 115)),
+        )
 
         sut.setSelectedCategories(selection)
 

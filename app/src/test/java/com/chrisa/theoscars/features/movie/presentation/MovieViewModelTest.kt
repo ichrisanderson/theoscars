@@ -94,46 +94,50 @@ class MovieViewModelTest {
             title = "All Quiet on the Western Front",
             youTubeVideoKey = "hf8EYbVxtCY",
             nominations = listOf(
-                NominationModel(category = "Cinematography", name = "James Friend", winner = null),
+                NominationModel(
+                    category = "Cinematography",
+                    name = "James Friend",
+                    winner = false,
+                ),
                 NominationModel(
                     category = "International Feature Film",
                     name = "Germany",
-                    winner = null,
+                    winner = false,
                 ),
                 NominationModel(
                     category = "Makeup and Hairstyling",
                     name = "Heike Merker and Linda Eisenhamerová",
-                    winner = null,
+                    winner = false,
                 ),
                 NominationModel(
                     category = "Music (Original Score)",
                     name = "Volker Bertelmann",
-                    winner = null,
+                    winner = false,
                 ),
                 NominationModel(
                     category = "Best Picture",
                     name = "Malte Grunert, Producer",
-                    winner = null,
+                    winner = false,
                 ),
                 NominationModel(
                     category = "Production Design",
                     name = "Production Design: Christian M. Goldbeck; Set Decoration: Ernestine Hipper",
-                    winner = null,
+                    winner = false,
                 ),
                 NominationModel(
                     category = "Sound",
                     name = "Viktor Prášil, Frank Kruse, Markus Stemler, Lars Ginzel and Stefan Korte",
-                    winner = null,
+                    winner = false,
                 ),
                 NominationModel(
                     category = "Visual Effects",
                     name = "Frank Petzold, Viktor Müller, Markus Frank and Kamil Jafar",
-                    winner = null,
+                    winner = false,
                 ),
                 NominationModel(
                     category = "Writing (Adapted Screenplay)",
                     name = "Screenplay - Edward Berger, Lesley Paterson & Ian Stokell",
-                    winner = null,
+                    winner = false,
                 ),
             ),
         )

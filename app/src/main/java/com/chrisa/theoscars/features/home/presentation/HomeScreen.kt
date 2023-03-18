@@ -36,10 +36,12 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
@@ -56,6 +58,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -69,14 +72,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -88,6 +95,7 @@ import com.chrisa.theoscars.features.home.domain.models.CategoryModel
 import com.chrisa.theoscars.features.home.domain.models.MovieSummaryModel
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
@@ -97,6 +105,7 @@ fun HomeScreen(
     val viewState by viewModel.viewState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     var openBottomSheet by rememberSaveable { mutableStateOf(false) }
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     val transition = updateTransition(viewState, label = "splashTransition")
     val contentAlpha by transition.animateFloat(
@@ -131,6 +140,7 @@ fun HomeScreen(
             categories = viewState.categories,
             selectedCategories = viewState.selectedCategories,
             onDismissRequest = {
+                keyboardController?.hide()
                 openBottomSheet = false
             },
         ) {
@@ -313,7 +323,6 @@ fun FilterSheet(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FilterContent(
     categories: List<CategoryModel>,
@@ -337,6 +346,91 @@ fun FilterContent(
             modifier = Modifier
                 .padding(bottom = 8.dp),
         )
+        YearFilter()
+        CategoryFilter(
+            selectedCategoriesStateList = selectedCategoriesStateList,
+            categories = categories,
+            modifier = Modifier
+                .padding(top = 8.dp),
+        )
+        Divider(
+            modifier = Modifier
+                .alpha(0.3f),
+        )
+        Button(
+            onClick = { onApplySelection(selectedCategoriesStateList) },
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .widthIn(128.dp)
+                .padding(vertical = 16.dp),
+        ) {
+            Text(
+                text = stringResource(id = R.string.apply_filter_cta),
+                style = MaterialTheme.typography.labelLarge,
+            )
+        }
+    }
+}
+
+@Composable
+private fun YearFilter(
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier,
+    ) {
+        Text(
+            text = stringResource(id = R.string.year_filter_title),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier
+                .padding(start = 16.dp, top = 8.dp, bottom = 8.dp),
+        )
+        Divider(
+            modifier = Modifier
+                .alpha(0.3f),
+        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .padding(vertical = 8.dp),
+        ) {
+            Text(
+                text = stringResource(id = R.string.from_label),
+                modifier = Modifier.padding(start = 16.dp),
+            )
+            OutlinedTextField(
+                value = "2023",
+                onValueChange = { },
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                modifier = Modifier
+                    .width(128.dp)
+                    .padding(horizontal = 16.dp),
+            )
+            Text(
+                text = stringResource(id = R.string.to_label),
+            )
+            OutlinedTextField(
+                value = "",
+                onValueChange = { },
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                modifier = Modifier
+                    .width(128.dp)
+                    .padding(horizontal = 16.dp),
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CategoryFilter(
+    selectedCategoriesStateList: SnapshotStateList<CategoryModel>,
+    categories: List<CategoryModel>,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier,
+    ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -410,22 +504,6 @@ fun FilterContent(
                     )
                 }
             }
-        }
-        Divider(
-            modifier = Modifier
-                .alpha(0.3f),
-        )
-        Button(
-            onClick = { onApplySelection(selectedCategoriesStateList) },
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .widthIn(128.dp)
-                .padding(vertical = 16.dp),
-        ) {
-            Text(
-                text = stringResource(id = R.string.apply_filter_cta),
-                style = MaterialTheme.typography.labelLarge,
-            )
         }
     }
 }

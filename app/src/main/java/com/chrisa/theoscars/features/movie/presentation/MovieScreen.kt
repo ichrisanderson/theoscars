@@ -142,9 +142,14 @@ private fun MovieContent(
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp),
             )
             Text(
+                text = movie.year,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp),
+            )
+            Text(
                 text = movie.overview,
                 style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(start = 16.dp, end = 20.dp, top = 8.dp),
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp),
             )
             HeaderSection(
                 R.string.nominations_title,
@@ -229,6 +234,7 @@ fun MovieContentPreview() {
                     backdropImagePath = "/mqsPyyeDCBAghXyjbw4TfEYwljw.jpg",
                     overview = "Paul Baumer and his friends Albert and Muller, egged on by romantic dreams of heroism, voluntarily enlist in the German army. Full of excitement and patriotic fervour, the boys enthusiastically march into a war they believe in. But once on the Western Front, they discover the soul-destroying horror of World War I.",
                     title = "All Quiet on the Western Front",
+                    year = "2022",
                     youTubeVideoKey = "hf8EYbVxtCY",
                     nominations = listOf(
                         NominationModel(

@@ -4,7 +4,7 @@
     <string name="empty_screen_subtitle">Under Construction</string>
     <string name="nominations_title">Nominations</string>
     <string name="filter_title">Filter</string>
-    <string name="year_filter_title">Year(s)</string>
+    <string name="year_filter_title">Years</string>
     <string name="categories_selected_title_format">Categories (%1$d)</string>
     <string name="apply_filter_cta">Apply</string>
     <string name="clear_filter_cta">Clear All</string>

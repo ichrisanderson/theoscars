@@ -110,6 +110,7 @@ class HomeViewModelTest {
                 backdropImagePath = "/mqsPyyeDCBAghXyjbw4TfEYwljw.jpg",
                 overview = "Paul Baumer and his friends Albert and Muller, egged on by romantic dreams of heroism, voluntarily enlist in the German army. Full of excitement and patriotic fervour, the boys enthusiastically march into a war they believe in. But once on the Western Front, they discover the soul-destroying horror of World War I.",
                 title = "All Quiet on the Western Front",
+                year = "2023",
             ),
         )
         assertThat(sut.viewState.value.movies.last()).isEqualTo(
@@ -118,6 +119,7 @@ class HomeViewModelTest {
                 backdropImagePath = "/572w5U3T7CiyAswyshiS48vO7uR.jpg",
                 overview = "Ivalu is gone. Her little sister is desperate to find her and her father does not care. The vast Greenlandic nature holds secrets. Where is Ivalu?",
                 title = "Ivalu",
+                year = "2023",
             ),
         )
     }
@@ -141,19 +143,27 @@ class HomeViewModelTest {
         val sut = homeViewModel()
         val newSelection = sut.viewState.value.selectedCategories.drop(2)
 
-        sut.setSelectedCategories(newSelection)
+        sut.updateFilter(
+            startYear = "2023",
+            endYear = "2023",
+            selectedCategories = newSelection,
+        )
 
         assertThat(sut.viewState.value.selectedCategories).isEqualTo(newSelection)
     }
 
     @Test
-    fun `WHEN filter applied THEN viewState updated with selected movies`() {
+    fun `WHEN category filter applied THEN viewState updated with selected movies`() {
         val sut = homeViewModel()
         val selection = listOf(
             CategoryModel(name = "Actress in a Supporting Role", ids = listOf(28, 115)),
         )
 
-        sut.setSelectedCategories(selection)
+        sut.updateFilter(
+            startYear = "2023",
+            endYear = "2023",
+            selectedCategories = selection,
+        )
 
         assertThat(sut.viewState.value.movies.map { it.title }).isEqualTo(
             listOf(
@@ -163,5 +173,41 @@ class HomeViewModelTest {
                 "The Whale",
             ),
         )
+    }
+
+    @Test
+    fun `WHEN year filter applied THEN viewState updated with selected movies`() {
+        val sut = homeViewModel()
+        val selection = listOf(
+            CategoryModel(name = "Best Picture", ids = listOf(67)),
+        )
+
+        sut.updateFilter(
+            startYear = "1960",
+            endYear = "2023",
+            selectedCategories = selection,
+        )
+
+        assertThat(sut.viewState.value.movies.map { it.title }).isEqualTo(
+            listOf(
+                "The Sound of Music",
+            ),
+        )
+    }
+
+    @Test
+    fun `GIVEN no movies match condition WHEN filter applied THEN viewState updated with empty movies`() {
+        val sut = homeViewModel()
+        val selection = listOf(
+            CategoryModel(name = "Writing (Adapted Screenplay)", ids = listOf(133)),
+        )
+
+        sut.updateFilter(
+            startYear = "1960",
+            endYear = "1970",
+            selectedCategories = selection,
+        )
+
+        assertThat(sut.viewState.value.movies.map { it.title }).isEmpty()
     }
 }

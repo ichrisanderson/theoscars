@@ -34,6 +34,7 @@ class LoadMoviesUseCase @Inject constructor(
                     backdropImagePath = it.backdropImagePath,
                     title = it.title,
                     overview = it.overview,
+                    year = it.year.toString(10),
                 )
             }
     }

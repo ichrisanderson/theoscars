@@ -52,34 +52,35 @@ class FakeNominationDao(
     override fun allMoviesForCeremony(year: Int): List<MovieSummary> {
         val nominations = this.nominations
             .filter { it.year == year }
-            .map { it.movieId }
-            .toSet()
-        val movies = movieDao.allMovies().filter { nominations.contains(it.id) }.map {
+            .associateBy { it.movieId }
+        val movies = movieDao.allMovies().filter { nominations.containsKey(it.id) }.map {
             MovieSummary(
                 id = it.id,
                 backdropImagePath = it.backdropImagePath.orEmpty(),
                 title = it.title,
                 overview = it.overview,
+                year = nominations[it.id]!!.year,
             )
         }
         return movies
     }
 
     override fun allMoviesForCeremonyWithFilter(
+        startYear: Int,
+        endYear: Int,
         categories: List<Long>,
-        year: Int,
     ): List<MovieSummary> {
         val categorySet = categories.toSet()
         val nominations = this.nominations
-            .filter { it.year == year && categorySet.contains(it.categoryId) }
-            .map { it.movieId }
-            .toSet()
-        val movies = movieDao.allMovies().filter { nominations.contains(it.id) }.map {
+            .filter { it.year in startYear..endYear && categorySet.contains(it.categoryId) }
+            .associateBy { it.movieId }
+        val movies = movieDao.allMovies().filter { nominations.containsKey(it.id) }.map {
             MovieSummary(
                 id = it.id,
                 backdropImagePath = it.backdropImagePath.orEmpty(),
                 title = it.title,
                 overview = it.overview,
+                year = nominations[it.id]!!.year,
             )
         }
         return movies

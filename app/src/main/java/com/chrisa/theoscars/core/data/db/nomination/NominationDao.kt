@@ -48,7 +48,7 @@ interface NominationDao {
     ): List<NominationCategory>
 
     @Query(
-        "SELECT DISTINCT movie.id, movie.backdropImagePath, movie.title, movie.overview FROM nomination " +
+        "SELECT DISTINCT movie.id, movie.backdropImagePath, movie.title, movie.overview, nomination.year FROM nomination " +
             "INNER JOIN movie ON movie.id = nomination.movieId " +
             "WHERE nomination.year = :year",
     )
@@ -57,14 +57,15 @@ interface NominationDao {
     ): List<MovieSummary>
 
     @Query(
-        "SELECT DISTINCT movie.id, movie.backdropImagePath, movie.title, movie.overview FROM nomination " +
+        "SELECT DISTINCT movie.id, movie.backdropImagePath, movie.title, movie.overview, nomination.year FROM nomination " +
             "INNER JOIN movie ON movie.id = nomination.movieId " +
             "INNER JOIN category ON category.id = nomination.categoryId " +
-            "WHERE nomination.year = :year AND category.id IN (:categories)",
+            "WHERE nomination.year >= :startYear AND nomination.year <= :endYear AND category.id IN (:categories)",
     )
     fun allMoviesForCeremonyWithFilter(
+        startYear: Int,
+        endYear: Int,
         categories: List<Long>,
-        year: Int,
     ): List<MovieSummary>
 
     @Query("SELECT * FROM nomination WHERE year = :ceremonyYear")
@@ -85,4 +86,5 @@ data class MovieSummary(
     val backdropImagePath: String?,
     val title: String,
     val overview: String,
+    val year: Int,
 )

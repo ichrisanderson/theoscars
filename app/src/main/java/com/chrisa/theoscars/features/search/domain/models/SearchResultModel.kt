@@ -19,5 +19,6 @@ package com.chrisa.theoscars.features.search.domain.models
 data class SearchResultModel(
     val movieId: Long,
     val title: String,
+    val year: String,
     val posterImagePath: String?,
 )

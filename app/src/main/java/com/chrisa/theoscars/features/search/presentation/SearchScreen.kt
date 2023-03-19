@@ -210,6 +210,11 @@ fun SearchResultCard(
                     text = searchResultModel.title,
                     style = MaterialTheme.typography.bodyLarge,
                 )
+                Text(
+                    text = searchResultModel.year,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
             }
         }
     }
@@ -302,16 +307,19 @@ fun SearchScreenPreview() {
                         movieId = 1,
                         posterImagePath = null,
                         title = "All Quiet on the Western Front",
+                        year = "2022",
                     ),
                     SearchResultModel(
                         movieId = 2,
                         posterImagePath = null,
                         title = "Everything Everywhere All At Once",
+                        year = "2022",
                     ),
                     SearchResultModel(
                         movieId = 3,
                         posterImagePath = null,
                         title = "Avatar: The Way of Water",
+                        year = "2022",
                     ),
                 ),
                 onSearchTextChanged = { },
@@ -348,6 +356,7 @@ fun SearchResultCardPreview() {
                     movieId = 1234,
                     posterImagePath = null,
                     title = "All Quiet on the Western Front",
+                    year = "2022",
                 ),
                 onClick = { },
                 modifier = Modifier.padding(8.dp),

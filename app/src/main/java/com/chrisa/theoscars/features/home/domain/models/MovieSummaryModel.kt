@@ -21,6 +21,7 @@ data class MovieSummaryModel(
     val backdropImagePath: String?,
     val overview: String,
     val title: String,
+    val year: String,
 )
 
 data class CategoryModel(

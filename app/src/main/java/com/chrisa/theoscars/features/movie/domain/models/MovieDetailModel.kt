@@ -21,6 +21,7 @@ data class MovieDetailModel(
     val backdropImagePath: String?,
     val overview: String,
     val title: String,
+    val year: String,
     val youTubeVideoKey: String?,
     val nominations: List<NominationModel>,
 )

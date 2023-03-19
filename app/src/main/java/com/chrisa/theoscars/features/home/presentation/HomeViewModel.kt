@@ -62,20 +62,34 @@ class HomeViewModel @Inject constructor(
                 movies = movies,
                 categories = categories,
                 selectedCategories = categories,
+                startYear = "2023",
+                endYear = "2023",
             )
         }
     }
 
-    fun setSelectedCategories(selectedCategories: List<CategoryModel>) {
+    fun updateFilter(startYear: String, endYear: String, selectedCategories: List<CategoryModel>) {
+        _viewState.update { vs ->
+            vs.copy(
+                startYear = startYear,
+                endYear = endYear,
+                selectedCategories = selectedCategories,
+            )
+        }
+
+        val start = startYear.toInt(10)
+        val end = endYear.toInt(10)
+
         coroutineScope.launch(dispatchers.io) {
             _viewState.update { vs ->
 
-                val filteredMovies = filterMoviesUseCase.execute(selectedCategories)
-
-                vs.copy(
-                    movies = filteredMovies,
+                val filteredMovies = filterMoviesUseCase.execute(
+                    startYear = start,
+                    endYear = end,
                     selectedCategories = selectedCategories,
                 )
+
+                vs.copy(movies = filteredMovies)
             }
         }
     }
@@ -86,6 +100,8 @@ data class ViewState(
     val movies: List<MovieSummaryModel>,
     val categories: List<CategoryModel>,
     val selectedCategories: List<CategoryModel>,
+    val startYear: String,
+    val endYear: String,
 ) {
 
     companion object {
@@ -94,6 +110,8 @@ data class ViewState(
             movies = emptyList(),
             categories = emptyList(),
             selectedCategories = emptyList(),
+            startYear = "",
+            endYear = "",
         )
     }
 }

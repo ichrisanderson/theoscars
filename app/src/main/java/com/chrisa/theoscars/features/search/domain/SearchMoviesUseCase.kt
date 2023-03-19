@@ -35,6 +35,7 @@ class SearchMoviesUseCase @Inject constructor(
                     movieId = it.id,
                     title = it.title,
                     posterImagePath = it.posterImagePath,
+                    year = it.releaseYear.toString(10),
                 )
             }
         }

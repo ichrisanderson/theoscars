@@ -16,7 +16,6 @@
 
 package com.chrisa.theoscars.features.home.presentation
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateFloat
@@ -36,15 +35,21 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
@@ -55,28 +60,29 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -88,6 +94,7 @@ import com.chrisa.theoscars.features.home.domain.models.CategoryModel
 import com.chrisa.theoscars.features.home.domain.models.MovieSummaryModel
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterialApi::class)
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
@@ -96,8 +103,6 @@ fun HomeScreen(
 ) {
     val viewState by viewModel.viewState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
-    var openBottomSheet by rememberSaveable { mutableStateOf(false) }
-
     val transition = updateTransition(viewState, label = "splashTransition")
     val contentAlpha by transition.animateFloat(
         transitionSpec = { tween(durationMillis = 300) },
@@ -111,32 +116,45 @@ fun HomeScreen(
     ) { vs ->
         if (vs.isLoading) 100.dp else 0.dp
     }
-    HomeContent(
-        movies = viewState.movies,
-        onMovieClick = onMovieClick,
-        onSearchClick = onSearchClick,
-        onFilterClick = {
-            coroutineScope.launch {
-                openBottomSheet = true
+    val modalSheetState = rememberModalBottomSheetState(
+        initialValue = ModalBottomSheetValue.Hidden,
+        confirmValueChange = { it != ModalBottomSheetValue.HalfExpanded },
+        skipHalfExpanded = true,
+    )
+
+    ModalBottomSheetLayout(
+        sheetState = modalSheetState,
+        sheetContent = {
+            if (modalSheetState.isVisible) {
+                Surface {
+                    FilterContent(
+                        categories = viewState.categories,
+                        selectedCategories = viewState.selectedCategories,
+                        startYear = viewState.startYear,
+                        endYear = viewState.endYear,
+                        onApplySelection = { startYear, endYear, categories ->
+                            viewModel.updateFilter(startYear, endYear, categories)
+                            coroutineScope.launch {
+                                modalSheetState.hide()
+                            }
+                        },
+                    )
+                }
             }
         },
-        modifier = Modifier.alpha(contentAlpha),
-        topPadding = contentTopPadding,
-    )
-    if (openBottomSheet) {
-        BackHandler {
-            openBottomSheet = false
-        }
-        FilterSheet(
-            categories = viewState.categories,
-            selectedCategories = viewState.selectedCategories,
-            onDismissRequest = {
-                openBottomSheet = false
+    ) {
+        HomeContent(
+            movies = viewState.movies,
+            onMovieClick = onMovieClick,
+            onSearchClick = onSearchClick,
+            onFilterClick = {
+                coroutineScope.launch {
+                    modalSheetState.show()
+                }
             },
-        ) {
-            openBottomSheet = false
-            viewModel.setSelectedCategories(it)
-        }
+            modifier = Modifier.alpha(contentAlpha),
+            topPadding = contentTopPadding,
+        )
     }
 }
 
@@ -281,6 +299,11 @@ fun MovieCard(
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp),
             )
             Text(
+                text = movie.year,
+                style = MaterialTheme.typography.titleSmall,
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp),
+            )
+            Text(
                 text = movie.overview,
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 16.dp),
@@ -289,38 +312,17 @@ fun MovieCard(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun FilterSheet(
-    categories: List<CategoryModel>,
-    selectedCategories: List<CategoryModel>,
-    onDismissRequest: () -> Unit,
-    onApplySelection: (List<CategoryModel>) -> Unit,
-) {
-    val skipPartiallyExpanded by remember { mutableStateOf(false) }
-    val bottomSheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = skipPartiallyExpanded,
-    )
-    ModalBottomSheet(
-        onDismissRequest = onDismissRequest,
-        sheetState = bottomSheetState,
-    ) {
-        FilterContent(
-            categories,
-            selectedCategories,
-            onApplySelection,
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FilterContent(
     categories: List<CategoryModel>,
     selectedCategories: List<CategoryModel>,
-    onApplySelection: (List<CategoryModel>) -> Unit,
+    startYear: String,
+    endYear: String,
+    onApplySelection: (String, String, List<CategoryModel>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var startYear by remember { mutableStateOf(startYear) }
+    var endYear by remember { mutableStateOf(endYear) }
     val selectedCategoriesStateList = remember { selectedCategories.toMutableStateList() }
 
     Column(
@@ -331,12 +333,112 @@ fun FilterContent(
             style = MaterialTheme.typography.titleLarge,
             modifier = Modifier
                 .padding(horizontal = 16.dp)
-                .padding(bottom = 8.dp),
+                .padding(vertical = 8.dp),
         )
         Divider(
             modifier = Modifier
                 .padding(bottom = 8.dp),
         )
+        YearFilter(
+            startYear = startYear,
+            endYear = endYear,
+            onStartYearChanged = { startYear = it },
+            onEndYearChanged = { endYear = it },
+        )
+        CategoryFilter(
+            selectedCategoriesStateList = selectedCategoriesStateList,
+            categories = categories,
+            modifier = Modifier
+                .padding(top = 8.dp),
+        )
+        Divider(
+            modifier = Modifier
+                .alpha(0.3f),
+        )
+        Button(
+            onClick = { onApplySelection(startYear, endYear, selectedCategoriesStateList) },
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .widthIn(128.dp)
+                .padding(vertical = 16.dp),
+        ) {
+            Text(
+                text = stringResource(id = R.string.apply_filter_cta),
+                style = MaterialTheme.typography.labelLarge,
+            )
+        }
+    }
+}
+
+@Composable
+private fun YearFilter(
+    startYear: String,
+    endYear: String,
+    onStartYearChanged: (String) -> Unit,
+    onEndYearChanged: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier,
+    ) {
+        Text(
+            text = stringResource(id = R.string.year_filter_title),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier
+                .padding(start = 16.dp, top = 8.dp, bottom = 8.dp),
+        )
+        Divider(
+            modifier = Modifier
+                .alpha(0.3f),
+        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .padding(vertical = 8.dp),
+        ) {
+            Text(
+                text = stringResource(id = R.string.from_label),
+                modifier = Modifier.padding(start = 16.dp),
+            )
+            OutlinedTextField(
+                value = startYear,
+                onValueChange = onStartYearChanged,
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                singleLine = true,
+                modifier = Modifier
+                    .width(128.dp)
+                    .padding(horizontal = 16.dp),
+            )
+            Text(
+                text = stringResource(id = R.string.to_label),
+            )
+            OutlinedTextField(
+                value = endYear,
+                onValueChange = onEndYearChanged,
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                singleLine = true,
+                modifier = Modifier
+                    .width(128.dp)
+                    .padding(horizontal = 16.dp),
+            )
+        }
+        Divider(
+            modifier = Modifier
+                .alpha(0.3f),
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CategoryFilter(
+    selectedCategoriesStateList: SnapshotStateList<CategoryModel>,
+    categories: List<CategoryModel>,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier,
+    ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -411,22 +513,6 @@ fun FilterContent(
                 }
             }
         }
-        Divider(
-            modifier = Modifier
-                .alpha(0.3f),
-        )
-        Button(
-            onClick = { onApplySelection(selectedCategoriesStateList) },
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .widthIn(128.dp)
-                .padding(vertical = 16.dp),
-        ) {
-            Text(
-                text = stringResource(id = R.string.apply_filter_cta),
-                style = MaterialTheme.typography.labelLarge,
-            )
-        }
     }
 }
 
@@ -442,12 +528,14 @@ fun HomeContentPreview() {
                         backdropImagePath = null,
                         overview = "Paul Baumer and his friends Albert and Muller, egged on by romantic dreams of heroism, voluntarily enlist in the German army. Full of excitement and patriotic fervour, the boys enthusiastically march into a war they believe in. But once on the Western Front, they discover the soul-destroying horror of World War I.",
                         title = "All Quiet on the Western Front",
+                        year = "2023",
                     ),
                     MovieSummaryModel(
                         id = 1043141,
                         backdropImagePath = null,
                         overview = "A cold night in December. Ebba waits for the tram to go home after a party, but the ride takes an unexpected turn.",
                         title = "Night Ride",
+                        year = "2023",
                     ),
                 ),
                 onMovieClick = { },
@@ -484,6 +572,7 @@ fun MovieCardPreview() {
                     backdropImagePath = null,
                     overview = "Paul Baumer and his friends Albert and Muller, egged on by romantic dreams of heroism, voluntarily enlist in the German army.",
                     title = "All Quiet on the Western Front",
+                    year = "2023",
                 ),
                 onMovieClick = { },
                 modifier = Modifier.padding(8.dp),
@@ -505,7 +594,9 @@ fun FilterDialogPreview() {
             FilterContent(
                 categories = categories,
                 selectedCategories = categories.drop(1),
-                onApplySelection = { },
+                startYear = "2023",
+                endYear = "2023",
+                onApplySelection = { startYear, endYear, selectedCategories -> },
             )
         }
     }

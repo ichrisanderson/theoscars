@@ -41,6 +41,7 @@ class LoadMovieDetailUseCase @Inject constructor(
             backdropImagePath = movie.backdropImagePath,
             overview = movie.overview,
             title = movie.title,
+            year = movie.releaseYear.toString(10),
             youTubeVideoKey = movie.youTubeVideoKey,
             nominations = nominations,
         )

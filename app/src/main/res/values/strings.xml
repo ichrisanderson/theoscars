@@ -4,6 +4,7 @@
     <string name="empty_screen_subtitle">Under Construction</string>
     <string name="nominations_title">Nominations</string>
     <string name="filter_title">Filter</string>
+    <string name="year_filter_title">Years</string>
     <string name="categories_selected_title_format">Categories (%1$d)</string>
     <string name="apply_filter_cta">Apply</string>
     <string name="clear_filter_cta">Clear All</string>
@@ -13,4 +14,6 @@
     <string name="search_placeholder">Search for movies</string>
     <string name="empty_search_results_title">No movies found</string>
     <string name="empty_search_results_subtitle">Please try a different search query…</string>
+    <string name="from_label">From:</string>
+    <string name="to_label">To:</string>
 </resources>

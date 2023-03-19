@@ -20,6 +20,13 @@ object NominationSeedData {
     val nominations2022 = """
 [
   {
+    "year_ceremony": 1966,
+    "categoryId": 67,
+    "movieId": 15121,
+    "content": "Robert Wise, Producer",
+    "winner": true
+  },
+  {
     "year_ceremony": 2023,
     "categoryId": 112,
     "movieId": 614934,

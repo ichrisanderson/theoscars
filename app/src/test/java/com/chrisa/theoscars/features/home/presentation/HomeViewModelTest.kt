@@ -144,8 +144,8 @@ class HomeViewModelTest {
         val newSelection = sut.viewState.value.selectedCategories.drop(2)
 
         sut.updateFilter(
-            startYear = "2023",
-            endYear = "2023",
+            startYear = 2023,
+            endYear = 2023,
             selectedCategories = newSelection,
         )
 
@@ -160,8 +160,8 @@ class HomeViewModelTest {
         )
 
         sut.updateFilter(
-            startYear = "2023",
-            endYear = "2023",
+            startYear = 2023,
+            endYear = 2023,
             selectedCategories = selection,
         )
 
@@ -183,8 +183,8 @@ class HomeViewModelTest {
         )
 
         sut.updateFilter(
-            startYear = "1960",
-            endYear = "2023",
+            startYear = 1960,
+            endYear = 2023,
             selectedCategories = selection,
         )
 
@@ -203,8 +203,8 @@ class HomeViewModelTest {
         )
 
         sut.updateFilter(
-            startYear = "1960",
-            endYear = "1970",
+            startYear = 1960,
+            endYear = 1970,
             selectedCategories = selection,
         )
 

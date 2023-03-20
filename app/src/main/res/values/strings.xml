@@ -16,4 +16,5 @@
     <string name="empty_search_results_subtitle">Please try a different search query…</string>
     <string name="from_label">From:</string>
     <string name="to_label">To:</string>
+    <string name="year_filter_error">Please enter a valid year format, e.g 1928 - 2023</string>
 </resources>

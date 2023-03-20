@@ -80,6 +80,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -240,14 +241,20 @@ fun AppBar(
             )
         },
         actions = {
-            IconButton(onClick = onSearchClick) {
+            IconButton(
+                onClick = onSearchClick,
+                modifier = Modifier.testTag("searchButton"),
+            ) {
                 Icon(
                     imageVector = Icons.Default.Search,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurface,
                 )
             }
-            IconButton(onClick = onFilterClick) {
+            IconButton(
+                onClick = onFilterClick,
+                modifier = Modifier.testTag("filterButton"),
+            ) {
                 Icon(
                     imageVector = Icons.Default.Tune,
                     contentDescription = null,

@@ -19,7 +19,7 @@ android {
         def movieDbKey = findProperty('movie_db_key')  ?: 'your_movie_db_key'
         buildConfigField "String", "MOVIE_DB_KEY", "\"$movieDbKey\""
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "com.chrisa.theoscars.HiltTestRunner"
 
         javaCompileOptions {
             annotationProcessorOptions {
@@ -143,6 +143,9 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     androidTestImplementation platform('androidx.compose:compose-bom:2022.10.00')
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
+
+    androidTestImplementation 'com.google.dagger:hilt-android-testing:2.45'
+    kaptAndroidTest 'com.google.dagger:hilt-android-compiler:2.45'
 
     debugImplementation 'androidx.compose.ui:ui-tooling'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'

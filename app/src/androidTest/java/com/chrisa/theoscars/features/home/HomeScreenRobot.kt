@@ -19,22 +19,30 @@ package com.chrisa.theoscars.features.home
 import androidx.activity.compose.setContent
 import androidx.compose.material3.Surface
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextClearance
+import androidx.compose.ui.test.performTextInput
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.chrisa.theoscars.MainActivity
+import com.chrisa.theoscars.R
 import com.chrisa.theoscars.core.ui.theme.OscarsTheme
 import com.chrisa.theoscars.features.home.presentation.HomeScreen
+import com.chrisa.theoscars.util.KeyboardHelper
+import com.chrisa.theoscars.util.onNodeWithStringId
 
 class HomeScreenRobot(
     private val composeTestRule: AndroidComposeTestRule<ActivityScenarioRule<MainActivity>, MainActivity>,
 ) {
 
+    private val keyboardHelper = KeyboardHelper(composeTestRule)
     fun setContent() = apply {
         composeTestRule.activity.setContent {
+            keyboardHelper.initialize()
             OscarsTheme {
                 Surface {
                     HomeScreen(viewModel = hiltViewModel(), onMovieClick = { }, onSearchClick = {})
@@ -43,13 +51,55 @@ class HomeScreenRobot(
         }
     }
 
+    private fun startYearNode() = composeTestRule.onNodeWithTag("startYear")
+
+    private fun endYearNode() = composeTestRule.onNodeWithTag("endYear")
+
+    private fun applyButtonNode() = composeTestRule.onNodeWithTag("applyButton")
+
     fun clickFilterButton() = apply {
         composeTestRule.onNodeWithTag("filterButton").performClick()
     }
 
     fun assertFilterDialogIsVisible() = apply {
-        composeTestRule.onNodeWithText("Filter").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Years").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Apply").assertIsDisplayed()
+        composeTestRule.onNodeWithStringId(R.string.filter_title).assertIsDisplayed()
+        composeTestRule.onNodeWithStringId(R.string.year_filter_title).assertIsDisplayed()
+        composeTestRule.onNodeWithStringId(R.string.apply_filter_cta).assertIsDisplayed()
+    }
+
+    fun clearStartYear() = apply {
+        startYearNode().performTextClearance()
+    }
+
+    fun enterStartYear(year: String) = apply {
+        startYearNode().performTextInput(year)
+    }
+
+    fun enterEndYear(year: String) = apply {
+        endYearNode().performTextInput(year)
+    }
+
+    fun clearEndYear() = apply {
+        endYearNode().performTextClearance()
+    }
+
+    fun hideKeyboard() = apply {
+        keyboardHelper.hideKeyboardIfShown()
+    }
+
+    fun assertYearErrorIsDisplayed() = apply {
+        composeTestRule.onNodeWithStringId(R.string.year_filter_error).assertIsDisplayed()
+    }
+
+    fun assertYearErrorDoesNotExist() = apply {
+        composeTestRule.onNodeWithStringId(R.string.year_filter_error).assertDoesNotExist()
+    }
+
+    fun assertApplyButtonIsEnabled() = apply {
+        applyButtonNode().assertIsEnabled()
+    }
+
+    fun assertApplyButtonIsDisabled() = apply {
+        applyButtonNode().assertIsNotEnabled()
     }
 }

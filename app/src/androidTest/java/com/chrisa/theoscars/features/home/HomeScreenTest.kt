@@ -33,10 +33,46 @@ class HomeScreenTest {
     val composeTestRule = createAndroidComposeRule<MainActivity>()
 
     @Test
-    fun testFilterIsDisplayed() {
+    fun filterIsDisplayed() {
         HomeScreenRobot(composeTestRule)
             .setContent()
             .clickFilterButton()
             .assertFilterDialogIsVisible()
+    }
+
+    @Test
+    fun startYearErrorMessageDisplayed() {
+        HomeScreenRobot(composeTestRule)
+            .setContent()
+            .clickFilterButton()
+            .clearStartYear()
+            .hideKeyboard()
+            .assertYearErrorIsDisplayed()
+            .assertApplyButtonIsDisabled()
+    }
+
+    @Test
+    fun endYearErrorMessageDisplayed() {
+        HomeScreenRobot(composeTestRule)
+            .setContent()
+            .clickFilterButton()
+            .clearEndYear()
+            .hideKeyboard()
+            .assertYearErrorIsDisplayed()
+            .assertApplyButtonIsDisabled()
+    }
+
+    @Test
+    fun applyButtonEnabledWhenValidDatesEntered() {
+        HomeScreenRobot(composeTestRule)
+            .setContent()
+            .clickFilterButton()
+            .clearStartYear()
+            .enterStartYear("1970")
+            .clearEndYear()
+            .enterEndYear("1999")
+            .hideKeyboard()
+            .assertYearErrorDoesNotExist()
+            .assertApplyButtonIsEnabled()
     }
 }

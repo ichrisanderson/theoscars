@@ -382,7 +382,8 @@ fun FilterContent(
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .widthIn(128.dp)
-                .padding(vertical = 16.dp),
+                .padding(vertical = 16.dp)
+                .testTag("applyButton"),
         ) {
             Text(
                 text = stringResource(id = R.string.apply_filter_cta),
@@ -432,7 +433,8 @@ private fun YearFilter(
                 isError = isStartYearError,
                 modifier = Modifier
                     .width(128.dp)
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = 16.dp)
+                    .testTag("startYear"),
             )
             Text(
                 text = stringResource(id = R.string.to_label),
@@ -445,7 +447,8 @@ private fun YearFilter(
                 isError = isEndYearError,
                 modifier = Modifier
                     .width(128.dp)
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = 16.dp)
+                    .testTag("endYear"),
             )
         }
         if (isStartYearError || isEndYearError) {

@@ -10,6 +10,7 @@ android {
     compileSdk 33
 
     defaultConfig {
+
         applicationId "com.chrisa.theoscars"
         minSdk 26
         targetSdk 33
@@ -29,12 +30,13 @@ android {
         }
     }
 
+    testOptions.unitTests.includeAndroidResources = true
+
     buildFeatures {
         buildConfig = true
     }
 
     buildTypes {
-
         debug {
             applicationIdSuffix ".debug"
             minifyEnabled false
@@ -143,6 +145,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     androidTestImplementation platform('androidx.compose:compose-bom:2022.10.00')
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
+    androidTestImplementation "androidx.test.ext:truth:1.5.0"
 
     androidTestImplementation 'com.google.dagger:hilt-android-testing:2.45'
     kaptAndroidTest 'com.google.dagger:hilt-android-compiler:2.45'

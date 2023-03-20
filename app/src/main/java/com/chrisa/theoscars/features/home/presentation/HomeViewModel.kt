@@ -68,24 +68,21 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun updateFilter(startYear: String, endYear: String, selectedCategories: List<CategoryModel>) {
+    fun updateFilter(startYear: Int, endYear: Int, selectedCategories: List<CategoryModel>) {
         _viewState.update { vs ->
             vs.copy(
-                startYear = startYear,
-                endYear = endYear,
+                startYear = startYear.toString(10),
+                endYear = endYear.toString(10),
                 selectedCategories = selectedCategories,
             )
         }
-
-        val start = startYear.toInt(10)
-        val end = endYear.toInt(10)
 
         coroutineScope.launch(dispatchers.io) {
             _viewState.update { vs ->
 
                 val filteredMovies = filterMoviesUseCase.execute(
-                    startYear = start,
-                    endYear = end,
+                    startYear = startYear,
+                    endYear = endYear,
                     selectedCategories = selectedCategories,
                 )
 

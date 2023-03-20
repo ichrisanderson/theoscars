@@ -130,8 +130,8 @@ fun HomeScreen(
                     FilterContent(
                         categories = viewState.categories,
                         selectedCategories = viewState.selectedCategories,
-                        startYear = viewState.startYear,
-                        endYear = viewState.endYear,
+                        currentStartYear = viewState.startYear,
+                        currentEndYear = viewState.endYear,
                         onApplySelection = { startYear, endYear, categories ->
                             viewModel.updateFilter(startYear, endYear, categories)
                             coroutineScope.launch {
@@ -316,13 +316,15 @@ fun MovieCard(
 fun FilterContent(
     categories: List<CategoryModel>,
     selectedCategories: List<CategoryModel>,
-    startYear: String,
-    endYear: String,
-    onApplySelection: (String, String, List<CategoryModel>) -> Unit,
+    currentStartYear: String,
+    currentEndYear: String,
+    onApplySelection: (Int, Int, List<CategoryModel>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var startYear by remember { mutableStateOf(startYear) }
-    var endYear by remember { mutableStateOf(endYear) }
+    var startYear by remember { mutableStateOf(currentStartYear) }
+    var endYear by remember { mutableStateOf(currentEndYear) }
+    var isStartYearError by remember { mutableStateOf(false) }
+    var isEndYearError by remember { mutableStateOf(false) }
     val selectedCategoriesStateList = remember { selectedCategories.toMutableStateList() }
 
     Column(
@@ -341,9 +343,17 @@ fun FilterContent(
         )
         YearFilter(
             startYear = startYear,
+            isStartYearError = isStartYearError,
             endYear = endYear,
-            onStartYearChanged = { startYear = it },
-            onEndYearChanged = { endYear = it },
+            isEndYearError = isEndYearError,
+            onStartYearChanged = {
+                startYear = it
+                isStartYearError = !YearValidator.isValidYear(startYear)
+            },
+            onEndYearChanged = {
+                endYear = it
+                isEndYearError = !YearValidator.isValidYear(endYear)
+            },
         )
         CategoryFilter(
             selectedCategoriesStateList = selectedCategoriesStateList,
@@ -356,7 +366,14 @@ fun FilterContent(
                 .alpha(0.3f),
         )
         Button(
-            onClick = { onApplySelection(startYear, endYear, selectedCategoriesStateList) },
+            enabled = !isStartYearError && !isEndYearError,
+            onClick = {
+                onApplySelection(
+                    startYear.toInt(10),
+                    endYear.toInt(10),
+                    selectedCategoriesStateList,
+                )
+            },
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .widthIn(128.dp)
@@ -373,7 +390,9 @@ fun FilterContent(
 @Composable
 private fun YearFilter(
     startYear: String,
+    isStartYearError: Boolean,
     endYear: String,
+    isEndYearError: Boolean,
     onStartYearChanged: (String) -> Unit,
     onEndYearChanged: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -405,6 +424,7 @@ private fun YearFilter(
                 onValueChange = onStartYearChanged,
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                 singleLine = true,
+                isError = isStartYearError,
                 modifier = Modifier
                     .width(128.dp)
                     .padding(horizontal = 16.dp),
@@ -417,9 +437,19 @@ private fun YearFilter(
                 onValueChange = onEndYearChanged,
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                 singleLine = true,
+                isError = isEndYearError,
                 modifier = Modifier
                     .width(128.dp)
                     .padding(horizontal = 16.dp),
+            )
+        }
+        if (isStartYearError || isEndYearError) {
+            Text(
+                text = stringResource(id = R.string.year_filter_error),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier
+                    .padding(start = 16.dp, top = 4.dp, bottom = 8.dp),
             )
         }
         Divider(
@@ -594,8 +624,8 @@ fun FilterDialogPreview() {
             FilterContent(
                 categories = categories,
                 selectedCategories = categories.drop(1),
-                startYear = "2023",
-                endYear = "2023",
+                currentStartYear = "2023",
+                currentEndYear = "2023",
                 onApplySelection = { startYear, endYear, selectedCategories -> },
             )
         }

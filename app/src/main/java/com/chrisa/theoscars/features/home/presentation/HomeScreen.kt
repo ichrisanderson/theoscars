@@ -67,6 +67,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -75,7 +76,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
@@ -95,7 +95,7 @@ import com.chrisa.theoscars.features.home.domain.models.CategoryModel
 import com.chrisa.theoscars.features.home.domain.models.MovieSummaryModel
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
@@ -330,8 +330,8 @@ fun FilterContent(
 ) {
     var startYear by remember { mutableStateOf(currentStartYear) }
     var endYear by remember { mutableStateOf(currentEndYear) }
-    var isStartYearError by remember { mutableStateOf(false) }
-    var isEndYearError by remember { mutableStateOf(false) }
+    val isStartYearError by remember { derivedStateOf { !YearValidator.isValidYear(startYear) } }
+    val isEndYearError by remember { derivedStateOf { !YearValidator.isValidYear(endYear) } }
     val selectedCategoriesStateList = remember { selectedCategories.toMutableStateList() }
 
     Column(
@@ -355,11 +355,9 @@ fun FilterContent(
             isEndYearError = isEndYearError,
             onStartYearChanged = {
                 startYear = it
-                isStartYearError = !YearValidator.isValidYear(startYear)
             },
             onEndYearChanged = {
                 endYear = it
-                isEndYearError = !YearValidator.isValidYear(endYear)
             },
         )
         CategoryFilter(

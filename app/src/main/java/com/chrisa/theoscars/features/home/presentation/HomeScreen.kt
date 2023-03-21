@@ -16,6 +16,7 @@
 
 package com.chrisa.theoscars.features.home.presentation
 
+import androidx.annotation.StringRes
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateFloat
@@ -88,6 +89,7 @@ import coil.compose.AsyncImage
 import com.chrisa.theoscars.R
 import com.chrisa.theoscars.core.ui.theme.OscarsTheme
 import com.chrisa.theoscars.features.home.domain.models.CategoryModel
+import com.chrisa.theoscars.features.home.domain.models.GenreModel
 import com.chrisa.theoscars.features.home.domain.models.MovieSummaryModel
 import kotlinx.coroutines.launch
 
@@ -128,6 +130,8 @@ fun HomeScreen(
                     FilterContent(
                         categories = viewState.categories,
                         selectedCategory = viewState.selectedCategory,
+                        genres = viewState.genres,
+                        selectedGenre = viewState.selectedGenre,
                         currentStartYear = viewState.startYear,
                         currentEndYear = viewState.endYear,
                         onApplySelection = { filterModel ->
@@ -325,6 +329,8 @@ fun MovieCard(
 fun FilterContent(
     categories: List<CategoryModel>,
     selectedCategory: CategoryModel,
+    genres: List<GenreModel>,
+    selectedGenre: GenreModel,
     currentStartYear: String,
     currentEndYear: String,
     onApplySelection: (FilterModel) -> Unit,
@@ -335,6 +341,7 @@ fun FilterContent(
     val isStartYearError by remember { derivedStateOf { !YearValidator.isValidYear(startYear) } }
     val isEndYearError by remember { derivedStateOf { !YearValidator.isValidYear(endYear) } }
     var selectedCategoryState by remember { mutableStateOf(selectedCategory) }
+    var selectedGenreState by remember { mutableStateOf(selectedGenre) }
 
     Column(
         modifier = modifier,
@@ -362,12 +369,25 @@ fun FilterContent(
                 endYear = it
             },
         )
-        CategoryFilter(
-            selectedCategory = selectedCategoryState,
-            categories = categories,
-            onCategorySelected = { selectedCategoryState = it },
+        ItemRowFilter(
+            selectedItem = selectedCategoryState,
+            onItemSelected = { selectedCategoryState = it },
+            displayItems = categories,
+            titleFormatId = R.string.categories_filter_title,
+            testTagPostFix = "Categories",
+            nameLabelMapper = CategoryModel::name,
             modifier = Modifier
                 .padding(top = 8.dp),
+        )
+        ItemRowFilter(
+            selectedItem = selectedGenreState,
+            onItemSelected = { selectedGenreState = it },
+            displayItems = genres,
+            titleFormatId = R.string.genres_filter_title,
+            testTagPostFix = "Genres",
+            nameLabelMapper = GenreModel::name,
+            modifier = Modifier
+                .padding(top = 16.dp),
         )
         Divider(
             modifier = Modifier
@@ -378,10 +398,11 @@ fun FilterContent(
             onClick = {
                 onApplySelection(
                     FilterModel(
-                        startYear.toInt(10),
-                        endYear.toInt(10),
-                        selectedCategoryState,
-                    )
+                        startYear = startYear.toInt(10),
+                        endYear = endYear.toInt(10),
+                        selectedCategory = selectedCategoryState,
+                        selectedGenre = selectedGenreState,
+                    ),
                 )
             },
             modifier = Modifier
@@ -474,11 +495,14 @@ private fun YearFilter(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun CategoryFilter(
-    selectedCategory: CategoryModel,
-    categories: List<CategoryModel>,
-    onCategorySelected: (CategoryModel) -> Unit,
+private fun <T> ItemRowFilter(
+    selectedItem: T,
+    displayItems: List<T>,
+    @StringRes titleFormatId: Int,
+    onItemSelected: (T) -> Unit,
+    nameLabelMapper: (T) -> String,
     modifier: Modifier = Modifier,
+    testTagPostFix: String = "",
 ) {
     Column(
         modifier = modifier,
@@ -487,7 +511,7 @@ private fun CategoryFilter(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = stringResource(id = R.string.categories_filter_title),
+                text = stringResource(id = titleFormatId),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier
                     .padding(start = 16.dp)
@@ -505,14 +529,14 @@ private fun CategoryFilter(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
-            categories.forEach { category ->
+            displayItems.forEach { displayItem ->
                 item {
                     FilterChip(
-                        selected = selectedCategory == category,
-                        onClick = { onCategorySelected(category) },
+                        selected = selectedItem == displayItem,
+                        onClick = { onItemSelected(displayItem) },
                         label = {
                             Text(
-                                text = category.name,
+                                text = nameLabelMapper(displayItem),
                                 style = MaterialTheme.typography.bodyMedium,
                             )
                         },
@@ -600,9 +624,16 @@ fun FilterDialogPreview() {
                 CategoryModel(name = "International Feature Film", ids = listOf(9, 56, 111, 123)),
                 CategoryModel(name = "Animated Feature Film", ids = listOf(106, 116)),
             )
+            val genres = listOf(
+                GenreModel(name = "Action", ids = listOf(1L)),
+                GenreModel(name = "Comedy", ids = listOf(1L)),
+                GenreModel(name = "Drama", ids = listOf(1L)),
+            )
             FilterContent(
                 categories = categories,
                 selectedCategory = categories.first(),
+                genres = genres,
+                selectedGenre = genres.last(),
                 currentStartYear = "2023",
                 currentEndYear = "2023",
                 onApplySelection = { },

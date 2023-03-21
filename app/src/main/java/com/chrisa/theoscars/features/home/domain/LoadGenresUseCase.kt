@@ -18,36 +18,30 @@ package com.chrisa.theoscars.features.home.domain
 
 import com.chrisa.theoscars.core.util.coroutines.CoroutineDispatchers
 import com.chrisa.theoscars.features.home.data.HomeDataRepository
-import com.chrisa.theoscars.features.home.domain.models.CategoryModel
 import com.chrisa.theoscars.features.home.domain.models.GenreModel
-import com.chrisa.theoscars.features.home.domain.models.MovieSummaryModel
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class FilterMoviesUseCase @Inject constructor(
+class LoadGenresUseCase @Inject constructor(
     private val coroutineDispatchers: CoroutineDispatchers,
     private val homeDataRepository: HomeDataRepository,
 ) {
-    suspend fun execute(
-        startYear: Int,
-        endYear: Int,
-        selectedCategory: CategoryModel,
-        selectedGenre: GenreModel,
-    ): List<MovieSummaryModel> = withContext(coroutineDispatchers.io) {
-        return@withContext homeDataRepository.allMoviesForCeremonyWithFilter(
-            startYear,
-            endYear,
-            selectedCategory.ids,
-            selectedGenre.ids,
-        )
-            .map {
-                MovieSummaryModel(
-                    id = it.id,
-                    backdropImagePath = it.backdropImagePath,
-                    title = it.title,
-                    overview = it.overview,
-                    year = it.year.toString(10),
-                )
-            }
+    suspend fun execute(): List<GenreModel> = withContext(coroutineDispatchers.io) {
+        val allGenres = homeDataRepository.allGenres()
+
+        val allGenresModel = GenreModel(name = "All", ids = allGenres.map { it.id })
+
+        val result = mutableListOf<GenreModel>()
+        result.add(allGenresModel)
+
+        val mappedGenres = allGenres.map {
+            GenreModel(
+                name = it.name,
+                ids = listOf(it.id),
+            )
+        }
+        result.addAll(mappedGenres)
+
+        return@withContext result
     }
 }

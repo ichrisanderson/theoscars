@@ -18,15 +18,16 @@ package com.chrisa.theoscars.core.data.db.genre
 
 class FakeGenreDao : GenreDao {
 
-    private val categoryList = mutableListOf<GenreEntity>()
+    private val genreList = mutableListOf<GenreEntity>()
 
-    override fun countAll(): Int = categoryList.size
+    override fun countAll(): Int = genreList.size
+    override fun all(): List<GenreEntity> = genreList
 
     override fun insert(category: GenreEntity) {
-        categoryList.add(category)
+        genreList.add(category)
     }
 
     override fun insertAll(categories: List<GenreEntity>) {
-        categoryList.addAll(categories)
+        genreList.addAll(categories)
     }
 }

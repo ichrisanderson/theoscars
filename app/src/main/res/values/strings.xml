@@ -6,6 +6,7 @@
     <string name="filter_title">Filter</string>
     <string name="year_filter_title">Years</string>
     <string name="categories_filter_title">Categories</string>
+    <string name="genres_filter_title">Genres</string>
     <string name="apply_filter_cta">Apply</string>
     <string name="clear_filter_cta">Clear All</string>
     <string name="select_all_filter_cta">Select All</string>

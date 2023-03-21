@@ -60,12 +60,14 @@ interface NominationDao {
         "SELECT DISTINCT movie.id, movie.backdropImagePath, movie.title, movie.overview, nomination.year FROM nomination " +
             "INNER JOIN movie ON movie.id = nomination.movieId " +
             "INNER JOIN category ON category.id = nomination.categoryId " +
-            "WHERE nomination.year >= :startYear AND nomination.year <= :endYear AND category.id IN (:categories)",
+            "INNER JOIN movieGenre ON movieGenre.movieId = movie.id " +
+            "WHERE nomination.year >= :startYear AND nomination.year <= :endYear AND category.id IN (:categories) AND movieGenre.genreId in (:genres)",
     )
     fun allMoviesForCeremonyWithFilter(
         startYear: Int,
         endYear: Int,
         categories: List<Long>,
+        genres: List<Long>,
     ): List<MovieSummary>
 
     @Query("SELECT * FROM nomination WHERE year = :ceremonyYear")

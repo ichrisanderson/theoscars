@@ -23,6 +23,7 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
@@ -51,14 +52,8 @@ class HomeScreenRobot(
         }
     }
 
-    private fun startYearNode() = composeTestRule.onNodeWithTag("startYear")
-
-    private fun endYearNode() = composeTestRule.onNodeWithTag("endYear")
-
-    private fun applyButtonNode() = composeTestRule.onNodeWithTag("applyButton")
-
     fun clickFilterButton() = apply {
-        composeTestRule.onNodeWithTag("filterButton").performClick()
+        composeTestRule.onNodeWithTag(filterButtonTestTag).performClick()
     }
 
     fun assertFilterDialogIsVisible() = apply {
@@ -68,19 +63,19 @@ class HomeScreenRobot(
     }
 
     fun clearStartYear() = apply {
-        startYearNode().performTextClearance()
+        composeTestRule.onNodeWithTag(startYearTestTag).performTextClearance()
     }
 
     fun enterStartYear(year: String) = apply {
-        startYearNode().performTextInput(year)
+        composeTestRule.onNodeWithTag(startYearTestTag).performTextInput(year)
     }
 
     fun enterEndYear(year: String) = apply {
-        endYearNode().performTextInput(year)
+        composeTestRule.onNodeWithTag(endYearTestTag).performTextInput(year)
     }
 
     fun clearEndYear() = apply {
-        endYearNode().performTextClearance()
+        composeTestRule.onNodeWithTag(endYearTestTag).performTextClearance()
     }
 
     fun hideKeyboard() = apply {
@@ -96,10 +91,33 @@ class HomeScreenRobot(
     }
 
     fun assertApplyButtonIsEnabled() = apply {
-        applyButtonNode().assertIsEnabled()
+        composeTestRule.onNodeWithTag(applyButtonTestTag).assertIsEnabled()
     }
 
     fun assertApplyButtonIsDisabled() = apply {
-        applyButtonNode().assertIsNotEnabled()
+        composeTestRule.onNodeWithTag(applyButtonTestTag).assertIsNotEnabled()
+    }
+
+    fun clickApplyButton() = apply {
+        composeTestRule.onNodeWithTag(applyButtonTestTag).performClick()
+    }
+
+    fun clickCategory(categoryText: String) = apply {
+        composeTestRule.onNodeWithText(categoryText).performClick()
+    }
+
+    fun clickGenre(genreText: String) = apply {
+        composeTestRule.onNodeWithText(genreText).performClick()
+    }
+
+    fun assertMovieTitleDisplayed(movieTitle: String) {
+        composeTestRule.onNodeWithText(movieTitle).assertIsDisplayed()
+    }
+
+    companion object {
+        private const val startYearTestTag = "startYear"
+        private const val endYearTestTag = "endYear"
+        private const val applyButtonTestTag = "applyButton"
+        private const val filterButtonTestTag = "filterButton"
     }
 }

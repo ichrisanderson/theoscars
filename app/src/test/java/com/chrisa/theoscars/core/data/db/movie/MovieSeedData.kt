@@ -17,7 +17,7 @@
 package com.chrisa.theoscars.core.data.db.movie
 
 object MovieSeedData {
-    val movies2022 = """
+    val data = """
 [
   {
     "id": 49046,

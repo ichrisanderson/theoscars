@@ -61,19 +61,19 @@ class HomeViewModel @Inject constructor(
                 isLoading = false,
                 movies = movies,
                 categories = categories,
-                selectedCategories = categories,
+                selectedCategory = categories.first(),
                 startYear = "2023",
                 endYear = "2023",
             )
         }
     }
 
-    fun updateFilter(startYear: Int, endYear: Int, selectedCategories: List<CategoryModel>) {
+    fun updateFilter(startYear: Int, endYear: Int, selectedCategory: CategoryModel) {
         _viewState.update { vs ->
             vs.copy(
                 startYear = startYear.toString(10),
                 endYear = endYear.toString(10),
-                selectedCategories = selectedCategories,
+                selectedCategory = selectedCategory,
             )
         }
 
@@ -83,7 +83,7 @@ class HomeViewModel @Inject constructor(
                 val filteredMovies = filterMoviesUseCase.execute(
                     startYear = startYear,
                     endYear = endYear,
-                    selectedCategories = selectedCategories,
+                    selectedCategory = selectedCategory,
                 )
 
                 vs.copy(movies = filteredMovies)
@@ -96,7 +96,7 @@ data class ViewState(
     val isLoading: Boolean,
     val movies: List<MovieSummaryModel>,
     val categories: List<CategoryModel>,
-    val selectedCategories: List<CategoryModel>,
+    val selectedCategory: CategoryModel,
     val startYear: String,
     val endYear: String,
 ) {
@@ -106,7 +106,7 @@ data class ViewState(
             isLoading = false,
             movies = emptyList(),
             categories = emptyList(),
-            selectedCategories = emptyList(),
+            selectedCategory = CategoryModel(ids = emptyList(), ""),
             startYear = "",
             endYear = "",
         )

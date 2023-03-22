@@ -17,14 +17,23 @@
 package com.chrisa.theoscars.core.data.db.category
 
 import androidx.room.Entity
+import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
+import com.chrisa.theoscars.core.data.db.categoryalias.CategoryAliasEntity
 
 @Entity(
     tableName = "category",
+    foreignKeys = [
+        ForeignKey(
+            entity = CategoryAliasEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["categoryAliasId"],
+        ),
+    ],
 )
 data class CategoryEntity(
     @PrimaryKey
     val id: Long,
-    val displayRank: Int,
+    val categoryAliasId: Long,
     val name: String,
 )

@@ -20,6 +20,8 @@ import com.chrisa.theoscars.core.data.LocalDateJsonAdapter
 import com.chrisa.theoscars.core.data.LocalDateTimeJsonAdapter
 import com.chrisa.theoscars.core.data.db.category.CategoryAssetDataSource
 import com.chrisa.theoscars.core.data.db.category.CategoryHelper
+import com.chrisa.theoscars.core.data.db.categoryalias.CategoryAliasAssetDataSource
+import com.chrisa.theoscars.core.data.db.categoryalias.CategoryAliasHelper
 import com.chrisa.theoscars.core.data.db.genre.GenreAssetDataSource
 import com.chrisa.theoscars.core.data.db.genre.GenreHelper
 import com.chrisa.theoscars.core.data.db.movie.MovieAssetDataSource
@@ -39,6 +41,10 @@ class BootstrapperBuilder {
             .build()
 
         return DefaultBootstrapper(
+            categoryAliasHelper = CategoryAliasHelper(
+                appDatabase,
+                CategoryAliasAssetDataSource(moshi, assetFileManager),
+            ),
             categoryHelper = CategoryHelper(
                 appDatabase,
                 CategoryAssetDataSource(moshi, assetFileManager),

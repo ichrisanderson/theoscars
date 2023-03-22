@@ -17,7 +17,7 @@
 package com.chrisa.theoscars.core.data.db.genre
 
 object GenreSeedData {
-    val genres = """
+    val data = """
 [
   {
     "id": 28,

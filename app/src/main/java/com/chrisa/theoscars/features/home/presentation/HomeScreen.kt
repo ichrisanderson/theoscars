@@ -38,27 +38,25 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -73,8 +71,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -104,6 +100,7 @@ fun HomeScreen(
 ) {
     val viewState by viewModel.viewState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
+    val lazyListState = rememberLazyListState()
     val transition = updateTransition(viewState, label = "splashTransition")
     val contentAlpha by transition.animateFloat(
         transitionSpec = { tween(durationMillis = 300) },
@@ -130,13 +127,14 @@ fun HomeScreen(
                 Surface {
                     FilterContent(
                         categories = viewState.categories,
-                        selectedCategories = viewState.selectedCategories,
+                        selectedCategory = viewState.selectedCategory,
                         currentStartYear = viewState.startYear,
                         currentEndYear = viewState.endYear,
                         onApplySelection = { startYear, endYear, categories ->
                             viewModel.updateFilter(startYear, endYear, categories)
                             coroutineScope.launch {
                                 modalSheetState.hide()
+                                lazyListState.scrollToItem(0)
                             }
                         },
                     )
@@ -145,6 +143,7 @@ fun HomeScreen(
         },
     ) {
         HomeContent(
+            listState = lazyListState,
             movies = viewState.movies,
             onMovieClick = onMovieClick,
             onSearchClick = onSearchClick,
@@ -161,6 +160,7 @@ fun HomeScreen(
 
 @Composable
 private fun HomeContent(
+    listState: LazyListState,
     movies: List<MovieSummaryModel>,
     onMovieClick: (Long) -> Unit,
     onSearchClick: () -> Unit,
@@ -177,7 +177,9 @@ private fun HomeContent(
         if (movies.isEmpty()) {
             EmptyMovies()
         } else {
-            LazyColumn {
+            LazyColumn(
+                state = listState,
+            ) {
                 items(items = movies, key = { it.id }) { movie ->
                     MovieCard(
                         movie = movie,
@@ -322,17 +324,17 @@ fun MovieCard(
 @Composable
 fun FilterContent(
     categories: List<CategoryModel>,
-    selectedCategories: List<CategoryModel>,
+    selectedCategory: CategoryModel,
     currentStartYear: String,
     currentEndYear: String,
-    onApplySelection: (Int, Int, List<CategoryModel>) -> Unit,
+    onApplySelection: (Int, Int, CategoryModel) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var startYear by remember { mutableStateOf(currentStartYear) }
     var endYear by remember { mutableStateOf(currentEndYear) }
     val isStartYearError by remember { derivedStateOf { !YearValidator.isValidYear(startYear) } }
     val isEndYearError by remember { derivedStateOf { !YearValidator.isValidYear(endYear) } }
-    val selectedCategoriesStateList = remember { selectedCategories.toMutableStateList() }
+    var selectedCategoryState by remember { mutableStateOf(selectedCategory) }
 
     Column(
         modifier = modifier,
@@ -361,8 +363,9 @@ fun FilterContent(
             },
         )
         CategoryFilter(
-            selectedCategoriesStateList = selectedCategoriesStateList,
+            selectedCategory = selectedCategoryState,
             categories = categories,
+            onCategorySelected = { selectedCategoryState = it },
             modifier = Modifier
                 .padding(top = 8.dp),
         )
@@ -376,7 +379,7 @@ fun FilterContent(
                 onApplySelection(
                     startYear.toInt(10),
                     endYear.toInt(10),
-                    selectedCategoriesStateList,
+                    selectedCategoryState,
                 )
             },
             modifier = Modifier
@@ -470,8 +473,9 @@ private fun YearFilter(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CategoryFilter(
-    selectedCategoriesStateList: SnapshotStateList<CategoryModel>,
+    selectedCategory: CategoryModel,
     categories: List<CategoryModel>,
+    onCategorySelected: (CategoryModel) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -481,43 +485,12 @@ private fun CategoryFilter(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = stringResource(
-                    id = R.string.categories_selected_title_format,
-                    selectedCategoriesStateList.size,
-                ),
+                text = stringResource(id = R.string.categories_filter_title),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier
                     .padding(start = 16.dp)
                     .padding(vertical = 8.dp),
             )
-            Spacer(modifier = Modifier.weight(1f))
-            FilledIconButton(
-                colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                ),
-                onClick = {
-                    selectedCategoriesStateList.clear()
-                },
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Clear,
-                    contentDescription = stringResource(id = R.string.clear_filter_cta),
-                )
-            }
-            FilledIconButton(
-                colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                ),
-                onClick = {
-                    selectedCategoriesStateList.clear()
-                    selectedCategoriesStateList.addAll(categories)
-                },
-            ) {
-                Icon(
-                    imageVector = Icons.Default.SelectAll,
-                    contentDescription = stringResource(id = R.string.select_all_filter_cta),
-                )
-            }
         }
         Divider(
             modifier = Modifier
@@ -533,14 +506,8 @@ private fun CategoryFilter(
             categories.forEach { category ->
                 item {
                     FilterChip(
-                        selected = selectedCategoriesStateList.contains(category),
-                        onClick = {
-                            if (selectedCategoriesStateList.contains(category)) {
-                                selectedCategoriesStateList.remove(category)
-                            } else {
-                                selectedCategoriesStateList.add(category)
-                            }
-                        },
+                        selected = selectedCategory == category,
+                        onClick = { onCategorySelected(category) },
                         label = {
                             Text(
                                 text = category.name,
@@ -560,6 +527,7 @@ fun HomeContentPreview() {
     OscarsTheme {
         Surface {
             HomeContent(
+                listState = rememberLazyListState(),
                 movies = listOf(
                     MovieSummaryModel(
                         id = 49046,
@@ -590,6 +558,7 @@ fun HomeContentEmptyMoviesPreview() {
     OscarsTheme {
         Surface {
             HomeContent(
+                listState = rememberLazyListState(),
                 movies = emptyList(),
                 onFilterClick = { },
                 onSearchClick = { },
@@ -631,7 +600,7 @@ fun FilterDialogPreview() {
             )
             FilterContent(
                 categories = categories,
-                selectedCategories = categories.drop(1),
+                selectedCategory = categories.first(),
                 currentStartYear = "2023",
                 currentEndYear = "2023",
                 onApplySelection = { startYear, endYear, selectedCategories -> },

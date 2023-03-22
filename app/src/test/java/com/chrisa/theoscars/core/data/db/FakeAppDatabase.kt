@@ -18,6 +18,8 @@ package com.chrisa.theoscars.core.data.db
 
 import com.chrisa.theoscars.core.data.db.category.CategoryDao
 import com.chrisa.theoscars.core.data.db.category.FakeCategoryDao
+import com.chrisa.theoscars.core.data.db.categoryalias.CategoryAliasDao
+import com.chrisa.theoscars.core.data.db.categoryalias.FakeCategoryAliasDao
 import com.chrisa.theoscars.core.data.db.genre.FakeGenreDao
 import com.chrisa.theoscars.core.data.db.genre.GenreDao
 import com.chrisa.theoscars.core.data.db.movie.FakeMovieDao
@@ -26,6 +28,7 @@ import com.chrisa.theoscars.core.data.db.nomination.FakeNominationDao
 import com.chrisa.theoscars.core.data.db.nomination.NominationDao
 
 class FakeAppDatabase(
+    private val categoryAliasDao: CategoryAliasDao = FakeCategoryAliasDao(),
     private val categoryDao: CategoryDao = FakeCategoryDao(),
     private val genreDao: GenreDao = FakeGenreDao(),
     private val movieDao: MovieDao = FakeMovieDao(),
@@ -33,8 +36,8 @@ class FakeAppDatabase(
 ) : AppDatabase {
 
     override fun nominationDao(): NominationDao = nominationDao
-
     override fun movieDao(): MovieDao = movieDao
+    override fun categoryAliasDao(): CategoryAliasDao = categoryAliasDao
     override fun categoryDao(): CategoryDao = categoryDao
     override fun genreDao(): GenreDao = genreDao
 }

@@ -30,13 +30,12 @@ class FilterMoviesUseCase @Inject constructor(
     suspend fun execute(
         startYear: Int,
         endYear: Int,
-        selectedCategories: List<CategoryModel>,
+        selectedCategory: CategoryModel,
     ): List<MovieSummaryModel> = withContext(coroutineDispatchers.io) {
-        val movies = homeDataRepository.allMoviesForCeremonyWithFilter(
-            startYear,
-            endYear,
-            selectedCategories.flatMap { it.ids },
-        )
+        val filteredMovies =
+            allMoviesForCeremonyWithSelectedCategories(startYear, endYear, selectedCategory)
+
+        return@withContext filteredMovies
             .map {
                 MovieSummaryModel(
                     id = it.id,
@@ -46,6 +45,15 @@ class FilterMoviesUseCase @Inject constructor(
                     year = it.year.toString(10),
                 )
             }
-        return@withContext movies
     }
+
+    private fun allMoviesForCeremonyWithSelectedCategories(
+        startYear: Int,
+        endYear: Int,
+        selectedCategory: CategoryModel,
+    ) = homeDataRepository.allMoviesForCeremonyWithFilter(
+        startYear,
+        endYear,
+        selectedCategory.ids,
+    )
 }

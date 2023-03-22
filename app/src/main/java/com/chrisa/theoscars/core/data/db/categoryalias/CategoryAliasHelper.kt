@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-package com.chrisa.theoscars.core.data.db.category
+package com.chrisa.theoscars.core.data.db.categoryalias
 
 import com.chrisa.theoscars.core.data.db.AppDatabase
 import javax.inject.Inject
 
-class CategoryHelper @Inject constructor(
+class CategoryAliasHelper @Inject constructor(
     private val appDatabase: AppDatabase,
-    private val dataSource: CategoryDataSource,
+    private val dataSource: CategoryAliasDataSource,
 ) {
-    private val dao = appDatabase.categoryDao()
+    private val dao = appDatabase.categoryAliasDao()
 
     fun insertData() {
         val items = dao.countAll()
         if (items > 0) return
 
-        val entities = dataSource.getCategories()
+        val entities = dataSource.getCategoryAliases()
             .map {
-                CategoryEntity(id = it.id, categoryAliasId = it.aliasId, name = it.name)
+                CategoryAliasEntity(id = it.id, name = it.name)
             }
 
         dao.insertAll(entities)

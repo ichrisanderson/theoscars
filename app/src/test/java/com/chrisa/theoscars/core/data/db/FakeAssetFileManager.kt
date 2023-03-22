@@ -17,6 +17,7 @@
 package com.chrisa.theoscars.core.data.db
 
 import com.chrisa.theoscars.core.data.db.category.CategorySeedData
+import com.chrisa.theoscars.core.data.db.categoryalias.CategoryAliasSeedData
 import com.chrisa.theoscars.core.data.db.genre.GenreSeedData
 import com.chrisa.theoscars.core.data.db.movie.MovieSeedData
 import com.chrisa.theoscars.core.data.db.nomination.NominationSeedData
@@ -25,10 +26,11 @@ import java.io.InputStream
 class FakeAssetFileManager : AssetFileManager {
     override fun openFile(fileName: String): InputStream {
         return when (fileName) {
-            "movies.json" -> MovieSeedData.movies2022.byteInputStream()
-            "nominations.json" -> NominationSeedData.nominations2022.byteInputStream()
-            "categories.json" -> CategorySeedData.categories2022.byteInputStream()
-            "genres.json" -> GenreSeedData.genres.byteInputStream()
+            "movies.json" -> MovieSeedData.data.byteInputStream()
+            "nominations.json" -> NominationSeedData.data.byteInputStream()
+            "categoryAliases.json" -> CategoryAliasSeedData.data.byteInputStream()
+            "categories.json" -> CategorySeedData.data.byteInputStream()
+            "genres.json" -> GenreSeedData.data.byteInputStream()
             else -> "".byteInputStream()
         }
     }

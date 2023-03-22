@@ -20,6 +20,8 @@ import android.content.Context
 import android.content.res.AssetManager
 import com.chrisa.theoscars.core.data.db.category.CategoryAssetDataSource
 import com.chrisa.theoscars.core.data.db.category.CategoryDataSource
+import com.chrisa.theoscars.core.data.db.categoryalias.CategoryAliasAssetDataSource
+import com.chrisa.theoscars.core.data.db.categoryalias.CategoryAliasDataSource
 import com.chrisa.theoscars.core.data.db.genre.GenreAssetDataSource
 import com.chrisa.theoscars.core.data.db.genre.GenreDataSource
 import com.chrisa.theoscars.core.data.db.movie.MovieAssetDataSource
@@ -56,6 +58,10 @@ internal object DatabaseModule {
     @Provides
     fun provideNominationDataSource(nominationAssetDataSource: NominationAssetDataSource): NominationDataSource =
         nominationAssetDataSource
+
+    @Provides
+    fun provideCategoryAliasAssetDataSource(categoryAliasAssetDataSource: CategoryAliasAssetDataSource): CategoryAliasDataSource =
+        categoryAliasAssetDataSource
 
     @Provides
     fun provideCategoryAssetDataSource(categoryAssetDataSource: CategoryAssetDataSource): CategoryDataSource =

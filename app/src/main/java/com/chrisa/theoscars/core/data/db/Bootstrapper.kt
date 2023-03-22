@@ -17,6 +17,7 @@
 package com.chrisa.theoscars.core.data.db
 
 import com.chrisa.theoscars.core.data.db.category.CategoryHelper
+import com.chrisa.theoscars.core.data.db.categoryalias.CategoryAliasHelper
 import com.chrisa.theoscars.core.data.db.genre.GenreHelper
 import com.chrisa.theoscars.core.data.db.movie.MovieHelper
 import com.chrisa.theoscars.core.data.db.nomination.NominationHelper
@@ -27,12 +28,14 @@ interface Bootstrapper {
 }
 
 class DefaultBootstrapper @Inject constructor(
+    private val categoryAliasHelper: CategoryAliasHelper,
     private val categoryHelper: CategoryHelper,
     private val genreHelper: GenreHelper,
     private val nominationHelper: NominationHelper,
     private val movieHelper: MovieHelper,
 ) : Bootstrapper {
     override fun insertData() {
+        categoryAliasHelper.insertData()
         categoryHelper.insertData()
         genreHelper.insertData()
         movieHelper.insertData()

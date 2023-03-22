@@ -14,13 +14,8 @@
  * limitations under the License.
  */
 
-package com.chrisa.theoscars.core.data.db.category
+package com.chrisa.theoscars.core.data.db.categoryalias
 
-import com.squareup.moshi.JsonClass
-
-@JsonClass(generateAdapter = true)
-data class CategorySeedDataModel(
-    val id: Long,
-    val aliasId: Long,
-    val name: String,
-)
+interface CategoryAliasDataSource {
+    fun getCategoryAliases(): List<CategoryAliasSeedDataModel>
+}

@@ -22,8 +22,10 @@ import com.chrisa.theoscars.core.util.coroutines.CoroutineDispatchers
 import com.chrisa.theoscars.features.home.domain.FilterMoviesUseCase
 import com.chrisa.theoscars.features.home.domain.InitializeDataUseCase
 import com.chrisa.theoscars.features.home.domain.LoadCategoriesUseCase
+import com.chrisa.theoscars.features.home.domain.LoadGenresUseCase
 import com.chrisa.theoscars.features.home.domain.LoadMoviesUseCase
 import com.chrisa.theoscars.features.home.domain.models.CategoryModel
+import com.chrisa.theoscars.features.home.domain.models.GenreModel
 import com.chrisa.theoscars.features.home.domain.models.MovieSummaryModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,6 +42,7 @@ class HomeViewModel @Inject constructor(
     private val loadMoviesUseCase: LoadMoviesUseCase,
     private val filterMoviesUseCase: FilterMoviesUseCase,
     private val loadCategoriesUseCase: LoadCategoriesUseCase,
+    private val loadGenresUseCase: LoadGenresUseCase,
 ) : ViewModel(coroutineScope) {
 
     private val _viewState = MutableStateFlow(ViewState.default())
@@ -56,24 +59,28 @@ class HomeViewModel @Inject constructor(
     private suspend fun loadMovies() {
         val movies = loadMoviesUseCase.execute()
         val categories = loadCategoriesUseCase.execute()
+        val genres = loadGenresUseCase.execute()
         _viewState.update {
             it.copy(
                 isLoading = false,
                 movies = movies,
                 categories = categories,
                 selectedCategory = categories.first(),
+                genres = genres,
+                selectedGenre = genres.first(),
                 startYear = "2023",
                 endYear = "2023",
             )
         }
     }
 
-    fun updateFilter(startYear: Int, endYear: Int, selectedCategory: CategoryModel) {
+    fun updateFilter(filterModel: FilterModel) {
         _viewState.update { vs ->
             vs.copy(
-                startYear = startYear.toString(10),
-                endYear = endYear.toString(10),
-                selectedCategory = selectedCategory,
+                startYear = filterModel.startYearString,
+                endYear = filterModel.endYearString,
+                selectedCategory = filterModel.selectedCategory,
+                selectedGenre = filterModel.selectedGenre,
             )
         }
 
@@ -81,9 +88,10 @@ class HomeViewModel @Inject constructor(
             _viewState.update { vs ->
 
                 val filteredMovies = filterMoviesUseCase.execute(
-                    startYear = startYear,
-                    endYear = endYear,
-                    selectedCategory = selectedCategory,
+                    startYear = filterModel.startYear,
+                    endYear = filterModel.endYear,
+                    selectedCategory = filterModel.selectedCategory,
+                    selectedGenre = filterModel.selectedGenre,
                 )
 
                 vs.copy(movies = filteredMovies)
@@ -97,6 +105,8 @@ data class ViewState(
     val movies: List<MovieSummaryModel>,
     val categories: List<CategoryModel>,
     val selectedCategory: CategoryModel,
+    val genres: List<GenreModel>,
+    val selectedGenre: GenreModel,
     val startYear: String,
     val endYear: String,
 ) {
@@ -106,9 +116,21 @@ data class ViewState(
             isLoading = false,
             movies = emptyList(),
             categories = emptyList(),
-            selectedCategory = CategoryModel(ids = emptyList(), ""),
+            selectedCategory = CategoryModel(name = "", ids = emptyList()),
+            genres = emptyList(),
+            selectedGenre = GenreModel(name = "", ids = emptyList()),
             startYear = "",
             endYear = "",
         )
     }
+}
+
+data class FilterModel(
+    val startYear: Int,
+    val endYear: Int,
+    val selectedCategory: CategoryModel,
+    val selectedGenre: GenreModel,
+) {
+    val startYearString = startYear.toString(10)
+    val endYearString = endYear.toString(10)
 }

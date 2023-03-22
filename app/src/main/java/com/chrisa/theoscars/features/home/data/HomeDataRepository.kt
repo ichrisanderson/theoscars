@@ -19,6 +19,7 @@ package com.chrisa.theoscars.features.home.data
 import com.chrisa.theoscars.core.data.db.AppDatabase
 import com.chrisa.theoscars.core.data.db.category.CategoryEntity
 import com.chrisa.theoscars.core.data.db.categoryalias.CategoryAliasEntity
+import com.chrisa.theoscars.core.data.db.genre.GenreEntity
 import com.chrisa.theoscars.core.data.db.nomination.MovieSummary
 import javax.inject.Inject
 
@@ -35,9 +36,15 @@ class HomeDataRepository @Inject constructor(
         startYear: Int,
         endYear: Int,
         categories: List<Long>,
+        genres: List<Long>,
     ): List<MovieSummary> {
         val dao = appDatabase.nominationDao()
-        return dao.allMoviesForCeremonyWithFilter(startYear, endYear, categories)
+        return dao.allMoviesForCeremonyWithFilter(startYear, endYear, categories, genres)
+    }
+
+    fun allGenres(): List<GenreEntity> {
+        val dao = appDatabase.genreDao()
+        return dao.all()
     }
 
     fun allCategories(): List<CategoryEntity> {

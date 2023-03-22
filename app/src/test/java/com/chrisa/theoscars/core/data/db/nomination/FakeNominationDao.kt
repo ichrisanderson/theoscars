@@ -69,12 +69,19 @@ class FakeNominationDao(
         startYear: Int,
         endYear: Int,
         categories: List<Long>,
+        genres: List<Long>,
     ): List<MovieSummary> {
         val categorySet = categories.toSet()
+        val genresSet = genres.toSet()
+        val allMovieGenres =
+            movieDao.allMovieGenres().filter { genresSet.contains(it.genreId) }.map { it.movieId }
+                .toSet()
         val nominations = this.nominations
             .filter { it.year in startYear..endYear && categorySet.contains(it.categoryId) }
             .associateBy { it.movieId }
-        val movies = movieDao.allMovies().filter { nominations.containsKey(it.id) }.map {
+        val movies = movieDao.allMovies().filter {
+            nominations.containsKey(it.id) && allMovieGenres.contains(it.id)
+        }.map {
             MovieSummary(
                 id = it.id,
                 backdropImagePath = it.backdropImagePath.orEmpty(),

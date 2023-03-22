@@ -75,4 +75,15 @@ class HomeScreenTest {
             .assertYearErrorDoesNotExist()
             .assertApplyButtonIsEnabled()
     }
+
+    @Test
+    fun filterItemsApplied() {
+        HomeScreenRobot(composeTestRule)
+            .setContent()
+            .clickFilterButton()
+            .clickCategory("Best Picture")
+            .clickGenre("Comedy")
+            .clickApplyButton()
+            .assertMovieTitleDisplayed("The Banshees of Inisherin")
+    }
 }

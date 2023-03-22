@@ -16,12 +16,15 @@
 
 package com.chrisa.theoscars.features.home.presentation
 
+import java.time.LocalDate
+
 object YearValidator {
     fun isValidYear(year: String): Boolean {
         if (year.isEmpty()) return false
+        val currentYear = LocalDate.now().year
         return try {
             val number = year.toInt(10)
-            number >= 1928
+            number in 1928..currentYear
         } catch (ex: NumberFormatException) {
             false
         }

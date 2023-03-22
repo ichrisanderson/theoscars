@@ -41,4 +41,7 @@ interface MovieDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertMovieGenres(items: List<MovieGenreEntity>)
+
+    @Query("SELECT * FROM movieGenre")
+    fun allMovieGenres(): List<MovieGenreEntity>
 }

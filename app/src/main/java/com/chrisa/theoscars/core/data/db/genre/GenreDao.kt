@@ -27,6 +27,9 @@ interface GenreDao {
     @Query("SELECT COUNT(id) FROM genre")
     fun countAll(): Int
 
+    @Query("SELECT * FROM genre ORDER BY name")
+    fun all(): List<GenreEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(genre: GenreEntity)
 

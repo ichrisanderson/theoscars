@@ -23,16 +23,16 @@ class FakeMovieDao : MovieDao {
 
     override fun countAll(): Int = movies.size
 
+    override fun allMovies(): List<MovieEntity> = movies
+
+    override fun allMovieGenres(): List<MovieGenreEntity> = moviesGenres
+
     override fun insert(item: MovieEntity) {
         movies.add(item)
     }
 
     override fun loadMovie(id: Long): MovieEntity? {
         return movies.firstOrNull { it.id == id }
-    }
-
-    override fun allMovies(): List<MovieEntity> {
-        return movies
     }
 
     override fun searchMovies(query: String): List<MovieEntity> {

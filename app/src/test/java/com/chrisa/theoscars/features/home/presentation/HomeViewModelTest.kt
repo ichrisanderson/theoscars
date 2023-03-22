@@ -145,9 +145,11 @@ class HomeViewModelTest {
         val newSelection = sut.viewState.value.categories[1]
 
         sut.updateFilter(
-            startYear = 2023,
-            endYear = 2023,
-            selectedCategory = newSelection,
+            FilterModel(
+                startYear = 2023,
+                endYear = 2023,
+                selectedCategory = newSelection
+            )
         )
 
         assertThat(sut.viewState.value.selectedCategory).isEqualTo(newSelection)
@@ -160,9 +162,11 @@ class HomeViewModelTest {
             .first { it.name == "Actress in a Supporting Role" }
 
         sut.updateFilter(
-            startYear = 2023,
-            endYear = 2023,
-            selectedCategory = selection,
+            FilterModel(
+                startYear = 2023,
+                endYear = 2023,
+                selectedCategory = selection
+            )
         )
 
         assertThat(sut.viewState.value.movies.map { it.title }).isEqualTo(
@@ -182,9 +186,11 @@ class HomeViewModelTest {
             .first { it.name == "Best Picture" }
 
         sut.updateFilter(
-            startYear = 1960,
-            endYear = 1970,
-            selectedCategory = selection,
+            FilterModel(
+                startYear = 1960,
+                endYear = 1970,
+                selectedCategory = selection
+            )
         )
 
         assertThat(sut.viewState.value.movies.map { it.title }).isEqualTo(
@@ -201,9 +207,11 @@ class HomeViewModelTest {
             .first { it.name == "Writing" }
 
         sut.updateFilter(
-            startYear = 1960,
-            endYear = 1970,
-            selectedCategory = selection,
+            FilterModel(
+                startYear = 1960,
+                endYear = 1970,
+                selectedCategory = selection
+            )
         )
 
         assertThat(sut.viewState.value.movies).isEmpty()

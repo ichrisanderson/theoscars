@@ -130,8 +130,8 @@ fun HomeScreen(
                         selectedCategory = viewState.selectedCategory,
                         currentStartYear = viewState.startYear,
                         currentEndYear = viewState.endYear,
-                        onApplySelection = { startYear, endYear, categories ->
-                            viewModel.updateFilter(startYear, endYear, categories)
+                        onApplySelection = { filterModel ->
+                            viewModel.updateFilter(filterModel)
                             coroutineScope.launch {
                                 modalSheetState.hide()
                                 lazyListState.scrollToItem(0)
@@ -327,7 +327,7 @@ fun FilterContent(
     selectedCategory: CategoryModel,
     currentStartYear: String,
     currentEndYear: String,
-    onApplySelection: (Int, Int, CategoryModel) -> Unit,
+    onApplySelection: (FilterModel) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var startYear by remember { mutableStateOf(currentStartYear) }
@@ -377,9 +377,11 @@ fun FilterContent(
             enabled = !isStartYearError && !isEndYearError,
             onClick = {
                 onApplySelection(
-                    startYear.toInt(10),
-                    endYear.toInt(10),
-                    selectedCategoryState,
+                    FilterModel(
+                        startYear.toInt(10),
+                        endYear.toInt(10),
+                        selectedCategoryState,
+                    )
                 )
             },
             modifier = Modifier
@@ -603,7 +605,7 @@ fun FilterDialogPreview() {
                 selectedCategory = categories.first(),
                 currentStartYear = "2023",
                 currentEndYear = "2023",
-                onApplySelection = { startYear, endYear, selectedCategories -> },
+                onApplySelection = { },
             )
         }
     }

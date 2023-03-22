@@ -68,12 +68,12 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun updateFilter(startYear: Int, endYear: Int, selectedCategory: CategoryModel) {
+    fun updateFilter(filterModel: FilterModel) {
         _viewState.update { vs ->
             vs.copy(
-                startYear = startYear.toString(10),
-                endYear = endYear.toString(10),
-                selectedCategory = selectedCategory,
+                startYear = filterModel.startYearString,
+                endYear = filterModel.endYearString,
+                selectedCategory = filterModel.selectedCategory,
             )
         }
 
@@ -81,9 +81,9 @@ class HomeViewModel @Inject constructor(
             _viewState.update { vs ->
 
                 val filteredMovies = filterMoviesUseCase.execute(
-                    startYear = startYear,
-                    endYear = endYear,
-                    selectedCategory = selectedCategory,
+                    startYear = filterModel.startYear,
+                    endYear = filterModel.endYear,
+                    selectedCategory = filterModel.selectedCategory,
                 )
 
                 vs.copy(movies = filteredMovies)
@@ -111,4 +111,13 @@ data class ViewState(
             endYear = "",
         )
     }
+}
+
+data class FilterModel(
+    val startYear: Int,
+    val endYear: Int,
+    val selectedCategory: CategoryModel
+) {
+    val startYearString = startYear.toString(10)
+    val endYearString = endYear.toString(10)
 }

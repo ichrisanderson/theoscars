@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package com.chrisa.theoscars.core.data.db.category
+package com.chrisa.theoscars.core.data.db.categoryalias
 
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
-data class CategorySeedDataModel(
+data class CategoryAliasSeedDataModel(
     val id: Long,
-    val aliasId: Long,
     val name: String,
 )

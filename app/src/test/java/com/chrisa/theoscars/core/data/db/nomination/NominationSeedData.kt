@@ -17,7 +17,7 @@
 package com.chrisa.theoscars.core.data.db.nomination
 
 object NominationSeedData {
-    val nominations2022 = """
+    val data = """
 [
   {
     "year_ceremony": 1966,

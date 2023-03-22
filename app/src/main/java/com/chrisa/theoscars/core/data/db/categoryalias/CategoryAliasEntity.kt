@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-package com.chrisa.theoscars.core.data.db.category
+package com.chrisa.theoscars.core.data.db.categoryalias
 
-import com.squareup.moshi.JsonClass
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 
-@JsonClass(generateAdapter = true)
-data class CategorySeedDataModel(
+@Entity(
+    tableName = "categoryAlias",
+)
+data class CategoryAliasEntity(
+    @PrimaryKey
     val id: Long,
-    val aliasId: Long,
     val name: String,
 )

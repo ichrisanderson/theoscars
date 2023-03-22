@@ -22,6 +22,8 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.chrisa.theoscars.core.data.db.category.CategoryDao
 import com.chrisa.theoscars.core.data.db.category.CategoryEntity
+import com.chrisa.theoscars.core.data.db.categoryalias.CategoryAliasDao
+import com.chrisa.theoscars.core.data.db.categoryalias.CategoryAliasEntity
 import com.chrisa.theoscars.core.data.db.genre.GenreDao
 import com.chrisa.theoscars.core.data.db.genre.GenreEntity
 import com.chrisa.theoscars.core.data.db.movie.MovieDao
@@ -33,12 +35,14 @@ import com.chrisa.theoscars.core.data.db.nomination.NominationEntity
 interface AppDatabase {
     fun nominationDao(): NominationDao
     fun movieDao(): MovieDao
+    fun categoryAliasDao(): CategoryAliasDao
     fun categoryDao(): CategoryDao
     fun genreDao(): GenreDao
 }
 
 @Database(
     entities = [
+        CategoryAliasEntity::class,
         CategoryEntity::class,
         GenreEntity::class,
         NominationEntity::class,
@@ -52,6 +56,7 @@ abstract class AndroidAppDatabase : RoomDatabase(), AppDatabase {
 
     abstract override fun nominationDao(): NominationDao
     abstract override fun movieDao(): MovieDao
+    abstract override fun categoryAliasDao(): CategoryAliasDao
     abstract override fun categoryDao(): CategoryDao
     abstract override fun genreDao(): GenreDao
 

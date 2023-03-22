@@ -14,26 +14,18 @@
  * limitations under the License.
  */
 
-package com.chrisa.theoscars.core.data.db.category
+package com.chrisa.theoscars.core.data.db.categoryalias
 
-import com.chrisa.theoscars.core.data.db.AppDatabase
+import com.chrisa.theoscars.core.data.db.AssetFileManager
+import com.chrisa.theoscars.core.data.db.AssetFileManager.Companion.openFileAsList
+import com.squareup.moshi.Moshi
 import javax.inject.Inject
 
-class CategoryHelper @Inject constructor(
-    private val appDatabase: AppDatabase,
-    private val dataSource: CategoryDataSource,
-) {
-    private val dao = appDatabase.categoryDao()
+class CategoryAliasAssetDataSource @Inject constructor(
+    private val moshi: Moshi,
+    private val assetFileManager: AssetFileManager,
+) : CategoryAliasDataSource {
 
-    fun insertData() {
-        val items = dao.countAll()
-        if (items > 0) return
-
-        val entities = dataSource.getCategories()
-            .map {
-                CategoryEntity(id = it.id, categoryAliasId = it.aliasId, name = it.name)
-            }
-
-        dao.insertAll(entities)
-    }
+    override fun getCategoryAliases(): List<CategoryAliasSeedDataModel> =
+        assetFileManager.openFileAsList("categoryAliases.json", moshi, CategoryAliasSeedDataModel::class.java)
 }

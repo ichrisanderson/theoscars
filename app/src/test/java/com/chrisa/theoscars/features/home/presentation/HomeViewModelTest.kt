@@ -28,7 +28,6 @@ import com.chrisa.theoscars.features.home.domain.FilterMoviesUseCase
 import com.chrisa.theoscars.features.home.domain.InitializeDataUseCase
 import com.chrisa.theoscars.features.home.domain.LoadCategoriesUseCase
 import com.chrisa.theoscars.features.home.domain.LoadMoviesUseCase
-import com.chrisa.theoscars.features.home.domain.models.CategoryModel
 import com.chrisa.theoscars.features.home.domain.models.MovieSummaryModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.Dispatchers
@@ -65,6 +64,7 @@ class HomeViewModelTest {
     }
 
     private fun homeViewModel(): HomeViewModel {
+        val homeDataRepository = HomeDataRepository(appDatabase)
         return HomeViewModel(
             dispatchers = dispatchers,
             coroutineScope = CloseableCoroutineScope(),
@@ -74,14 +74,15 @@ class HomeViewModelTest {
             ),
             loadMoviesUseCase = LoadMoviesUseCase(
                 dispatchers,
-                HomeDataRepository(appDatabase),
+                homeDataRepository,
             ),
             filterMoviesUseCase = FilterMoviesUseCase(
                 dispatchers,
-                HomeDataRepository(appDatabase),
+                homeDataRepository,
             ),
             loadCategoriesUseCase = LoadCategoriesUseCase(
                 dispatchers,
+                homeDataRepository,
             ),
         )
     }
@@ -135,34 +136,33 @@ class HomeViewModelTest {
     fun `WHEN initialised THEN all categories are selected`() {
         val sut = homeViewModel()
 
-        assertThat(sut.viewState.value.selectedCategories).containsAtLeastElementsIn(sut.viewState.value.categories)
+        assertThat(sut.viewState.value.selectedCategory.name).isEqualTo("All")
     }
 
     @Test
     fun `WHEN selected categories updated THEN viewState updated`() {
         val sut = homeViewModel()
-        val newSelection = sut.viewState.value.selectedCategories.drop(2)
+        val newSelection = sut.viewState.value.categories[1]
 
         sut.updateFilter(
             startYear = 2023,
             endYear = 2023,
-            selectedCategories = newSelection,
+            selectedCategory = newSelection,
         )
 
-        assertThat(sut.viewState.value.selectedCategories).isEqualTo(newSelection)
+        assertThat(sut.viewState.value.selectedCategory).isEqualTo(newSelection)
     }
 
     @Test
     fun `WHEN category filter applied THEN viewState updated with selected movies`() {
         val sut = homeViewModel()
-        val selection = listOf(
-            CategoryModel(name = "Actress in a Supporting Role", ids = listOf(28, 115)),
-        )
+        val selection = sut.viewState.value.categories
+            .first { it.name == "Actress in a Supporting Role" }
 
         sut.updateFilter(
             startYear = 2023,
             endYear = 2023,
-            selectedCategories = selection,
+            selectedCategory = selection,
         )
 
         assertThat(sut.viewState.value.movies.map { it.title }).isEqualTo(
@@ -178,14 +178,13 @@ class HomeViewModelTest {
     @Test
     fun `WHEN year filter applied THEN viewState updated with selected movies`() {
         val sut = homeViewModel()
-        val selection = listOf(
-            CategoryModel(name = "Best Picture", ids = listOf(67)),
-        )
+        val selection = sut.viewState.value.categories
+            .first { it.name == "Best Picture" }
 
         sut.updateFilter(
             startYear = 1960,
-            endYear = 2023,
-            selectedCategories = selection,
+            endYear = 1970,
+            selectedCategory = selection,
         )
 
         assertThat(sut.viewState.value.movies.map { it.title }).isEqualTo(
@@ -198,16 +197,15 @@ class HomeViewModelTest {
     @Test
     fun `GIVEN no movies match condition WHEN filter applied THEN viewState updated with empty movies`() {
         val sut = homeViewModel()
-        val selection = listOf(
-            CategoryModel(name = "Writing (Adapted Screenplay)", ids = listOf(133)),
-        )
+        val selection = sut.viewState.value.categories
+            .first { it.name == "Writing" }
 
         sut.updateFilter(
             startYear = 1960,
             endYear = 1970,
-            selectedCategories = selection,
+            selectedCategory = selection,
         )
 
-        assertThat(sut.viewState.value.movies.map { it.title }).isEmpty()
+        assertThat(sut.viewState.value.movies).isEmpty()
     }
 }

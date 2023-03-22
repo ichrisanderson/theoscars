@@ -28,9 +28,3 @@ data class CategoryModel(
     val ids: List<Long>,
     val name: String,
 )
-
-data class NominationModel(
-    val category: String,
-    val name: String,
-    val winner: Boolean?,
-)

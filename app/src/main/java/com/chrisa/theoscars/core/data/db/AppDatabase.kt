@@ -64,7 +64,13 @@ abstract class AndroidAppDatabase : RoomDatabase(), AppDatabase {
         private const val databaseName = "the-oscars-db"
 
         fun buildDatabase(context: Context): AppDatabase {
+            val seedDBExists = context.assets.list("")?.contains(databaseName) ?: false
             return Room.databaseBuilder(context, AndroidAppDatabase::class.java, databaseName)
+                .apply {
+                    if (seedDBExists) {
+                        createFromAsset(databaseName)
+                    }
+                }
                 .build()
         }
     }

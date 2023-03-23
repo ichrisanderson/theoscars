@@ -20,7 +20,7 @@ import com.chrisa.theoscars.core.data.db.AppDatabase
 import javax.inject.Inject
 
 class NominationHelper @Inject constructor(
-    appDatabase: AppDatabase,
+    private val appDatabase: AppDatabase,
     private val dataSource: NominationDataSource,
 ) {
     private val dao = appDatabase.nominationDao()
@@ -30,8 +30,18 @@ class NominationHelper @Inject constructor(
         if (items > 0) return
 
         val dataSourceItems = dataSource.getNominations()
+        val categoryKeys = appDatabase.categoryDao().allCategories().associate { it.id to it.name }
+        val movieKeys = appDatabase.movieDao().allMovies().associate { it.id to it.title }
 
         dataSourceItems.forEach {
+            if (!categoryKeys.containsKey(it.categoryId)) {
+                throw IllegalStateException("Category not found $it. ${categoryKeys.size}")
+            }
+
+            if (!movieKeys.containsKey(it.movieId)) {
+                throw IllegalStateException("Movie not found $it. ${movieKeys.size}")
+            }
+
             dao.insert(
                 NominationEntity(
                     year = it.ceremonyYear,

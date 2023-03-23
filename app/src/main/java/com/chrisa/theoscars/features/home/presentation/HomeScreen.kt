@@ -65,6 +65,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -374,7 +375,6 @@ fun FilterContent(
             onItemSelected = { selectedCategoryState = it },
             displayItems = categories,
             titleFormatId = R.string.categories_filter_title,
-            testTagPostFix = "Categories",
             nameLabelMapper = CategoryModel::name,
             modifier = Modifier
                 .padding(top = 8.dp),
@@ -384,7 +384,6 @@ fun FilterContent(
             onItemSelected = { selectedGenreState = it },
             displayItems = genres,
             titleFormatId = R.string.genres_filter_title,
-            testTagPostFix = "Genres",
             nameLabelMapper = GenreModel::name,
             modifier = Modifier
                 .padding(top = 16.dp),
@@ -502,8 +501,13 @@ private fun <T> ItemRowFilter(
     onItemSelected: (T) -> Unit,
     nameLabelMapper: (T) -> String,
     modifier: Modifier = Modifier,
-    testTagPostFix: String = "",
 ) {
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(displayItems) {
+        listState.scrollToItem(displayItems.indexOf(selectedItem))
+    }
+
     Column(
         modifier = modifier,
     ) {
@@ -524,6 +528,7 @@ private fun <T> ItemRowFilter(
                 .alpha(0.3f),
         )
         LazyRow(
+            state = listState,
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(horizontal = 16.dp),
             modifier = Modifier

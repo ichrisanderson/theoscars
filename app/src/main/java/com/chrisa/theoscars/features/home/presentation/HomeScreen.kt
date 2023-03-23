@@ -23,6 +23,7 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -61,6 +62,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -139,7 +141,6 @@ fun HomeScreen(
                             viewModel.updateFilter(filterModel)
                             coroutineScope.launch {
                                 modalSheetState.hide()
-                                lazyListState.scrollToItem(0)
                             }
                         },
                     )
@@ -163,6 +164,7 @@ fun HomeScreen(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun HomeContent(
     listState: LazyListState,
@@ -189,6 +191,7 @@ private fun HomeContent(
                     MovieCard(
                         movie = movie,
                         onMovieClick = onMovieClick,
+                        modifier = Modifier.animateItemPlacement(),
                     )
                 }
             }
@@ -388,10 +391,6 @@ fun FilterContent(
             modifier = Modifier
                 .padding(top = 16.dp),
         )
-        Divider(
-            modifier = Modifier
-                .alpha(0.3f),
-        )
         Button(
             enabled = !isStartYearError && !isEndYearError,
             onClick = {
@@ -549,6 +548,10 @@ private fun <T> ItemRowFilter(
                 }
             }
         }
+        Divider(
+            modifier = Modifier
+                .alpha(0.3f),
+        )
     }
 }
 

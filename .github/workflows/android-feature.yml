@@ -1,0 +1,25 @@
+name: Android Feature
+
+on:
+  push:
+    branches:
+      - '*'
+      - '!main'
+
+jobs:
+
+  build:
+    name: Build
+    runs-on: ubuntu-18.04
+    steps:
+      -   uses: actions/checkout@v1
+      -   name: Set up JDK 11
+          uses: actions/setup-java@v1
+          with:
+            java-version: 11
+      -   name: Compile
+          run: bash ./gradlew compileDebugSources compileDebugUnitTestSources -PdisablePreDex --quiet
+      -   name: Lint
+          run: bash ./gradlew app:lintDebug ktlintCheck -PdisablePreDex --quiet
+      -   name: Unit tests
+          run: bash ./gradlew test --stacktrace

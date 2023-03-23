@@ -1,0 +1,19 @@
+// Check for google-services.json file and copy to project dir
+copySeedData(findProperty('oscar_seed_data_dir') ?: '', file("src/main/assets"))
+
+private void copySeedData(seedDir = '', targetDir) {
+    if (seedDir != '') {
+        def seedDirectory = new File(seedDir)
+        if (seedDirectory.exists()) {
+            writeFile("the-oscars-db", seedDir, targetDir)
+        }
+    }
+}
+
+private void writeFile(fileName = '', seedDir, targetDir) {
+    def seedFile = new File(seedDir, fileName)
+    def targetFile = new File(targetDir, fileName)
+    if (seedFile.exists() && !targetFile.exists()) {
+        targetFile.write(seedFile.text)
+    }
+}

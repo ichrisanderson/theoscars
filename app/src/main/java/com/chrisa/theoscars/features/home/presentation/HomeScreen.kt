@@ -62,7 +62,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -374,13 +373,14 @@ fun FilterContent(
             },
         )
         ItemRowFilter(
+            displayItems = categories,
             selectedItem = selectedCategoryState,
             onItemSelected = { selectedCategoryState = it },
-            displayItems = categories,
             titleFormatId = R.string.categories_filter_title,
             nameLabelMapper = CategoryModel::name,
             modifier = Modifier
                 .padding(top = 8.dp),
+            testTagPostFix = "Categories",
         )
         ItemRowFilter(
             selectedItem = selectedGenreState,
@@ -390,6 +390,7 @@ fun FilterContent(
             nameLabelMapper = GenreModel::name,
             modifier = Modifier
                 .padding(top = 16.dp),
+            testTagPostFix = "Genres",
         )
         Button(
             enabled = !isStartYearError && !isEndYearError,
@@ -494,17 +495,21 @@ private fun YearFilter(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun <T> ItemRowFilter(
-    selectedItem: T,
     displayItems: List<T>,
-    @StringRes titleFormatId: Int,
+    selectedItem: T,
     onItemSelected: (T) -> Unit,
+    @StringRes titleFormatId: Int,
     nameLabelMapper: (T) -> String,
     modifier: Modifier = Modifier,
+    testTagPostFix: String = "",
 ) {
     val listState = rememberLazyListState()
 
     LaunchedEffect(displayItems) {
-        listState.scrollToItem(displayItems.indexOf(selectedItem))
+        val selectedIndex = displayItems.indexOf(selectedItem)
+        if (selectedIndex >= 0) {
+            listState.scrollToItem(selectedIndex)
+        }
     }
 
     Column(
@@ -531,10 +536,11 @@ private fun <T> ItemRowFilter(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(horizontal = 16.dp),
             modifier = Modifier
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .testTag("itemRowFilter_$testTagPostFix"),
         ) {
             displayItems.forEach { displayItem ->
-                item {
+                item(key = nameLabelMapper(displayItem)) {
                     FilterChip(
                         selected = selectedItem == displayItem,
                         onClick = { onItemSelected(displayItem) },

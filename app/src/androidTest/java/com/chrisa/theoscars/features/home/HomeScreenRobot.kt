@@ -22,9 +22,11 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToKey
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -54,6 +56,11 @@ class HomeScreenRobot(
 
     fun clickFilterButton() = apply {
         composeTestRule.onNodeWithTag(filterButtonTestTag).performClick()
+        composeTestRule.waitUntil(timeoutMillis = 5000L) {
+            composeTestRule
+                .onAllNodesWithText("Filter")
+                .fetchSemanticsNodes().size == 1
+        }
     }
 
     fun assertFilterDialogIsVisible() = apply {
@@ -103,10 +110,12 @@ class HomeScreenRobot(
     }
 
     fun clickCategory(categoryText: String) = apply {
+        composeTestRule.onNodeWithTag(categoriesItemListTestTag).performScrollToKey(categoryText)
         composeTestRule.onNodeWithText(categoryText).performClick()
     }
 
     fun clickGenre(genreText: String) = apply {
+        composeTestRule.onNodeWithTag(genresItemListTestTag).performScrollToKey(genreText)
         composeTestRule.onNodeWithText(genreText).performClick()
     }
 
@@ -119,5 +128,7 @@ class HomeScreenRobot(
         private const val endYearTestTag = "endYear"
         private const val applyButtonTestTag = "applyButton"
         private const val filterButtonTestTag = "filterButton"
+        private const val categoriesItemListTestTag = "itemRowFilter_Categories"
+        private const val genresItemListTestTag = "itemRowFilter_Genres"
     }
 }

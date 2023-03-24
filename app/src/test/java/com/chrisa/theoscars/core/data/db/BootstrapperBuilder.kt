@@ -41,6 +41,7 @@ class BootstrapperBuilder {
             .build()
 
         return DefaultBootstrapper(
+            appDatabase = appDatabase,
             categoryAliasHelper = CategoryAliasHelper(
                 appDatabase,
                 CategoryAliasAssetDataSource(moshi, assetFileManager),

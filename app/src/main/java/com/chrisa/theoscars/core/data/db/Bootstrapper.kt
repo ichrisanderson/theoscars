@@ -28,6 +28,7 @@ interface Bootstrapper {
 }
 
 class DefaultBootstrapper @Inject constructor(
+    private val appDatabase: AppDatabase,
     private val categoryAliasHelper: CategoryAliasHelper,
     private val categoryHelper: CategoryHelper,
     private val genreHelper: GenreHelper,
@@ -35,10 +36,16 @@ class DefaultBootstrapper @Inject constructor(
     private val movieHelper: MovieHelper,
 ) : Bootstrapper {
     override fun insertData() {
-        categoryAliasHelper.insertData()
-        categoryHelper.insertData()
-        genreHelper.insertData()
-        movieHelper.insertData()
-        nominationHelper.insertData()
+        appDatabase.beginTransaction()
+        try {
+            categoryAliasHelper.insertData()
+            categoryHelper.insertData()
+            genreHelper.insertData()
+            movieHelper.insertData()
+            nominationHelper.insertData()
+            appDatabase.setTransactionSuccessful()
+        } finally {
+            appDatabase.endTransaction()
+        }
     }
 }

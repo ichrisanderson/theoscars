@@ -38,6 +38,9 @@ interface AppDatabase {
     fun categoryAliasDao(): CategoryAliasDao
     fun categoryDao(): CategoryDao
     fun genreDao(): GenreDao
+    fun beginTransaction()
+    fun setTransactionSuccessful()
+    fun endTransaction()
 }
 
 @Database(

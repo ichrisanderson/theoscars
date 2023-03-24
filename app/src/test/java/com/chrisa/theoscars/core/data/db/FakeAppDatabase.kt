@@ -40,4 +40,7 @@ class FakeAppDatabase(
     override fun categoryAliasDao(): CategoryAliasDao = categoryAliasDao
     override fun categoryDao(): CategoryDao = categoryDao
     override fun genreDao(): GenreDao = genreDao
+    override fun beginTransaction() = Unit
+    override fun setTransactionSuccessful() = Unit
+    override fun endTransaction() = Unit
 }

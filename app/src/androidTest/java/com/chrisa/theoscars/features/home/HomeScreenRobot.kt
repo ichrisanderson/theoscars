@@ -22,6 +22,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -55,6 +56,11 @@ class HomeScreenRobot(
 
     fun clickFilterButton() = apply {
         composeTestRule.onNodeWithTag(filterButtonTestTag).performClick()
+        composeTestRule.waitUntil(timeoutMillis = 5000L) {
+            composeTestRule
+                .onAllNodesWithText("Filter")
+                .fetchSemanticsNodes().size == 1
+        }
     }
 
     fun assertFilterDialogIsVisible() = apply {

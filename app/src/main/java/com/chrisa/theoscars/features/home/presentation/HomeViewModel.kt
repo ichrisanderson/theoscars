@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -60,6 +61,7 @@ class HomeViewModel @Inject constructor(
         val movies = loadMoviesUseCase.execute()
         val categories = loadCategoriesUseCase.execute()
         val genres = loadGenresUseCase.execute()
+        Timber.tag("UI_TEST").d("Has Category: ${categories.any { it.name == "Best Picture" }}")
         _viewState.update {
             it.copy(
                 isLoading = false,

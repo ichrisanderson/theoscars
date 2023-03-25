@@ -5,14 +5,16 @@ on:
     branches:
       - 'main'
 
-jobs:
+env:
+  CACHE_VERSION: 1 # Increment this to invalidate the cache.
 
+jobs:
   build:
     name: Build
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Copy CI gradle.properties
         run: mkdir -p ~/.gradle ; cp .github/ci-gradle.properties ~/.gradle/gradle.properties
@@ -21,6 +23,18 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
+
+      - run: chmod u+x ./clear_gradle_cache.sh
+      - run: ./clear_gradle_cache.sh
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ env.CACHE_VERSION }}
+
+      - name: Check Gradle wrapper
+        uses: gradle/wrapper-validation-action@v1
 
       - name: Compile
         run: bash ./gradlew compileDebugSources compileDebugUnitTestSources -PdisablePreDex --quiet
@@ -58,6 +72,15 @@ jobs:
       - name: Copy CI gradle.properties
         run: mkdir -p ~/.gradle ; cp .github/ci-gradle.properties ~/.gradle/gradle.properties
 
+      - run: chmod u+x ./clear_gradle_cache.sh
+      - run: ./clear_gradle_cache.sh
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ env.CACHE_VERSION }}
+
       - name: Gradle cache
         uses: gradle/gradle-build-action@v2.4.0
 
@@ -78,6 +101,7 @@ jobs:
           arch: x86_64
           force-avd-creation: false
           profile: Nexus 6
+          ram-size: 4096M
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: false
           script: echo "Generated AVD snapshot for caching."
@@ -89,6 +113,7 @@ jobs:
           arch: x86_64
           force-avd-creation: false
           profile: Nexus 6
+          ram-size: 4096M
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: |

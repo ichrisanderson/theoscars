@@ -29,6 +29,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToKey
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.printToLog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.chrisa.theoscars.MainActivity
@@ -36,6 +37,7 @@ import com.chrisa.theoscars.R
 import com.chrisa.theoscars.core.ui.theme.OscarsTheme
 import com.chrisa.theoscars.features.home.presentation.HomeScreen
 import com.chrisa.theoscars.util.KeyboardHelper
+import com.chrisa.theoscars.util.onAllNodesWithStringId
 import com.chrisa.theoscars.util.onNodeWithStringId
 
 class HomeScreenRobot(
@@ -56,9 +58,12 @@ class HomeScreenRobot(
 
     fun clickFilterButton() = apply {
         composeTestRule.onNodeWithTag(filterButtonTestTag).performClick()
+    }
+
+    fun waitForFilterTitle() = apply {
         composeTestRule.waitUntil(timeoutMillis = 5000L) {
             composeTestRule
-                .onAllNodesWithText("Filter")
+                .onAllNodesWithStringId(R.string.filter_title)
                 .fetchSemanticsNodes().size == 1
         }
     }
@@ -109,7 +114,17 @@ class HomeScreenRobot(
         composeTestRule.onNodeWithTag(applyButtonTestTag).performClick()
     }
 
+    fun waitForText(text: String) = apply {
+        composeTestRule.waitUntil(timeoutMillis = 5000L) {
+            composeTestRule
+                .onAllNodesWithText(text)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
     fun clickCategory(categoryText: String) = apply {
+        composeTestRule.onNodeWithTag(categoriesItemListTestTag)
+            .printToLog("categoriesItemListTestTag")
         composeTestRule.onNodeWithTag(categoriesItemListTestTag).performScrollToKey(categoryText)
         composeTestRule.onNodeWithText(categoryText).performClick()
     }

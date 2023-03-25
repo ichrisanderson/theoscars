@@ -81,6 +81,8 @@ class HomeScreenTest {
         HomeScreenRobot(composeTestRule)
             .setContent()
             .clickFilterButton()
+            .waitForFilterTitle()
+            .waitForText("Actor in a Leading Role")
             .clickCategory("Best Picture")
             .clickGenre("Comedy")
             .clickApplyButton()

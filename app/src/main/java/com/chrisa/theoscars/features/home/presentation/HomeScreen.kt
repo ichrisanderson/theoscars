@@ -94,6 +94,7 @@ import com.chrisa.theoscars.features.home.domain.models.CategoryModel
 import com.chrisa.theoscars.features.home.domain.models.GenreModel
 import com.chrisa.theoscars.features.home.domain.models.MovieSummaryModel
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -503,10 +504,14 @@ private fun <T> ItemRowFilter(
     modifier: Modifier = Modifier,
     testTagPostFix: String = "",
 ) {
+    Timber.tag("UI_TEST").d("displayItems.size: ${displayItems.size}")
+    Timber.tag("UI_TEST").d("ItemRowFilter. Has Name: ${displayItems.any { nameLabelMapper(it) == "Best Picture" }}")
+
     val listState = rememberLazyListState()
 
     LaunchedEffect(displayItems) {
         val selectedIndex = displayItems.indexOf(selectedItem)
+        Timber.tag("UI_TEST").d("ItemRowFilter. selectedIndex: $selectedIndex")
         if (selectedIndex >= 0) {
             listState.scrollToItem(selectedIndex)
         }

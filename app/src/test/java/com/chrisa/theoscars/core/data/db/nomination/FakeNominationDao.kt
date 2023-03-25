@@ -17,10 +17,12 @@
 package com.chrisa.theoscars.core.data.db.nomination
 
 import com.chrisa.theoscars.core.data.db.category.CategoryDao
+import com.chrisa.theoscars.core.data.db.categoryalias.CategoryAliasDao
 import com.chrisa.theoscars.core.data.db.movie.MovieDao
 
 class FakeNominationDao(
     private val categoryDao: CategoryDao,
+    private val categoryAliasDao: CategoryAliasDao,
     private val movieDao: MovieDao,
 ) : NominationDao {
 
@@ -68,16 +70,20 @@ class FakeNominationDao(
     override fun allMoviesForCeremonyWithFilter(
         startYear: Int,
         endYear: Int,
-        categories: List<Long>,
-        genres: List<Long>,
+        categoryAliasId: Long,
+        genreId: Long,
     ): List<MovieSummary> {
-        val categorySet = categories.toSet()
-        val genresSet = genres.toSet()
+        val allCategoryAliases =
+            categoryAliasDao.allCategoryAliases().filter { categoryAliasId == 0L || it.id == categoryAliasId }.map { it.id }
+                .toSet()
+        val allCategories =
+            categoryDao.allCategories().filter { allCategoryAliases.contains(it.categoryAliasId) }.map { it.id }
+                .toSet()
         val allMovieGenres =
-            movieDao.allMovieGenres().filter { genresSet.contains(it.genreId) }.map { it.movieId }
+            movieDao.allMovieGenres().filter { genreId == 0L || it.genreId == genreId }.map { it.movieId }
                 .toSet()
         val nominations = this.nominations
-            .filter { it.year in startYear..endYear && categorySet.contains(it.categoryId) }
+            .filter { it.year in startYear..endYear && allCategories.contains(it.categoryId) }
             .associateBy { it.movieId }
         val movies = movieDao.allMovies().filter {
             nominations.containsKey(it.id) && allMovieGenres.contains(it.id)

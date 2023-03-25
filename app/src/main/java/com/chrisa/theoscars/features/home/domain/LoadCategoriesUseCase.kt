@@ -27,25 +27,15 @@ class LoadCategoriesUseCase @Inject constructor(
     private val homeDataRepository: HomeDataRepository,
 ) {
     suspend fun execute(): List<CategoryModel> = withContext(coroutineDispatchers.io) {
-        val categories = homeDataRepository.allCategories()
-        val categoryAliasMap =
-            homeDataRepository.allCategoryAliases().associate { it.id to it.name }
-        val categoryMap = mutableMapOf<Long, MutableList<Long>>()
+        val categoryAliases = homeDataRepository.allCategoryAliases()
 
-        categories.forEach {
-            if (!categoryMap.containsKey(it.categoryAliasId)) {
-                categoryMap[it.categoryAliasId] = mutableListOf()
-            }
-            categoryMap[it.categoryAliasId]!!.add(it.id)
-        }
-
-        val allCategoryModel = CategoryModel(name = "All", ids = categories.map { it.id })
+        val allCategoryModel = CategoryModel(name = "All", id = 0)
 
         val result = mutableListOf<CategoryModel>()
         result.add(allCategoryModel)
 
-        val mappedModels = categoryMap.map { e ->
-            CategoryModel(name = categoryAliasMap[e.key]!!, ids = e.value)
+        val mappedModels = categoryAliases.map { c ->
+            CategoryModel(name = c.name, id = c.id)
         }
         result.addAll(mappedModels)
 

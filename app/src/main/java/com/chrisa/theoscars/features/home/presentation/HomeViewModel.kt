@@ -118,9 +118,9 @@ data class ViewState(
             isLoading = false,
             movies = emptyList(),
             categories = emptyList(),
-            selectedCategory = CategoryModel(name = "", ids = emptyList()),
+            selectedCategory = CategoryModel(name = "", id = -1L),
             genres = emptyList(),
-            selectedGenre = GenreModel(name = "", ids = emptyList()),
+            selectedGenre = GenreModel(name = "", id = -1L),
             startYear = "",
             endYear = "",
         )

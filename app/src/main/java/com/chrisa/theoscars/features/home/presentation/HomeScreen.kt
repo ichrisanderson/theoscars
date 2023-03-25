@@ -505,7 +505,8 @@ private fun <T> ItemRowFilter(
     testTagPostFix: String = "",
 ) {
     Timber.tag("UI_TEST").d("displayItems.size: ${displayItems.size}")
-    Timber.tag("UI_TEST").d("ItemRowFilter. Has Name: ${displayItems.any { nameLabelMapper(it) == "Best Picture" }}")
+    Timber.tag("UI_TEST")
+        .d("ItemRowFilter. Has Name: ${displayItems.any { nameLabelMapper(it) == "Best Picture" }}")
 
     val listState = rememberLazyListState()
 
@@ -639,14 +640,14 @@ fun FilterDialogPreview() {
     OscarsTheme {
         Surface {
             val categories = listOf(
-                CategoryModel(name = "Best Picture", ids = listOf(48, 67, 127, 43, 8, 16)),
-                CategoryModel(name = "International Feature Film", ids = listOf(9, 56, 111, 123)),
-                CategoryModel(name = "Animated Feature Film", ids = listOf(106, 116)),
+                CategoryModel(name = "Best Picture", id = 48),
+                CategoryModel(name = "International Feature Film", id = 9),
+                CategoryModel(name = "Animated Feature Film", id = 106),
             )
             val genres = listOf(
-                GenreModel(name = "Action", ids = listOf(1L)),
-                GenreModel(name = "Comedy", ids = listOf(1L)),
-                GenreModel(name = "Drama", ids = listOf(1L)),
+                GenreModel(name = "Action", id = 1L),
+                GenreModel(name = "Comedy", id = 1L),
+                GenreModel(name = "Drama", id = 1L),
             )
             FilterContent(
                 categories = categories,

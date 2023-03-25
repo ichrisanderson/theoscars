@@ -37,8 +37,8 @@ class FilterMoviesUseCase @Inject constructor(
         return@withContext homeDataRepository.allMoviesForCeremonyWithFilter(
             startYear,
             endYear,
-            selectedCategory.ids,
-            selectedGenre.ids,
+            selectedCategory.id,
+            selectedGenre.id,
         )
             .map {
                 MovieSummaryModel(

@@ -26,10 +26,10 @@ data class MovieSummaryModel(
 
 data class CategoryModel(
     val name: String,
-    val ids: List<Long>,
+    val id: Long,
 )
 
 data class GenreModel(
     val name: String,
-    val ids: List<Long>,
+    val id: Long,
 )

@@ -122,7 +122,7 @@ jobs:
             adb logcat --clear || true
             adb logcat --clear || true
             adb logcat > logcat.txt &
-            ./gradlew connectedCheck --stacktrace
+            ./gradlew connectedDebugAndroidTest --stacktrace
 
       - name: Upload logcat output
         if: ${{ always() }}

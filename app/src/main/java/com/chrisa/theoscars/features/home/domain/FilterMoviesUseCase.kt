@@ -33,12 +33,14 @@ class FilterMoviesUseCase @Inject constructor(
         endYear: Int,
         selectedCategory: CategoryModel,
         selectedGenre: GenreModel,
+        winnersOnly: Boolean,
     ): List<MovieSummaryModel> = withContext(coroutineDispatchers.io) {
         return@withContext homeDataRepository.allMoviesForCeremonyWithFilter(
-            startYear,
-            endYear,
-            selectedCategory.id,
-            selectedGenre.id,
+            startYear = startYear,
+            endYear = endYear,
+            categoryAliasId = selectedCategory.id,
+            genreId = selectedGenre.id,
+            winner = if (winnersOnly) 1 else -1,
         )
             .map {
                 MovieSummaryModel(

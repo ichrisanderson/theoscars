@@ -29,15 +29,13 @@ class LoadCategoriesUseCase @Inject constructor(
     suspend fun execute(): List<CategoryModel> = withContext(coroutineDispatchers.io) {
         val categoryAliases = homeDataRepository.allCategoryAliases()
 
-        val allCategoryModel = CategoryModel(name = "All", id = 0)
-
         val result = mutableListOf<CategoryModel>()
-        result.add(allCategoryModel)
-
-        val mappedModels = categoryAliases.map { c ->
-            CategoryModel(name = c.name, id = c.id)
-        }
-        result.addAll(mappedModels)
+        result.add(CategoryModel(name = "All", id = 0))
+        result.addAll(
+            categoryAliases.map { c ->
+                CategoryModel(name = c.name, id = c.id)
+            },
+        )
 
         return@withContext result
     }

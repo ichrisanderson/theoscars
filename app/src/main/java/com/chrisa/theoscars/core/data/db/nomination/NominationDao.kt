@@ -62,13 +62,14 @@ interface NominationDao {
             "INNER JOIN category ON category.id = nomination.categoryId " +
             "INNER JOIN categoryAlias ON category.categoryAliasId = categoryAlias.id " +
             "LEFT OUTER JOIN movieGenre ON movieGenre.movieId = movie.id " +
-            "WHERE nomination.year >= :startYear AND nomination.year <= :endYear AND (:categoryAliasId = 0 OR categoryAlias.id = :categoryAliasId) AND (:genreId = 0 OR movieGenre.genreId = :genreId)",
+            "WHERE (nomination.year >= :startYear AND nomination.year <= :endYear) AND (:categoryAliasId = 0 OR categoryAlias.id = :categoryAliasId) AND (:genreId = 0 OR movieGenre.genreId = :genreId) AND (:winner = -1 OR nomination.winner = :winner)",
     )
     fun allMoviesForCeremonyWithFilter(
         startYear: Int,
         endYear: Int,
         categoryAliasId: Long,
         genreId: Long,
+        winner: Int,
     ): List<MovieSummary>
 }
 

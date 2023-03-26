@@ -27,6 +27,13 @@ object NominationSeedData {
     "winner": true
   },
   {
+    "year_ceremony": 2022,
+    "categoryId": 39,
+    "movieId": 777270,
+    "content": "Written by Kenneth Branagh",
+    "winner": true
+  },
+  {
     "year_ceremony": 2023,
     "categoryId": 112,
     "movieId": 614934,

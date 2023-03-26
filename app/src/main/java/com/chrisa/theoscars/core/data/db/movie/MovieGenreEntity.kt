@@ -25,7 +25,7 @@ import androidx.room.Index
     indices = [
         Index("movieId"),
         Index("genreId"),
-    ]
+    ],
 )
 data class MovieGenreEntity(
     val movieId: Long,

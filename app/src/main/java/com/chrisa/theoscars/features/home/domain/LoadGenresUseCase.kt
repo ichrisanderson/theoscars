@@ -29,18 +29,13 @@ class LoadGenresUseCase @Inject constructor(
     suspend fun execute(): List<GenreModel> = withContext(coroutineDispatchers.io) {
         val allGenres = homeDataRepository.allGenres()
 
-        val allGenresModel = GenreModel(name = "All", id = 0)
-
         val result = mutableListOf<GenreModel>()
-        result.add(allGenresModel)
-
-        val mappedGenres = allGenres.map {
-            GenreModel(
-                name = it.name,
-                id = it.id,
-            )
-        }
-        result.addAll(mappedGenres)
+        result.add(GenreModel(name = "All", id = 0))
+        result.addAll(
+            allGenres.map {
+                GenreModel(name = it.name, id = it.id)
+            },
+        )
 
         return@withContext result
     }

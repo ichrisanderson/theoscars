@@ -25,9 +25,12 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -44,7 +47,9 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
@@ -54,6 +59,7 @@ import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -62,6 +68,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -82,6 +89,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -94,7 +102,6 @@ import com.chrisa.theoscars.features.home.domain.models.CategoryModel
 import com.chrisa.theoscars.features.home.domain.models.GenreModel
 import com.chrisa.theoscars.features.home.domain.models.MovieSummaryModel
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -129,16 +136,18 @@ fun HomeScreen(
         sheetState = modalSheetState,
         sheetContent = {
             if (modalSheetState.isVisible) {
+                val filterModel = viewState.filterModel
                 Surface {
                     FilterContent(
-                        categories = viewState.categories,
-                        selectedCategory = viewState.selectedCategory,
-                        genres = viewState.genres,
-                        selectedGenre = viewState.selectedGenre,
-                        currentStartYear = viewState.startYear,
-                        currentEndYear = viewState.endYear,
-                        onApplySelection = { filterModel ->
-                            viewModel.updateFilter(filterModel)
+                        categories = filterModel.categories,
+                        selectedCategory = filterModel.selectedCategory,
+                        genres = filterModel.genres,
+                        selectedGenre = filterModel.selectedGenre,
+                        currentStartYear = filterModel.startYearString,
+                        currentEndYear = filterModel.endYearString,
+                        winnersOnly = filterModel.winnersOnly,
+                        onApplySelection = { newFilter ->
+                            viewModel.updateFilter(newFilter)
                             coroutineScope.launch {
                                 modalSheetState.hide()
                             }
@@ -148,19 +157,28 @@ fun HomeScreen(
             }
         },
     ) {
-        HomeContent(
-            listState = lazyListState,
-            movies = viewState.movies,
-            onMovieClick = onMovieClick,
-            onSearchClick = onSearchClick,
-            onFilterClick = {
-                coroutineScope.launch {
-                    modalSheetState.show()
-                }
-            },
-            modifier = Modifier.alpha(contentAlpha),
-            topPadding = contentTopPadding,
-        )
+        if (viewState.isLoading) {
+            Box(Modifier.fillMaxSize()) {
+                CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.align(Alignment.Center),
+                )
+            }
+        } else {
+            HomeContent(
+                listState = lazyListState,
+                movies = viewState.movies,
+                onMovieClick = onMovieClick,
+                onSearchClick = onSearchClick,
+                onFilterClick = {
+                    coroutineScope.launch {
+                        modalSheetState.show()
+                    }
+                },
+                modifier = Modifier.alpha(contentAlpha),
+                topPadding = contentTopPadding,
+            )
+        }
     }
 }
 
@@ -191,7 +209,9 @@ private fun HomeContent(
                     MovieCard(
                         movie = movie,
                         onMovieClick = onMovieClick,
-                        modifier = Modifier.animateItemPlacement(),
+                        modifier = Modifier
+                            .testTag("movieCard")
+                            .animateItemPlacement(),
                     )
                 }
             }
@@ -337,6 +357,7 @@ fun FilterContent(
     selectedGenre: GenreModel,
     currentStartYear: String,
     currentEndYear: String,
+    winnersOnly: Boolean,
     onApplySelection: (FilterModel) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -346,6 +367,8 @@ fun FilterContent(
     val isEndYearError by remember { derivedStateOf { !YearValidator.isValidYear(endYear) } }
     var selectedCategoryState by remember { mutableStateOf(selectedCategory) }
     var selectedGenreState by remember { mutableStateOf(selectedGenre) }
+    var winnersOnlyState by remember { mutableStateOf(winnersOnly) }
+    val scrollState = rememberScrollState()
 
     Column(
         modifier = modifier,
@@ -361,60 +384,77 @@ fun FilterContent(
             modifier = Modifier
                 .padding(bottom = 8.dp),
         )
-        YearFilter(
-            startYear = startYear,
-            isStartYearError = isStartYearError,
-            endYear = endYear,
-            isEndYearError = isEndYearError,
-            onStartYearChanged = {
-                startYear = it
-            },
-            onEndYearChanged = {
-                endYear = it
-            },
-        )
-        ItemRowFilter(
-            displayItems = categories,
-            selectedItem = selectedCategoryState,
-            onItemSelected = { selectedCategoryState = it },
-            titleFormatId = R.string.categories_filter_title,
-            nameLabelMapper = CategoryModel::name,
+        Column(
             modifier = Modifier
-                .padding(top = 8.dp),
-            testTagPostFix = "Categories",
-        )
-        ItemRowFilter(
-            selectedItem = selectedGenreState,
-            onItemSelected = { selectedGenreState = it },
-            displayItems = genres,
-            titleFormatId = R.string.genres_filter_title,
-            nameLabelMapper = GenreModel::name,
-            modifier = Modifier
-                .padding(top = 16.dp),
-            testTagPostFix = "Genres",
-        )
-        Button(
-            enabled = !isStartYearError && !isEndYearError,
-            onClick = {
-                onApplySelection(
-                    FilterModel(
-                        startYear = startYear.toInt(10),
-                        endYear = endYear.toInt(10),
-                        selectedCategory = selectedCategoryState,
-                        selectedGenre = selectedGenreState,
-                    ),
-                )
-            },
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .widthIn(128.dp)
-                .padding(vertical = 16.dp)
-                .testTag("applyButton"),
+                .testTag("filterContentList")
+                .verticalScroll(scrollState),
         ) {
-            Text(
-                text = stringResource(id = R.string.apply_filter_cta),
-                style = MaterialTheme.typography.labelLarge,
+            YearFilter(
+                startYear = startYear,
+                isStartYearError = isStartYearError,
+                endYear = endYear,
+                isEndYearError = isEndYearError,
+                onStartYearChanged = {
+                    startYear = it
+                },
+                onEndYearChanged = {
+                    endYear = it
+                },
             )
+            ItemRowFilter(
+                displayItems = categories,
+                selectedItem = selectedCategoryState,
+                onItemSelected = { selectedCategoryState = it },
+                titleFormatId = R.string.categories_filter_title,
+                nameLabelMapper = CategoryModel::name,
+                modifier = Modifier
+                    .padding(top = 8.dp),
+                testTagPostFix = "Categories",
+            )
+            ItemRowFilter(
+                selectedItem = selectedGenreState,
+                onItemSelected = { selectedGenreState = it },
+                displayItems = genres,
+                titleFormatId = R.string.genres_filter_title,
+                nameLabelMapper = GenreModel::name,
+                modifier = Modifier
+                    .padding(top = 16.dp),
+                testTagPostFix = "Genres",
+            )
+            WinnersFilter(
+                isSelected = winnersOnlyState,
+                onSelectionChange = {
+                    winnersOnlyState = it
+                },
+                modifier = Modifier
+                    .padding(top = 16.dp),
+            )
+            Button(
+                enabled = !isStartYearError && !isEndYearError,
+                onClick = {
+                    onApplySelection(
+                        FilterModel(
+                            startYear = startYear.toInt(10),
+                            endYear = endYear.toInt(10),
+                            categories = categories,
+                            selectedCategory = selectedCategoryState,
+                            genres = genres,
+                            selectedGenre = selectedGenreState,
+                            winnersOnly = winnersOnlyState,
+                        ),
+                    )
+                },
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .widthIn(128.dp)
+                    .padding(vertical = 16.dp)
+                    .testTag("applyButton"),
+            ) {
+                Text(
+                    text = stringResource(id = R.string.apply_filter_cta),
+                    style = MaterialTheme.typography.labelLarge,
+                )
+            }
         }
     }
 }
@@ -504,15 +544,10 @@ private fun <T> ItemRowFilter(
     modifier: Modifier = Modifier,
     testTagPostFix: String = "",
 ) {
-    Timber.tag("UI_TEST").d("displayItems.size: ${displayItems.size}")
-    Timber.tag("UI_TEST")
-        .d("ItemRowFilter. Has Name: ${displayItems.any { nameLabelMapper(it) == "Best Picture" }}")
-
     val listState = rememberLazyListState()
 
     LaunchedEffect(displayItems) {
         val selectedIndex = displayItems.indexOf(selectedItem)
-        Timber.tag("UI_TEST").d("ItemRowFilter. selectedIndex: $selectedIndex")
         if (selectedIndex >= 0) {
             listState.scrollToItem(selectedIndex)
         }
@@ -563,6 +598,45 @@ private fun <T> ItemRowFilter(
         Divider(
             modifier = Modifier
                 .alpha(0.3f),
+        )
+    }
+}
+
+@Composable
+private fun WinnersFilter(
+    isSelected: Boolean,
+    onSelectionChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .testTag("winnersOnlyRow")
+            .clickable(
+                interactionSource = interactionSource,
+                indication = LocalIndication.current,
+                role = Role.Switch,
+                onClick = {
+                    onSelectionChange(!isSelected)
+                },
+            ),
+    ) {
+        Text(
+            text = stringResource(id = R.string.winners_filter_title),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier
+                .padding(start = 16.dp)
+                .padding(vertical = 8.dp),
+        )
+        Spacer(modifier = Modifier.weight(1.0f))
+        Switch(
+            checked = isSelected,
+            onCheckedChange = onSelectionChange,
+            modifier = Modifier
+                .testTag("winnersOnlySwitch")
+                .padding(horizontal = 16.dp),
         )
     }
 }
@@ -656,6 +730,7 @@ fun FilterDialogPreview() {
                 selectedGenre = genres.last(),
                 currentStartYear = "2023",
                 currentEndYear = "2023",
+                winnersOnly = false,
                 onApplySelection = { },
             )
         }

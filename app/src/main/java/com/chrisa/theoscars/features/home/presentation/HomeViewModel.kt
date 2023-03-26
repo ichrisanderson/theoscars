@@ -32,7 +32,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -61,30 +60,25 @@ class HomeViewModel @Inject constructor(
         val movies = loadMoviesUseCase.execute()
         val categories = loadCategoriesUseCase.execute()
         val genres = loadGenresUseCase.execute()
-        Timber.tag("UI_TEST").d("Has Category: ${categories.any { it.name == "Best Picture" }}")
         _viewState.update {
             it.copy(
                 isLoading = false,
                 movies = movies,
-                categories = categories,
-                selectedCategory = categories.first(),
-                genres = genres,
-                selectedGenre = genres.first(),
-                startYear = "2023",
-                endYear = "2023",
+                filterModel = FilterModel(
+                    categories = categories,
+                    selectedCategory = categories.first(),
+                    genres = genres,
+                    selectedGenre = genres.first(),
+                    startYear = 2023,
+                    endYear = 2023,
+                    winnersOnly = false,
+                ),
             )
         }
     }
 
     fun updateFilter(filterModel: FilterModel) {
-        _viewState.update { vs ->
-            vs.copy(
-                startYear = filterModel.startYearString,
-                endYear = filterModel.endYearString,
-                selectedCategory = filterModel.selectedCategory,
-                selectedGenre = filterModel.selectedGenre,
-            )
-        }
+        _viewState.update { vs -> vs.copy(filterModel = filterModel) }
 
         coroutineScope.launch(dispatchers.io) {
             _viewState.update { vs ->
@@ -106,24 +100,14 @@ class HomeViewModel @Inject constructor(
 data class ViewState(
     val isLoading: Boolean,
     val movies: List<MovieSummaryModel>,
-    val categories: List<CategoryModel>,
-    val selectedCategory: CategoryModel,
-    val genres: List<GenreModel>,
-    val selectedGenre: GenreModel,
-    val startYear: String,
-    val endYear: String,
+    val filterModel: FilterModel,
 ) {
 
     companion object {
         fun default() = ViewState(
             isLoading = false,
             movies = emptyList(),
-            categories = emptyList(),
-            selectedCategory = CategoryModel(name = "", id = -1L),
-            genres = emptyList(),
-            selectedGenre = GenreModel(name = "", id = -1L),
-            startYear = "",
-            endYear = "",
+            filterModel = FilterModel.default(),
         )
     }
 }
@@ -131,10 +115,24 @@ data class ViewState(
 data class FilterModel(
     val startYear: Int,
     val endYear: Int,
+    val categories: List<CategoryModel>,
     val selectedCategory: CategoryModel,
+    val genres: List<GenreModel>,
     val selectedGenre: GenreModel,
     val winnersOnly: Boolean,
 ) {
     val startYearString = startYear.toString(10)
     val endYearString = endYear.toString(10)
+
+    companion object {
+        fun default() = FilterModel(
+            categories = emptyList(),
+            selectedCategory = CategoryModel(name = "", id = -1L),
+            genres = emptyList(),
+            selectedGenre = GenreModel(name = "", id = -1L),
+            startYear = 0,
+            endYear = 0,
+            winnersOnly = false,
+        )
+    }
 }

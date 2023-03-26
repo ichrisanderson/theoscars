@@ -141,43 +141,33 @@ class HomeViewModelTest {
     fun `WHEN initialised THEN all categories are selected`() {
         val sut = homeViewModel()
 
-        assertThat(sut.viewState.value.selectedCategory.name).isEqualTo("All")
+        assertThat(sut.viewState.value.filterModel.selectedCategory.name).isEqualTo("All")
     }
 
     @Test
     fun `WHEN selected categories updated THEN viewState updated`() {
         val sut = homeViewModel()
         val selectedCategory =
-            sut.viewState.value.categories.first { it.name == "Actor in a Leading Role" }
-        val selectedGenre = sut.viewState.value.genres[0]
+            sut.viewState.value.filterModel.categories.first { it.name == "Actor in a Leading Role" }
 
         sut.updateFilter(
-            FilterModel(
-                startYear = 2023,
-                endYear = 2023,
+            sut.viewState.value.filterModel.copy(
                 selectedCategory = selectedCategory,
-                selectedGenre = selectedGenre,
-                winnersOnly = false,
             ),
         )
 
-        assertThat(sut.viewState.value.selectedCategory.name).isEqualTo("Actor in a Leading Role")
+        assertThat(sut.viewState.value.filterModel.selectedCategory.name).isEqualTo("Actor in a Leading Role")
     }
 
     @Test
     fun `WHEN category filter applied THEN viewState updated with selected movies`() {
         val sut = homeViewModel()
-        val selectedCategory = sut.viewState.value.categories
+        val selectedCategory = sut.viewState.value.filterModel.categories
             .first { it.name == "Actress in a Supporting Role" }
-        val selectedGenre = sut.viewState.value.genres.first()
 
         sut.updateFilter(
-            FilterModel(
-                startYear = 2023,
-                endYear = 2023,
+            sut.viewState.value.filterModel.copy(
                 selectedCategory = selectedCategory,
-                selectedGenre = selectedGenre,
-                winnersOnly = false,
             ),
         )
 
@@ -194,17 +184,14 @@ class HomeViewModelTest {
     @Test
     fun `WHEN year filter applied THEN viewState updated with selected movies`() {
         val sut = homeViewModel()
-        val selectedCategory = sut.viewState.value.categories
+        val selectedCategory = sut.viewState.value.filterModel.categories
             .first { it.name == "Best Picture" }
-        val selectedGenre = sut.viewState.value.genres.first()
 
         sut.updateFilter(
-            FilterModel(
+            sut.viewState.value.filterModel.copy(
                 startYear = 1960,
                 endYear = 1970,
                 selectedCategory = selectedCategory,
-                selectedGenre = selectedGenre,
-                winnersOnly = false,
             ),
         )
 
@@ -218,17 +205,14 @@ class HomeViewModelTest {
     @Test
     fun `GIVEN no movies match condition WHEN filter applied THEN viewState updated with empty movies`() {
         val sut = homeViewModel()
-        val selectedCategory = sut.viewState.value.categories
+        val selectedCategory = sut.viewState.value.filterModel.categories
             .first { it.name == "Writing" }
-        val selectedGenre = sut.viewState.value.genres.first()
 
         sut.updateFilter(
-            FilterModel(
+            sut.viewState.value.filterModel.copy(
                 startYear = 1960,
                 endYear = 1970,
                 selectedCategory = selectedCategory,
-                selectedGenre = selectedGenre,
-                winnersOnly = false,
             ),
         )
 
@@ -238,17 +222,16 @@ class HomeViewModelTest {
     @Test
     fun `WHEN genre filter applied THEN viewState updated with selected movies`() {
         val sut = homeViewModel()
-        val selectedCategory = sut.viewState.value.categories
+        val selectedCategory = sut.viewState.value.filterModel.categories
             .first { it.name == "Best Picture" }
-        val selectedGenre = sut.viewState.value.genres.first { it.name == "Science Fiction" }
+        val selectedGenre = sut.viewState.value.filterModel.genres.first { it.name == "Science Fiction" }
 
         sut.updateFilter(
-            FilterModel(
+            sut.viewState.value.filterModel.copy(
                 startYear = 1960,
                 endYear = 2023,
                 selectedCategory = selectedCategory,
                 selectedGenre = selectedGenre,
-                winnersOnly = false,
             ),
         )
 
@@ -265,11 +248,9 @@ class HomeViewModelTest {
         val sut = homeViewModel()
 
         sut.updateFilter(
-            FilterModel(
+            sut.viewState.value.filterModel.copy(
                 startYear = 2021,
                 endYear = 2023,
-                selectedCategory = sut.viewState.value.categories.first(),
-                selectedGenre = sut.viewState.value.genres.first(),
                 winnersOnly = true,
             ),
         )

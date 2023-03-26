@@ -98,6 +98,7 @@ import com.chrisa.theoscars.features.home.domain.models.CategoryModel
 import com.chrisa.theoscars.features.home.domain.models.GenreModel
 import com.chrisa.theoscars.features.home.domain.models.MovieSummaryModel
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -143,6 +144,7 @@ fun HomeScreen(
                         currentEndYear = filterModel.endYearString,
                         winnersOnly = filterModel.winnersOnly,
                         onApplySelection = { filterModel ->
+                            Timber.tag("UI_TEST").d("updateFilter: $filterModel")
                             viewModel.updateFilter(filterModel)
                             coroutineScope.launch {
                                 modalSheetState.hide()
@@ -189,6 +191,7 @@ private fun HomeContent(
         if (movies.isEmpty()) {
             EmptyMovies()
         } else {
+            Timber.tag("UI_TEST").d("Render.movies.size: ${movies.size}")
             LazyColumn(
                 state = listState,
             ) {
@@ -196,7 +199,7 @@ private fun HomeContent(
                     MovieCard(
                         movie = movie,
                         onMovieClick = onMovieClick,
-                        modifier = Modifier.animateItemPlacement(),
+                        modifier = Modifier.testTag("movieCard").animateItemPlacement(),
                     )
                 }
             }

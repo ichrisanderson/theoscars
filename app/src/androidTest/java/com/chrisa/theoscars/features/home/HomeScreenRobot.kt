@@ -111,7 +111,11 @@ class HomeScreenRobot(
     }
 
     fun clickApplyButton() = apply {
+        composeTestRule.onNodeWithTag(applyButtonTestTag)
+            .printToLog("applyButtonTestTag")
         composeTestRule.onNodeWithTag(applyButtonTestTag).performClick()
+        composeTestRule.onNodeWithTag(applyButtonTestTag)
+            .printToLog("applyButtonTestTag")
     }
 
     fun waitForText(text: String) = apply {

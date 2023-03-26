@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -83,6 +84,8 @@ class HomeViewModel @Inject constructor(
         coroutineScope.launch(dispatchers.io) {
             _viewState.update { vs ->
 
+                Timber.tag("UI_TEST").d("updateFilter: $filterModel")
+
                 val filteredMovies = filterMoviesUseCase.execute(
                     startYear = filterModel.startYear,
                     endYear = filterModel.endYear,
@@ -90,6 +93,8 @@ class HomeViewModel @Inject constructor(
                     selectedGenre = filterModel.selectedGenre,
                     winnersOnly = filterModel.winnersOnly,
                 )
+
+                Timber.tag("UI_TEST").d("filteredMovies.size: ${filteredMovies.size}")
 
                 vs.copy(movies = filteredMovies)
             }

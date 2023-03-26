@@ -17,10 +17,15 @@
 package com.chrisa.theoscars.core.data.db.movie
 
 import androidx.room.Entity
+import androidx.room.Index
 
 @Entity(
     tableName = "movieGenre",
     primaryKeys = ["movieId", "genreId"],
+    indices = [
+        Index("movieId"),
+        Index("genreId"),
+    ]
 )
 data class MovieGenreEntity(
     val movieId: Long,

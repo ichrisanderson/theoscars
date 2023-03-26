@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "79361e9f7447ac018b5b3f8bed7b0f65",
+    "identityHash": "cc057000340274a73478944c1d4ccf38",
     "entities": [
       {
         "tableName": "categoryAlias",
@@ -59,7 +59,17 @@
             "id"
           ]
         },
-        "indices": [],
+        "indices": [
+          {
+            "name": "index_category_categoryAliasId",
+            "unique": false,
+            "columnNames": [
+              "categoryAliasId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_category_categoryAliasId` ON `${TABLE_NAME}` (`categoryAliasId`)"
+          }
+        ],
         "foreignKeys": [
           {
             "table": "categoryAlias",
@@ -147,7 +157,26 @@
             "id"
           ]
         },
-        "indices": [],
+        "indices": [
+          {
+            "name": "index_nomination_categoryId",
+            "unique": false,
+            "columnNames": [
+              "categoryId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_nomination_categoryId` ON `${TABLE_NAME}` (`categoryId`)"
+          },
+          {
+            "name": "index_nomination_categoryId",
+            "unique": false,
+            "columnNames": [
+              "categoryId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_nomination_categoryId` ON `${TABLE_NAME}` (`categoryId`)"
+          }
+        ],
         "foreignKeys": [
           {
             "table": "category",
@@ -301,14 +330,33 @@
             "genreId"
           ]
         },
-        "indices": [],
+        "indices": [
+          {
+            "name": "index_movieGenre_movieId",
+            "unique": false,
+            "columnNames": [
+              "movieId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_movieGenre_movieId` ON `${TABLE_NAME}` (`movieId`)"
+          },
+          {
+            "name": "index_movieGenre_genreId",
+            "unique": false,
+            "columnNames": [
+              "genreId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_movieGenre_genreId` ON `${TABLE_NAME}` (`genreId`)"
+          }
+        ],
         "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '79361e9f7447ac018b5b3f8bed7b0f65')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'cc057000340274a73478944c1d4ccf38')"
     ]
   }
 }

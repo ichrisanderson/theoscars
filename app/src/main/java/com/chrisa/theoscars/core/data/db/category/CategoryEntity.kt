@@ -18,6 +18,7 @@ package com.chrisa.theoscars.core.data.db.category
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.chrisa.theoscars.core.data.db.categoryalias.CategoryAliasEntity
 
@@ -30,6 +31,9 @@ import com.chrisa.theoscars.core.data.db.categoryalias.CategoryAliasEntity
             childColumns = ["categoryAliasId"],
         ),
     ],
+    indices = [
+        Index("categoryAliasId"),
+    ]
 )
 data class CategoryEntity(
     @PrimaryKey

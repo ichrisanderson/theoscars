@@ -35,11 +35,11 @@ class HomeDataRepository @Inject constructor(
     fun allMoviesForCeremonyWithFilter(
         startYear: Int,
         endYear: Int,
-        categories: List<Long>,
-        genres: List<Long>,
+        categoryAliasId: Long,
+        genreId: Long,
     ): List<MovieSummary> {
         val dao = appDatabase.nominationDao()
-        return dao.allMoviesForCeremonyWithFilter(startYear, endYear, categories, genres)
+        return dao.allMoviesForCeremonyWithFilter(startYear, endYear, categoryAliasId, genreId)
     }
 
     fun allGenres(): List<GenreEntity> {

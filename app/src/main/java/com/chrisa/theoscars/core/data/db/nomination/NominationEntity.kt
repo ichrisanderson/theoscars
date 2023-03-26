@@ -18,6 +18,7 @@ package com.chrisa.theoscars.core.data.db.nomination
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.chrisa.theoscars.core.data.db.category.CategoryEntity
 import com.chrisa.theoscars.core.data.db.movie.MovieEntity
@@ -36,6 +37,10 @@ import com.chrisa.theoscars.core.data.db.movie.MovieEntity
             childColumns = ["movieId"],
         ),
     ],
+    indices = [
+        Index("categoryId"),
+        Index("movieId")
+    ]
 )
 data class NominationEntity(
     @PrimaryKey(autoGenerate = true)

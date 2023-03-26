@@ -32,7 +32,7 @@ class FakeAppDatabase(
     private val categoryDao: CategoryDao = FakeCategoryDao(),
     private val genreDao: GenreDao = FakeGenreDao(),
     private val movieDao: MovieDao = FakeMovieDao(),
-    private val nominationDao: NominationDao = FakeNominationDao(categoryDao, movieDao),
+    private val nominationDao: NominationDao = FakeNominationDao(categoryDao, categoryAliasDao, movieDao),
 ) : AppDatabase {
 
     override fun nominationDao(): NominationDao = nominationDao

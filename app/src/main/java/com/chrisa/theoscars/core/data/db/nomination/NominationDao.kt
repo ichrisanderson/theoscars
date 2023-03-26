@@ -70,12 +70,6 @@ interface NominationDao {
         categoryAliasId: Long,
         genreId: Long,
     ): List<MovieSummary>
-
-    @Query("SELECT * FROM nomination WHERE year = :ceremonyYear")
-    fun allNominationsForCeremony(ceremonyYear: Int): List<NominationEntity>
-
-    @Query("SELECT DISTINCT content FROM nomination WHERE year = :ceremonyYear")
-    fun allContentForCeremony(ceremonyYear: Int): List<String>
 }
 
 data class NominationCategory(

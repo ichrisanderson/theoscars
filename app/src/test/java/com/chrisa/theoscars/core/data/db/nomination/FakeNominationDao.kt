@@ -98,12 +98,4 @@ class FakeNominationDao(
         }
         return movies
     }
-
-    override fun allNominationsForCeremony(ceremonyYear: Int): List<NominationEntity> {
-        TODO("Not yet implemented")
-    }
-
-    override fun allContentForCeremony(ceremonyYear: Int): List<String> {
-        TODO("Not yet implemented")
-    }
 }

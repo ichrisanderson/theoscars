@@ -30,6 +30,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -46,7 +47,9 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
@@ -56,6 +59,7 @@ import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -98,7 +102,6 @@ import com.chrisa.theoscars.features.home.domain.models.CategoryModel
 import com.chrisa.theoscars.features.home.domain.models.GenreModel
 import com.chrisa.theoscars.features.home.domain.models.MovieSummaryModel
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -143,9 +146,8 @@ fun HomeScreen(
                         currentStartYear = filterModel.startYearString,
                         currentEndYear = filterModel.endYearString,
                         winnersOnly = filterModel.winnersOnly,
-                        onApplySelection = { filterModel ->
-                            Timber.tag("UI_TEST").d("updateFilter: $filterModel")
-                            viewModel.updateFilter(filterModel)
+                        onApplySelection = { newFilter ->
+                            viewModel.updateFilter(newFilter)
                             coroutineScope.launch {
                                 modalSheetState.hide()
                             }
@@ -155,19 +157,28 @@ fun HomeScreen(
             }
         },
     ) {
-        HomeContent(
-            listState = lazyListState,
-            movies = viewState.movies,
-            onMovieClick = onMovieClick,
-            onSearchClick = onSearchClick,
-            onFilterClick = {
-                coroutineScope.launch {
-                    modalSheetState.show()
-                }
-            },
-            modifier = Modifier.alpha(contentAlpha),
-            topPadding = contentTopPadding,
-        )
+        if (viewState.isLoading) {
+            Box(Modifier.fillMaxSize()) {
+                CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.align(Alignment.Center),
+                )
+            }
+        } else {
+            HomeContent(
+                listState = lazyListState,
+                movies = viewState.movies,
+                onMovieClick = onMovieClick,
+                onSearchClick = onSearchClick,
+                onFilterClick = {
+                    coroutineScope.launch {
+                        modalSheetState.show()
+                    }
+                },
+                modifier = Modifier.alpha(contentAlpha),
+                topPadding = contentTopPadding,
+            )
+        }
     }
 }
 
@@ -191,7 +202,6 @@ private fun HomeContent(
         if (movies.isEmpty()) {
             EmptyMovies()
         } else {
-            Timber.tag("UI_TEST").d("Render.movies.size: ${movies.size}")
             LazyColumn(
                 state = listState,
             ) {
@@ -199,7 +209,9 @@ private fun HomeContent(
                     MovieCard(
                         movie = movie,
                         onMovieClick = onMovieClick,
-                        modifier = Modifier.testTag("movieCard").animateItemPlacement(),
+                        modifier = Modifier
+                            .testTag("movieCard")
+                            .animateItemPlacement(),
                     )
                 }
             }
@@ -356,6 +368,7 @@ fun FilterContent(
     var selectedCategoryState by remember { mutableStateOf(selectedCategory) }
     var selectedGenreState by remember { mutableStateOf(selectedGenre) }
     var winnersOnlyState by remember { mutableStateOf(winnersOnly) }
+    val scrollState = rememberScrollState()
 
     Column(
         modifier = modifier,
@@ -371,71 +384,77 @@ fun FilterContent(
             modifier = Modifier
                 .padding(bottom = 8.dp),
         )
-        YearFilter(
-            startYear = startYear,
-            isStartYearError = isStartYearError,
-            endYear = endYear,
-            isEndYearError = isEndYearError,
-            onStartYearChanged = {
-                startYear = it
-            },
-            onEndYearChanged = {
-                endYear = it
-            },
-        )
-        ItemRowFilter(
-            displayItems = categories,
-            selectedItem = selectedCategoryState,
-            onItemSelected = { selectedCategoryState = it },
-            titleFormatId = R.string.categories_filter_title,
-            nameLabelMapper = CategoryModel::name,
+        Column(
             modifier = Modifier
-                .padding(top = 8.dp),
-            testTagPostFix = "Categories",
-        )
-        ItemRowFilter(
-            selectedItem = selectedGenreState,
-            onItemSelected = { selectedGenreState = it },
-            displayItems = genres,
-            titleFormatId = R.string.genres_filter_title,
-            nameLabelMapper = GenreModel::name,
-            modifier = Modifier
-                .padding(top = 16.dp),
-            testTagPostFix = "Genres",
-        )
-        WinnersFilter(
-            isSelected = winnersOnlyState,
-            onSelectionChange = {
-                winnersOnlyState = it
-            },
-            modifier = Modifier
-                .padding(top = 16.dp),
-        )
-        Button(
-            enabled = !isStartYearError && !isEndYearError,
-            onClick = {
-                onApplySelection(
-                    FilterModel(
-                        startYear = startYear.toInt(10),
-                        endYear = endYear.toInt(10),
-                        categories = categories,
-                        selectedCategory = selectedCategoryState,
-                        genres = genres,
-                        selectedGenre = selectedGenreState,
-                        winnersOnly = winnersOnlyState,
-                    ),
-                )
-            },
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .widthIn(128.dp)
-                .padding(vertical = 16.dp)
-                .testTag("applyButton"),
+                .testTag("filterContentList")
+                .verticalScroll(scrollState),
         ) {
-            Text(
-                text = stringResource(id = R.string.apply_filter_cta),
-                style = MaterialTheme.typography.labelLarge,
+            YearFilter(
+                startYear = startYear,
+                isStartYearError = isStartYearError,
+                endYear = endYear,
+                isEndYearError = isEndYearError,
+                onStartYearChanged = {
+                    startYear = it
+                },
+                onEndYearChanged = {
+                    endYear = it
+                },
             )
+            ItemRowFilter(
+                displayItems = categories,
+                selectedItem = selectedCategoryState,
+                onItemSelected = { selectedCategoryState = it },
+                titleFormatId = R.string.categories_filter_title,
+                nameLabelMapper = CategoryModel::name,
+                modifier = Modifier
+                    .padding(top = 8.dp),
+                testTagPostFix = "Categories",
+            )
+            ItemRowFilter(
+                selectedItem = selectedGenreState,
+                onItemSelected = { selectedGenreState = it },
+                displayItems = genres,
+                titleFormatId = R.string.genres_filter_title,
+                nameLabelMapper = GenreModel::name,
+                modifier = Modifier
+                    .padding(top = 16.dp),
+                testTagPostFix = "Genres",
+            )
+            WinnersFilter(
+                isSelected = winnersOnlyState,
+                onSelectionChange = {
+                    winnersOnlyState = it
+                },
+                modifier = Modifier
+                    .padding(top = 16.dp),
+            )
+            Button(
+                enabled = !isStartYearError && !isEndYearError,
+                onClick = {
+                    onApplySelection(
+                        FilterModel(
+                            startYear = startYear.toInt(10),
+                            endYear = endYear.toInt(10),
+                            categories = categories,
+                            selectedCategory = selectedCategoryState,
+                            genres = genres,
+                            selectedGenre = selectedGenreState,
+                            winnersOnly = winnersOnlyState,
+                        ),
+                    )
+                },
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .widthIn(128.dp)
+                    .padding(vertical = 16.dp)
+                    .testTag("applyButton"),
+            ) {
+                Text(
+                    text = stringResource(id = R.string.apply_filter_cta),
+                    style = MaterialTheme.typography.labelLarge,
+                )
+            }
         }
     }
 }

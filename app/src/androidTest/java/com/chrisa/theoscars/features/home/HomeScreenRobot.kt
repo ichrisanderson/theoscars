@@ -21,15 +21,17 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToKey
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
-import androidx.compose.ui.test.printToLog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.chrisa.theoscars.MainActivity
@@ -57,10 +59,12 @@ class HomeScreenRobot(
     }
 
     fun clickFilterButton() = apply {
+        composeTestRule.waitUntil(timeoutMillis = 5000L) {
+            composeTestRule
+                .onAllNodesWithTag(filterButtonTestTag)
+                .fetchSemanticsNodes().size == 1
+        }
         composeTestRule.onNodeWithTag(filterButtonTestTag).performClick()
-    }
-
-    fun waitForFilterTitle() = apply {
         composeTestRule.waitUntil(timeoutMillis = 5000L) {
             composeTestRule
                 .onAllNodesWithStringId(R.string.filter_title)
@@ -111,11 +115,9 @@ class HomeScreenRobot(
     }
 
     fun clickApplyButton() = apply {
-        composeTestRule.onNodeWithTag(applyButtonTestTag)
-            .printToLog("applyButtonTestTag")
+        composeTestRule.onNodeWithTag(filterContentListTestTag)
+            .performScrollToNode(hasTestTag(applyButtonTestTag))
         composeTestRule.onNodeWithTag(applyButtonTestTag).performClick()
-        composeTestRule.onNodeWithTag(applyButtonTestTag)
-            .printToLog("applyButtonTestTag")
     }
 
     fun waitForText(text: String) = apply {
@@ -127,8 +129,6 @@ class HomeScreenRobot(
     }
 
     fun clickCategory(categoryText: String) = apply {
-        composeTestRule.onNodeWithTag(categoriesItemListTestTag)
-            .printToLog("categoriesItemListTestTag")
         composeTestRule.onNodeWithTag(categoriesItemListTestTag).performScrollToKey(categoryText)
         composeTestRule.onNodeWithText(categoryText).performClick()
     }
@@ -160,5 +160,6 @@ class HomeScreenRobot(
         private const val genresItemListTestTag = "itemRowFilter_Genres"
         private const val winnersOnlyRowTestTag = "winnersOnlyRow"
         private const val winnersOnlySwitchTestTag = "winnersOnlySwitch"
+        private const val filterContentListTestTag = "filterContentList"
     }
 }

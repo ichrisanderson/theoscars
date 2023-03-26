@@ -135,7 +135,16 @@ class HomeScreenRobot(
     }
 
     fun assertMovieTitleDisplayed(movieTitle: String) {
+        waitForText(movieTitle)
         composeTestRule.onNodeWithText(movieTitle).assertIsDisplayed()
+    }
+
+    fun clickWinnersOnlyRow() = apply {
+        composeTestRule.onNodeWithTag(winnersOnlyRowTestTag).performClick()
+    }
+
+    fun clickWinnersOnlySwitch() = apply {
+        composeTestRule.onNodeWithTag(winnersOnlySwitchTestTag).performClick()
     }
 
     companion object {
@@ -145,5 +154,7 @@ class HomeScreenRobot(
         private const val filterButtonTestTag = "filterButton"
         private const val categoriesItemListTestTag = "itemRowFilter_Categories"
         private const val genresItemListTestTag = "itemRowFilter_Genres"
+        private const val winnersOnlyRowTestTag = "winnersOnlyRow"
+        private const val winnersOnlySwitchTestTag = "winnersOnlySwitch"
     }
 }

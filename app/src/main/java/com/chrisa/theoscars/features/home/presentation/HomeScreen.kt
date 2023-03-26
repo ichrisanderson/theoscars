@@ -590,15 +590,16 @@ private fun WinnersFilter(
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier.clickable(
-            interactionSource = interactionSource,
-            // This is for removing ripple when Row is clicked
-            indication = LocalIndication.current,
-            role = Role.Switch,
-            onClick = {
-                onSelectionChange(!isSelected)
-            },
-        ),
+        modifier = modifier
+            .testTag("winnersOnlyRow")
+            .clickable(
+                interactionSource = interactionSource,
+                indication = LocalIndication.current,
+                role = Role.Switch,
+                onClick = {
+                    onSelectionChange(!isSelected)
+                },
+            ),
     ) {
         Text(
             text = stringResource(id = R.string.winners_filter_title),
@@ -612,6 +613,7 @@ private fun WinnersFilter(
             checked = isSelected,
             onCheckedChange = onSelectionChange,
             modifier = Modifier
+                .testTag("winnersOnlySwitch")
                 .padding(horizontal = 16.dp),
         )
     }

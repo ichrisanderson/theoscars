@@ -88,4 +88,30 @@ class HomeScreenTest {
             .clickApplyButton()
             .assertMovieTitleDisplayed("The Banshees of Inisherin")
     }
+
+    @Test
+    fun winnersOnlyRowFilterItemsApplied() {
+        HomeScreenRobot(composeTestRule)
+            .setContent()
+            .clickFilterButton()
+            .clearStartYear()
+            .enterStartYear("2022")
+            .hideKeyboard()
+            .clickWinnersOnlyRow()
+            .clickApplyButton()
+            .assertMovieTitleDisplayed("CODA")
+    }
+
+    @Test
+    fun winnersOnlySwitchFilterItemsApplied() {
+        HomeScreenRobot(composeTestRule)
+            .setContent()
+            .clickFilterButton()
+            .clearStartYear()
+            .enterStartYear("2022")
+            .hideKeyboard()
+            .clickWinnersOnlySwitch()
+            .clickApplyButton()
+            .assertMovieTitleDisplayed("CODA")
+    }
 }

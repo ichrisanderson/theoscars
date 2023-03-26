@@ -72,6 +72,7 @@ class FakeNominationDao(
         endYear: Int,
         categoryAliasId: Long,
         genreId: Long,
+        winner: Int,
     ): List<MovieSummary> {
         val allCategoryAliases =
             categoryAliasDao.allCategoryAliases().filter { categoryAliasId == 0L || it.id == categoryAliasId }.map { it.id }
@@ -83,7 +84,7 @@ class FakeNominationDao(
             movieDao.allMovieGenres().filter { genreId == 0L || it.genreId == genreId }.map { it.movieId }
                 .toSet()
         val nominations = this.nominations
-            .filter { it.year in startYear..endYear && allCategories.contains(it.categoryId) }
+            .filter { it.year in startYear..endYear && allCategories.contains(it.categoryId) && (winner == -1 || it.winner) }
             .associateBy { it.movieId }
         val movies = movieDao.allMovies().filter {
             nominations.containsKey(it.id) && allMovieGenres.contains(it.id)

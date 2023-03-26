@@ -346,6 +346,7 @@ fun FilterContent(
     val isEndYearError by remember { derivedStateOf { !YearValidator.isValidYear(endYear) } }
     var selectedCategoryState by remember { mutableStateOf(selectedCategory) }
     var selectedGenreState by remember { mutableStateOf(selectedGenre) }
+    var winnersOnly by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier,
@@ -402,6 +403,7 @@ fun FilterContent(
                         endYear = endYear.toInt(10),
                         selectedCategory = selectedCategoryState,
                         selectedGenre = selectedGenreState,
+                        winnersOnly = winnersOnly,
                     ),
                 )
             },

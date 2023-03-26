@@ -39,8 +39,8 @@ import com.chrisa.theoscars.core.data.db.movie.MovieEntity
     ],
     indices = [
         Index("categoryId"),
-        Index("movieId")
-    ]
+        Index("movieId"),
+    ],
 )
 data class NominationEntity(
     @PrimaryKey(autoGenerate = true)

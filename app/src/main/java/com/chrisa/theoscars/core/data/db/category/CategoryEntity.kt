@@ -33,7 +33,7 @@ import com.chrisa.theoscars.core.data.db.categoryalias.CategoryAliasEntity
     ],
     indices = [
         Index("categoryAliasId"),
-    ]
+    ],
 )
 data class CategoryEntity(
     @PrimaryKey

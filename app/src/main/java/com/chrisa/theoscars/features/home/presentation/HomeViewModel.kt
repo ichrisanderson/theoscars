@@ -94,6 +94,7 @@ class HomeViewModel @Inject constructor(
                     endYear = filterModel.endYear,
                     selectedCategory = filterModel.selectedCategory,
                     selectedGenre = filterModel.selectedGenre,
+                    winnersOnly = filterModel.winnersOnly,
                 )
 
                 vs.copy(movies = filteredMovies)
@@ -132,6 +133,7 @@ data class FilterModel(
     val endYear: Int,
     val selectedCategory: CategoryModel,
     val selectedGenre: GenreModel,
+    val winnersOnly: Boolean,
 ) {
     val startYearString = startYear.toString(10)
     val endYearString = endYear.toString(10)

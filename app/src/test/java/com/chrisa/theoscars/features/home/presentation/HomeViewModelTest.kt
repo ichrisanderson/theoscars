@@ -157,6 +157,7 @@ class HomeViewModelTest {
                 endYear = 2023,
                 selectedCategory = selectedCategory,
                 selectedGenre = selectedGenre,
+                winnersOnly = false,
             ),
         )
 
@@ -176,6 +177,7 @@ class HomeViewModelTest {
                 endYear = 2023,
                 selectedCategory = selectedCategory,
                 selectedGenre = selectedGenre,
+                winnersOnly = false,
             ),
         )
 
@@ -202,6 +204,7 @@ class HomeViewModelTest {
                 endYear = 1970,
                 selectedCategory = selectedCategory,
                 selectedGenre = selectedGenre,
+                winnersOnly = false,
             ),
         )
 
@@ -225,6 +228,7 @@ class HomeViewModelTest {
                 endYear = 1970,
                 selectedCategory = selectedCategory,
                 selectedGenre = selectedGenre,
+                winnersOnly = false,
             ),
         )
 
@@ -244,6 +248,7 @@ class HomeViewModelTest {
                 endYear = 2023,
                 selectedCategory = selectedCategory,
                 selectedGenre = selectedGenre,
+                winnersOnly = false,
             ),
         )
 
@@ -251,6 +256,27 @@ class HomeViewModelTest {
             listOf(
                 "Avatar: The Way of Water",
                 "Everything Everywhere All at Once",
+            ),
+        )
+    }
+
+    @Test
+    fun `WHEN winner filter applied THEN viewState updated with selected movies`() {
+        val sut = homeViewModel()
+
+        sut.updateFilter(
+            FilterModel(
+                startYear = 2021,
+                endYear = 2023,
+                selectedCategory = sut.viewState.value.categories.first(),
+                selectedGenre = sut.viewState.value.genres.first(),
+                winnersOnly = true,
+            ),
+        )
+
+        assertThat(sut.viewState.value.movies.map { it.title }).isEqualTo(
+            listOf(
+                "Belfast",
             ),
         )
     }

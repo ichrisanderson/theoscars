@@ -52,7 +52,24 @@ object MovieSeedData {
     "displayTitle": "The Sound of Music",
     "metadata": "The Sound of Music Robert Wise",
     "runtime": 174
-  },  
+  },
+  {
+    "id": 777270,
+    "backdropImagePath": "/4KLlHifB1kgMtWl3YnY8JinOj65.jpg",
+    "posterImagePath": "/3mInLZyPOVLsZRsBwNHi3UJXXnm.jpg",
+    "overview": "Buddy is a young boy on the cusp of adolescence, whose life is filled with familial love, childhood hijinks, and a blossoming romance. Yet, with his beloved hometown caught up in increasing turmoil, his family faces a momentous choice: hope the conflict will pass or leave everything they know behind for a new life.",
+    "title": "Belfast",
+    "releaseYear": 2021,
+    "youTubeVideoKey": "C658p987SQI",
+    "genreIds": "18",
+    "imdbId": "tt12789558",
+    "originalLanguage": "en",
+    "spokenLanguages": "en",
+    "originalTitle": "Belfast",
+    "displayTitle": "Belfast",
+    "metadata": "Belfast Ciarán Hinds Judi Dench Kenneth Branagh Music Van Morrison Laura Berwick Kenneth Branagh Becca Kovacik Tamar Thomas Denise Yarde Simon Chase James Mather Niv Adiri Kenneth Branagh",
+    "runtime": 98
+  },
   {
     "id": 76600,
     "backdropImagePath": "/ovM06PdF3M8wvKb06i4sjW3xoww.jpg",

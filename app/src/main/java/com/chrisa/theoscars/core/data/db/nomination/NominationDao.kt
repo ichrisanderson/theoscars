@@ -71,6 +71,15 @@ interface NominationDao {
         genreId: Long,
         winner: Int,
     ): List<MovieSummary>
+
+    @Query(
+        "SELECT DISTINCT movie.id, movie.posterImagePath, movie.title, movie.overview, nomination.year FROM nomination " +
+            "INNER JOIN movie ON movie.id = nomination.movieId " +
+            "WHERE movie.metadata LIKE :query",
+    )
+    fun searchMovies(
+        query: String,
+    ): List<MovieSearchSummary>
 }
 
 data class NominationCategory(
@@ -82,6 +91,14 @@ data class NominationCategory(
 data class MovieSummary(
     val id: Long,
     val backdropImagePath: String?,
+    val title: String,
+    val overview: String,
+    val year: Int,
+)
+
+data class MovieSearchSummary(
+    val id: Long,
+    val posterImagePath: String?,
     val title: String,
     val overview: String,
     val year: Int,

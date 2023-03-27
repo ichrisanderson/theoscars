@@ -47,6 +47,7 @@ class HomeScreenRobot(
 ) {
 
     private val keyboardHelper = KeyboardHelper(composeTestRule)
+
     fun setContent() = apply {
         composeTestRule.activity.setContent {
             keyboardHelper.initialize()

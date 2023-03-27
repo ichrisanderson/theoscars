@@ -99,4 +99,25 @@ class FakeNominationDao(
         }
         return movies
     }
+
+    override fun searchMovies(query: String): List<MovieSearchSummary> {
+        val queryText = query.substring(1, query.lastIndex)
+        val regex = Regex("^.*?$queryText.*?\$", RegexOption.IGNORE_CASE)
+
+        val movies = movieDao.allMovies().filter { it.title.matches(regex) }
+        val movieIds = movies.map { it.id }.toSet()
+        val nominations = this.nominations
+            .filter { movieIds.contains(it.movieId) }
+            .associateBy { it.movieId }
+
+        return movies.map {
+            MovieSearchSummary(
+                id = it.id,
+                posterImagePath = it.posterImagePath.orEmpty(),
+                title = it.title,
+                overview = it.overview,
+                year = nominations[it.id]!!.year,
+            )
+        }
+    }
 }

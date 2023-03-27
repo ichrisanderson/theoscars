@@ -99,7 +99,7 @@ class SearchViewModelTest {
                     movieId = 545611,
                     title = "Everything Everywhere All at Once",
                     posterImagePath = "/w3LxiVYdWWRvEVdn5RYq6jIqkb1.jpg",
-                    year = "2022",
+                    year = "2023",
                 ),
             ),
         )

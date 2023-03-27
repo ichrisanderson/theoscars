@@ -32,3 +32,9 @@ fun <A : ComponentActivity> AndroidComposeTestRule<ActivityScenarioRule<A>, A>.o
 fun <A : ComponentActivity> AndroidComposeTestRule<ActivityScenarioRule<A>, A>.onNodeWithStringId(
     @StringRes id: Int,
 ): SemanticsNodeInteraction = onNodeWithText(activity.getString(id))
+
+fun <A : ComponentActivity> AndroidComposeTestRule<ActivityScenarioRule<A>, A>.getString(
+    @StringRes id: Int,
+): String {
+    return activity.getString(id)
+}

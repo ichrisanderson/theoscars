@@ -36,9 +36,6 @@ interface MovieDao {
     @Query("SELECT * FROM movie")
     fun allMovies(): List<MovieEntity>
 
-    @Query("SELECT * FROM movie WHERE metadata LIKE :query")
-    fun searchMovies(query: String): List<MovieEntity>
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertMovieGenres(items: List<MovieGenreEntity>)
 

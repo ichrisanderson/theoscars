@@ -70,6 +70,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -173,7 +174,8 @@ fun SearchResultCard(
     Card(
         shape = MaterialTheme.shapes.small,
         modifier = modifier
-            .clickable { onClick(searchResultModel.movieId) },
+            .clickable { onClick(searchResultModel.movieId) }
+            .testTag("movieCard_${searchResultModel.movieId}"),
     ) {
         Row(
             Modifier
@@ -246,11 +248,16 @@ fun SearchBar(
                     .onFocusChanged { focusState ->
                         showClearButton = (focusState.isFocused)
                     }
+                    .testTag("searchBar")
                     .focusRequester(focusRequester),
                 value = searchText,
                 onValueChange = onSearchTextChanged,
                 placeholder = {
-                    Text(text = placeholderText)
+                    Text(
+                        text = placeholderText,
+                        modifier = Modifier
+                            .testTag("searchBarPlaceholderText"),
+                    )
                 },
                 colors = TextFieldDefaults.textFieldColors(
                     focusedIndicatorColor = Color.Transparent,
@@ -263,7 +270,10 @@ fun SearchBar(
                         enter = fadeIn(),
                         exit = fadeOut(),
                     ) {
-                        IconButton(onClick = { onClearClick() }) {
+                        IconButton(
+                            onClick = { onClearClick() },
+                            modifier = Modifier.testTag("clearSearchButton"),
+                        ) {
                             Icon(
                                 imageVector = Icons.Filled.Close,
                                 contentDescription = null,
@@ -280,7 +290,10 @@ fun SearchBar(
             )
         },
         navigationIcon = {
-            IconButton(onClick = { onNavigateBack() }) {
+            IconButton(
+                onClick = { onNavigateBack() },
+                modifier = Modifier.testTag("closeButton"),
+            ) {
                 Icon(
                     imageVector = Icons.Filled.ArrowBack,
                     modifier = Modifier,

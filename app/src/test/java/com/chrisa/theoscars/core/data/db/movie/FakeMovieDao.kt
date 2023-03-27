@@ -35,12 +35,6 @@ class FakeMovieDao : MovieDao {
         return movies.firstOrNull { it.id == id }
     }
 
-    override fun searchMovies(query: String): List<MovieEntity> {
-        val queryText = query.substring(1, query.lastIndex)
-        val regex = Regex("^.*?$queryText.*?\$", RegexOption.IGNORE_CASE)
-        return movies.filter { it.title.matches(regex) }
-    }
-
     override fun insertMovieGenres(items: List<MovieGenreEntity>) {
         moviesGenres.addAll(items)
     }

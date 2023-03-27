@@ -113,4 +113,21 @@ class HomeScreenTest {
             .clickApplyButton()
             .assertMovieTitleDisplayed("CODA")
     }
+
+    @Test
+    fun assertSearchAction() {
+        HomeScreenRobot(composeTestRule)
+            .setContent()
+            .clickSearchButton()
+            .assertSearchAction()
+    }
+
+    @Test
+    fun assertMovieClickAction() {
+        val movieId = 614934L
+        HomeScreenRobot(composeTestRule)
+            .setContent()
+            .clickMovie(movieId)
+            .assertMovieClickAction(movieId)
+    }
 }

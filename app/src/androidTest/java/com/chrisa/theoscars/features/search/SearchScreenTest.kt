@@ -80,9 +80,20 @@ class SearchScreenTest {
         SearchScreenRobot(composeTestRule)
             .setContent()
             .clearSearchTerm()
-            .enterSearchTerm("Everything Everywhere")
+            .enterSearchTerm("Every")
             .hideKeyboard()
             .clickClearSearchButton()
             .assertEmptyMovieTextDisplayed()
+    }
+
+    @Test
+    fun assertMovieClickAction() {
+        SearchScreenRobot(composeTestRule)
+            .setContent()
+            .clearSearchTerm()
+            .enterSearchTerm("Everything Everywhere")
+            .hideKeyboard()
+            .clickMovie(movieId = 545611L)
+            .assertMovieClickAction(movieId = 545611L)
     }
 }

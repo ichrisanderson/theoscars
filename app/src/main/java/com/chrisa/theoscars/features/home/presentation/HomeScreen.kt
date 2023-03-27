@@ -97,7 +97,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.chrisa.theoscars.R
+import com.chrisa.theoscars.core.ui.common.TextUtil.prefixWithCeremonyEmoji
 import com.chrisa.theoscars.core.ui.theme.OscarsTheme
+import com.chrisa.theoscars.core.util.YearValidator
 import com.chrisa.theoscars.features.home.domain.models.CategoryModel
 import com.chrisa.theoscars.features.home.domain.models.GenreModel
 import com.chrisa.theoscars.features.home.domain.models.MovieSummaryModel
@@ -204,13 +206,14 @@ private fun HomeContent(
         } else {
             LazyColumn(
                 state = listState,
+                modifier = Modifier.testTag("movieList"),
             ) {
                 items(items = movies, key = { it.id }) { movie ->
                     MovieCard(
                         movie = movie,
                         onMovieClick = onMovieClick,
                         modifier = Modifier
-                            .testTag("movieCard")
+                            .testTag("movieCard_${movie.id}")
                             .animateItemPlacement(),
                     )
                 }
@@ -336,7 +339,7 @@ fun MovieCard(
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp),
             )
             Text(
-                text = movie.year,
+                text = movie.year.prefixWithCeremonyEmoji(),
                 style = MaterialTheme.typography.titleSmall,
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp),
             )

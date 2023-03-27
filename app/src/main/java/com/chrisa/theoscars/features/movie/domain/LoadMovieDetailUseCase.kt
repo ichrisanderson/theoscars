@@ -29,7 +29,9 @@ class LoadMovieDetailUseCase @Inject constructor(
 ) {
     suspend fun execute(id: Long): MovieDetailModel? = withContext(coroutineDispatchers.io) {
         val movie = movieDataRepository.loadMovie(id) ?: return@withContext null
-        val nominations = movieDataRepository.loadNominations(movie.id).map {
+        val movieNominations = movieDataRepository.loadNominations(movie.id)
+
+        val nominations = movieNominations.map {
             NominationModel(
                 category = it.category,
                 name = it.nomination,
@@ -41,7 +43,7 @@ class LoadMovieDetailUseCase @Inject constructor(
             backdropImagePath = movie.backdropImagePath,
             overview = movie.overview,
             title = movie.title,
-            year = movie.releaseYear.toString(10),
+            year = movieNominations.first().year.toString(10),
             youTubeVideoKey = movie.youTubeVideoKey,
             nominations = nominations,
         )

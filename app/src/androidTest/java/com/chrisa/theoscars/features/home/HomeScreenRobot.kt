@@ -17,14 +17,14 @@
 package com.chrisa.theoscars.features.home
 
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
-import androidx.compose.ui.test.onAllNodesWithTag
-import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -39,44 +39,52 @@ import com.chrisa.theoscars.R
 import com.chrisa.theoscars.core.ui.theme.OscarsTheme
 import com.chrisa.theoscars.features.home.presentation.HomeScreen
 import com.chrisa.theoscars.util.KeyboardHelper
-import com.chrisa.theoscars.util.onAllNodesWithStringId
-import com.chrisa.theoscars.util.onNodeWithStringId
+import com.chrisa.theoscars.util.onAllNodesWithStringResId
+import com.chrisa.theoscars.util.onNodeWithStringResId
+import com.chrisa.theoscars.util.waitOnAllNodesWitTag
+import com.chrisa.theoscars.util.waitOnAllNodesWithText
+import com.google.common.truth.Truth.assertThat
 
 class HomeScreenRobot(
     private val composeTestRule: AndroidComposeTestRule<ActivityScenarioRule<MainActivity>, MainActivity>,
 ) {
 
     private val keyboardHelper = KeyboardHelper(composeTestRule)
+    private var screenAction: ScreenAction? = null
 
     fun setContent() = apply {
         composeTestRule.activity.setContent {
             keyboardHelper.initialize()
             OscarsTheme {
-                Surface {
-                    HomeScreen(viewModel = hiltViewModel(), onMovieClick = { }, onSearchClick = {})
+                Surface(modifier = Modifier.statusBarsPadding()) {
+                    HomeScreen(
+                        viewModel = hiltViewModel(),
+                        onMovieClick = { screenAction = ScreenAction.MovieClick(it) },
+                        onSearchClick = { screenAction = ScreenAction.Search },
+                    )
                 }
             }
         }
     }
 
     fun clickFilterButton() = apply {
-        composeTestRule.waitUntil(timeoutMillis = 5000L) {
-            composeTestRule
-                .onAllNodesWithTag(filterButtonTestTag)
-                .fetchSemanticsNodes().size == 1
-        }
+        composeTestRule.waitOnAllNodesWitTag(filterButtonTestTag, useUnmergedTree = true)
         composeTestRule.onNodeWithTag(filterButtonTestTag).performClick()
         composeTestRule.waitUntil(timeoutMillis = 5000L) {
             composeTestRule
-                .onAllNodesWithStringId(R.string.filter_title)
+                .onAllNodesWithStringResId(R.string.filter_title)
                 .fetchSemanticsNodes().size == 1
         }
     }
 
+    fun waitForText(text: String) = apply {
+        composeTestRule.waitOnAllNodesWithText(text)
+    }
+
     fun assertFilterDialogIsVisible() = apply {
-        composeTestRule.onNodeWithStringId(R.string.filter_title).assertIsDisplayed()
-        composeTestRule.onNodeWithStringId(R.string.year_filter_title).assertIsDisplayed()
-        composeTestRule.onNodeWithStringId(R.string.apply_filter_cta).assertIsDisplayed()
+        composeTestRule.onNodeWithStringResId(R.string.filter_title).assertIsDisplayed()
+        composeTestRule.onNodeWithStringResId(R.string.year_filter_title).assertIsDisplayed()
+        composeTestRule.onNodeWithStringResId(R.string.apply_filter_cta).assertIsDisplayed()
     }
 
     fun clearStartYear() = apply {
@@ -100,11 +108,11 @@ class HomeScreenRobot(
     }
 
     fun assertYearErrorIsDisplayed() = apply {
-        composeTestRule.onNodeWithStringId(R.string.year_filter_error).assertIsDisplayed()
+        composeTestRule.onNodeWithStringResId(R.string.year_filter_error).assertIsDisplayed()
     }
 
     fun assertYearErrorDoesNotExist() = apply {
-        composeTestRule.onNodeWithStringId(R.string.year_filter_error).assertDoesNotExist()
+        composeTestRule.onNodeWithStringResId(R.string.year_filter_error).assertDoesNotExist()
     }
 
     fun assertApplyButtonIsEnabled() = apply {
@@ -121,14 +129,6 @@ class HomeScreenRobot(
         composeTestRule.onNodeWithTag(applyButtonTestTag).performClick()
     }
 
-    fun waitForText(text: String) = apply {
-        composeTestRule.waitUntil(timeoutMillis = 5000L) {
-            composeTestRule
-                .onAllNodesWithText(text)
-                .fetchSemanticsNodes().isNotEmpty()
-        }
-    }
-
     fun clickCategory(categoryText: String) = apply {
         composeTestRule.onNodeWithTag(categoriesItemListTestTag).performScrollToKey(categoryText)
         composeTestRule.onNodeWithText(categoryText).performClick()
@@ -140,7 +140,7 @@ class HomeScreenRobot(
     }
 
     fun assertMovieTitleDisplayed(movieTitle: String) {
-        waitForText(movieTitle)
+        composeTestRule.waitOnAllNodesWithText(movieTitle)
         composeTestRule.onNodeWithText(movieTitle).assertIsDisplayed()
     }
 
@@ -152,15 +152,43 @@ class HomeScreenRobot(
         composeTestRule.onNodeWithTag(winnersOnlySwitchTestTag).performClick()
     }
 
+    fun clickSearchButton() = apply {
+        composeTestRule.waitOnAllNodesWitTag(searchButtonTestTag, useUnmergedTree = true)
+        composeTestRule.onNodeWithTag(searchButtonTestTag).performClick()
+    }
+
+    fun assertSearchAction() = apply {
+        assertThat(screenAction).isEqualTo(ScreenAction.Search)
+    }
+
+    fun clickMovie(movieId: Long) = apply {
+        composeTestRule.waitOnAllNodesWitTag(movieListTestTag)
+        composeTestRule.onNodeWithTag(movieListTestTag).performScrollToKey(movieId)
+        val tag = "$movieCardTestTag$movieId"
+        composeTestRule.onNodeWithTag(tag).performClick()
+    }
+
+    fun assertMovieClickAction(movieId: Long) = apply {
+        assertThat(screenAction).isEqualTo(ScreenAction.MovieClick(movieId))
+    }
+
     companion object {
         private const val startYearTestTag = "startYear"
         private const val endYearTestTag = "endYear"
         private const val applyButtonTestTag = "applyButton"
         private const val filterButtonTestTag = "filterButton"
+        private const val searchButtonTestTag = "searchButton"
+        private const val movieListTestTag = "movieList"
+        private const val movieCardTestTag = "movieCard_"
         private const val categoriesItemListTestTag = "itemRowFilter_Categories"
         private const val genresItemListTestTag = "itemRowFilter_Genres"
         private const val winnersOnlyRowTestTag = "winnersOnlyRow"
         private const val winnersOnlySwitchTestTag = "winnersOnlySwitch"
         private const val filterContentListTestTag = "filterContentList"
+
+        sealed class ScreenAction {
+            data class MovieClick(val id: Long) : ScreenAction()
+            object Search : ScreenAction()
+        }
     }
 }

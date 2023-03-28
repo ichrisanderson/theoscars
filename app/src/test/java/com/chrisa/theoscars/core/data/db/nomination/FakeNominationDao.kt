@@ -47,6 +47,7 @@ class FakeNominationDao(
                     nomination = nomination.content,
                     category = categories[nomination.categoryId]!!.name,
                     winner = nomination.winner,
+                    year = nomination.year,
                 )
             }
     }

@@ -79,8 +79,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.chrisa.theoscars.R
+import com.chrisa.theoscars.core.ui.common.TextUtil.prefixWithCeremonyEmoji
 import com.chrisa.theoscars.core.ui.theme.OscarsTheme
 import com.chrisa.theoscars.features.search.domain.models.SearchResultModel
+import timber.log.Timber
 
 @Composable
 fun SearchScreen(
@@ -97,6 +99,7 @@ fun SearchScreen(
         onClearClick = viewModel::clearQuery,
         onMovieClick = onMovieClick,
         onClose = onClose,
+        modifier = Modifier.testTag("searchScreenContent"),
     )
 }
 
@@ -106,10 +109,14 @@ private fun SearchScreenContent(
     searchResults: List<SearchResultModel>,
     onMovieClick: (Long) -> Unit,
     onSearchTextChanged: (String) -> Unit,
-    onClearClick: () -> Unit = {},
+    onClearClick: () -> Unit,
     onClose: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
+    Timber.tag("UI_TEST").d("searchQuery=$searchQuery;searchResults=${searchResults.size}")
     Scaffold(
+        modifier = modifier,
+        contentWindowInsets = WindowInsets(top = 0.dp, bottom = 0.dp),
         topBar = {
             SearchBar(
                 searchText = searchQuery,
@@ -213,7 +220,7 @@ fun SearchResultCard(
                     style = MaterialTheme.typography.bodyLarge,
                 )
                 Text(
-                    text = searchResultModel.year,
+                    text = searchResultModel.year.prefixWithCeremonyEmoji(),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(top = 8.dp),
                 )
@@ -337,6 +344,7 @@ fun SearchScreenPreview() {
                 ),
                 onSearchTextChanged = { },
                 onMovieClick = { },
+                onClearClick = { },
                 onClose = {},
             )
         }
@@ -353,6 +361,7 @@ fun SearchEmptyScreenPreview() {
                 searchResults = emptyList(),
                 onSearchTextChanged = { },
                 onMovieClick = { },
+                onClearClick = { },
                 onClose = {},
             )
         }
@@ -369,7 +378,7 @@ fun SearchResultCardPreview() {
                     movieId = 1234,
                     posterImagePath = null,
                     title = "All Quiet on the Western Front",
-                    year = "2022",
+                    year = "2023",
                 ),
                 onClick = { },
                 modifier = Modifier.padding(8.dp),

@@ -38,7 +38,7 @@ interface NominationDao {
     fun allCategoriesForCeremony(ceremonyYear: Int): List<String>
 
     @Query(
-        "SELECT DISTINCT nomination.content as 'nomination', category.name as 'category', nomination.winner FROM nomination " +
+        "SELECT DISTINCT nomination.content as 'nomination', category.name as 'category', nomination.winner, nomination.year FROM nomination " +
             "INNER JOIN movie ON movie.id = nomination.movieId " +
             "INNER JOIN category ON category.id = nomination.categoryId " +
             "WHERE movieId = :movieId",
@@ -86,6 +86,7 @@ data class NominationCategory(
     val nomination: String,
     val category: String,
     val winner: Boolean,
+    val year: Int,
 )
 
 data class MovieSummary(

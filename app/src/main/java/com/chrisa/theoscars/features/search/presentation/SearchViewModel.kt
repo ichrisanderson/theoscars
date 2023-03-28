@@ -22,6 +22,7 @@ import com.chrisa.theoscars.core.util.coroutines.CoroutineDispatchers
 import com.chrisa.theoscars.features.search.domain.SearchMoviesUseCase
 import com.chrisa.theoscars.features.search.domain.models.SearchResultModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -38,15 +39,19 @@ class SearchViewModel @Inject constructor(
     private val _viewState = MutableStateFlow(ViewState.default())
     val viewState: StateFlow<ViewState> = _viewState
 
+    private var queryJob: Job? = null
+
     fun updateQuery(searchQuery: String) {
+        queryJob?.cancel()
         _viewState.update { vs -> vs.copy(searchQuery = searchQuery) }
-        coroutineScope.launch(dispatchers.io) {
+        queryJob = coroutineScope.launch(dispatchers.io) {
             val searchResults = searchMoviesUseCase.execute(searchQuery)
             _viewState.update { vs -> vs.copy(searchResults = searchResults) }
         }
     }
 
     fun clearQuery() {
+        queryJob?.cancel()
         _viewState.update { vs -> vs.copy(searchQuery = "", searchResults = emptyList()) }
     }
 }

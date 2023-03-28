@@ -37,7 +37,9 @@ class MovieViewModel @Inject constructor(
     private val loadMovieDetailUseCase: LoadMovieDetailUseCase,
 ) : ViewModel(coroutineScope) {
 
-    private val movieId: Long = checkNotNull(savedStateHandle["movieId"])
+    private val movieId: Long = checkNotNull(
+        savedStateHandle["movieId"],
+    )
 
     private val _viewState = MutableStateFlow(ViewState.default())
     val viewState: StateFlow<ViewState> = _viewState

@@ -14,19 +14,10 @@
  * limitations under the License.
  */
 
-package com.chrisa.theoscars.features.home.presentation
+package com.chrisa.theoscars.core.ui.common
 
-import java.time.LocalDate
+object TextUtil {
 
-object YearValidator {
-    fun isValidYear(year: String): Boolean {
-        if (year.isEmpty()) return false
-        val currentYear = LocalDate.now().year
-        return try {
-            val number = year.toInt(10)
-            number in 1928..currentYear
-        } catch (ex: NumberFormatException) {
-            false
-        }
-    }
+    fun String.prefixWithCeremonyEmoji() =
+        "\uD83C\uDFC6 $this"
 }

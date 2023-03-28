@@ -19,6 +19,7 @@ package com.chrisa.theoscars.features.movie.presentation
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -46,11 +47,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.chrisa.theoscars.R
+import com.chrisa.theoscars.core.ui.common.TextUtil.prefixWithCeremonyEmoji
 import com.chrisa.theoscars.core.ui.theme.OscarsTheme
 import com.chrisa.theoscars.features.movie.domain.models.MovieDetailModel
 import com.chrisa.theoscars.features.movie.domain.models.NominationModel
@@ -63,8 +66,12 @@ fun MovieScreen(
 ) {
     val viewState by viewModel.viewState.collectAsState()
     Scaffold(
+        contentWindowInsets = WindowInsets(top = 0.dp, bottom = 0.dp),
         topBar = {
-            IconButton(onClick = onClose) {
+            IconButton(
+                onClick = onClose,
+                modifier = Modifier.testTag("closeButton"),
+            ) {
                 Icon(
                     imageVector = Icons.Filled.ArrowBack,
                     tint = Color.White,
@@ -104,7 +111,9 @@ private fun MovieContent(
         }
     } else {
         Column(
-            modifier.verticalScroll(rememberScrollState()),
+            modifier
+                .verticalScroll(rememberScrollState())
+                .testTag("movieContent_${movie.id}"),
         ) {
             Box(
                 modifier = modifier
@@ -124,7 +133,8 @@ private fun MovieContent(
                         containerColor = Color.Black.copy(alpha = 0.6f),
                     ),
                     modifier = Modifier
-                        .align(Alignment.Center),
+                        .align(Alignment.Center)
+                        .testTag("playButton"),
                 ) {
                     Icon(
                         imageVector = Icons.Filled.PlayArrow,
@@ -142,7 +152,7 @@ private fun MovieContent(
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp),
             )
             Text(
-                text = movie.year,
+                text = movie.year.prefixWithCeremonyEmoji(),
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp),
             )

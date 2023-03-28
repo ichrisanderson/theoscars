@@ -21,15 +21,16 @@ import androidx.annotation.StringRes
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.SemanticsNodeInteractionCollection
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 
-fun <A : ComponentActivity> AndroidComposeTestRule<ActivityScenarioRule<A>, A>.onAllNodesWithStringId(
+fun <A : ComponentActivity> AndroidComposeTestRule<ActivityScenarioRule<A>, A>.onAllNodesWithStringResId(
     @StringRes id: Int,
 ): SemanticsNodeInteractionCollection = onAllNodesWithText(activity.getString(id))
 
-fun <A : ComponentActivity> AndroidComposeTestRule<ActivityScenarioRule<A>, A>.onNodeWithStringId(
+fun <A : ComponentActivity> AndroidComposeTestRule<ActivityScenarioRule<A>, A>.onNodeWithStringResId(
     @StringRes id: Int,
 ): SemanticsNodeInteraction = onNodeWithText(activity.getString(id))
 
@@ -38,3 +39,38 @@ fun <A : ComponentActivity> AndroidComposeTestRule<ActivityScenarioRule<A>, A>.g
 ): String {
     return activity.getString(id)
 }
+
+private const val defaultTimeoutMillis = 5000L
+
+fun <A : ComponentActivity> AndroidComposeTestRule<ActivityScenarioRule<A>, A>.waitOnAllNodesWithText(
+    text: String,
+    useUnmergedTree: Boolean = false,
+    timeoutMillis: Long = defaultTimeoutMillis,
+) =
+    this.waitUntil(timeoutMillis = timeoutMillis) {
+        this.onAllNodesWithText(text = text, useUnmergedTree = useUnmergedTree)
+            .fetchSemanticsNodes()
+            .isNotEmpty()
+    }
+
+fun <A : ComponentActivity> AndroidComposeTestRule<ActivityScenarioRule<A>, A>.waitOnAllNodesWitTag(
+    text: String,
+    useUnmergedTree: Boolean = false,
+    timeoutMillis: Long = defaultTimeoutMillis,
+) =
+    this.waitUntil(timeoutMillis = timeoutMillis) {
+        this.onAllNodesWithTag(testTag = text, useUnmergedTree = useUnmergedTree)
+            .fetchSemanticsNodes()
+            .isNotEmpty()
+    }
+
+fun <A : ComponentActivity> AndroidComposeTestRule<ActivityScenarioRule<A>, A>.waitOnAllNodesWithStringResId(
+    @StringRes id: Int,
+    useUnmergedTree: Boolean = false,
+    timeoutMillis: Long = defaultTimeoutMillis,
+) =
+    this.waitUntil(timeoutMillis = timeoutMillis) {
+        this.onAllNodesWithText(text = activity.getString(id), useUnmergedTree = useUnmergedTree)
+            .fetchSemanticsNodes()
+            .isNotEmpty()
+    }

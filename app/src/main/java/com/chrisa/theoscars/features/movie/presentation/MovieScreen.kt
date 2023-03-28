@@ -83,7 +83,7 @@ fun MovieScreen(
                 Icon(
                     imageVector = Icons.Filled.ArrowBack,
                     tint = Color.White,
-                    contentDescription = null,
+                    contentDescription = stringResource(id = R.string.close_button_description),
                     modifier = Modifier
                         .size(48.dp)
                         .padding(8.dp),
@@ -130,7 +130,7 @@ private fun MovieContent(
             ) {
                 AsyncImage(
                     model = "https://image.tmdb.org/t/p/w500/${movie.backdropImagePath}",
-                    contentDescription = null,
+                    contentDescription = stringResource(id = R.string.movie_image_description_format, movie.title),
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(16 / 9.0f),
@@ -147,7 +147,7 @@ private fun MovieContent(
                     Icon(
                         imageVector = Icons.Filled.PlayArrow,
                         tint = Color.White.copy(alpha = 0.9f),
-                        contentDescription = null,
+                        contentDescription = stringResource(id = R.string.play_button_description),
                         modifier = Modifier
                             .size(48.dp),
                     )
@@ -231,7 +231,7 @@ fun Nomination(
                 Image(
                     painter = painterResource(R.drawable.winner_badge),
                     modifier = Modifier.fillMaxSize(),
-                    contentDescription = "",
+                    contentDescription = stringResource(id = R.string.winner_badge_description),
                 )
             },
         )

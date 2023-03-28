@@ -16,7 +16,6 @@
 
 package com.chrisa.theoscars.features.home.presentation
 
-import androidx.annotation.StringRes
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateFloat
@@ -32,7 +31,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -44,7 +42,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
@@ -62,7 +59,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -73,7 +69,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -97,6 +92,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.chrisa.theoscars.R
+import com.chrisa.theoscars.core.ui.common.FilterList
 import com.chrisa.theoscars.core.ui.common.TextUtil.prefixWithCeremonyEmoji
 import com.chrisa.theoscars.core.ui.theme.OscarsTheme
 import com.chrisa.theoscars.core.util.YearValidator
@@ -404,22 +400,22 @@ fun FilterContent(
                     endYear = it
                 },
             )
-            ItemRowFilter(
+            FilterList(
+                titleStringResId = R.string.categories_filter_title,
                 displayItems = categories,
                 selectedItem = selectedCategoryState,
                 onItemSelected = { selectedCategoryState = it },
-                titleFormatId = R.string.categories_filter_title,
-                nameLabelMapper = CategoryModel::name,
+                itemLabelMapper = CategoryModel::name,
                 modifier = Modifier
                     .padding(top = 8.dp),
                 testTagPostFix = "Categories",
             )
-            ItemRowFilter(
+            FilterList(
+                titleStringResId = R.string.genres_filter_title,
                 selectedItem = selectedGenreState,
                 onItemSelected = { selectedGenreState = it },
                 displayItems = genres,
-                titleFormatId = R.string.genres_filter_title,
-                nameLabelMapper = GenreModel::name,
+                itemLabelMapper = GenreModel::name,
                 modifier = Modifier
                     .padding(top = 16.dp),
                 testTagPostFix = "Genres",
@@ -528,75 +524,6 @@ private fun YearFilter(
                 modifier = Modifier
                     .padding(start = 16.dp, top = 4.dp, bottom = 8.dp),
             )
-        }
-        Divider(
-            modifier = Modifier
-                .alpha(0.3f),
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun <T> ItemRowFilter(
-    displayItems: List<T>,
-    selectedItem: T,
-    onItemSelected: (T) -> Unit,
-    @StringRes titleFormatId: Int,
-    nameLabelMapper: (T) -> String,
-    modifier: Modifier = Modifier,
-    testTagPostFix: String = "",
-) {
-    val listState = rememberLazyListState()
-
-    LaunchedEffect(displayItems) {
-        val selectedIndex = displayItems.indexOf(selectedItem)
-        if (selectedIndex >= 0) {
-            listState.scrollToItem(selectedIndex)
-        }
-    }
-
-    Column(
-        modifier = modifier,
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = stringResource(id = titleFormatId),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier
-                    .padding(start = 16.dp)
-                    .padding(vertical = 8.dp),
-            )
-        }
-        Divider(
-            modifier = Modifier
-                .padding(top = 8.dp)
-                .alpha(0.3f),
-        )
-        LazyRow(
-            state = listState,
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag("itemRowFilter_$testTagPostFix"),
-        ) {
-            displayItems.forEach { displayItem ->
-                item(key = nameLabelMapper(displayItem)) {
-                    FilterChip(
-                        selected = selectedItem == displayItem,
-                        onClick = { onItemSelected(displayItem) },
-                        label = {
-                            Text(
-                                text = nameLabelMapper(displayItem),
-                                style = MaterialTheme.typography.bodyMedium,
-                            )
-                        },
-                    )
-                }
-            }
         }
         Divider(
             modifier = Modifier

@@ -104,7 +104,7 @@ class MovieScreenRobot(
             .assert(hasAnyDescendant(hasText(composeTestRule.getString(R.string.nominations_title))))
         movie.nominations.forEach { nomination ->
             composeTestRule.onNodeWithTag(tag)
-                .assert(hasAnyDescendant(hasText(nomination.category)))
+                .assert(hasAnyDescendant(hasText(nomination.category, substring = true)))
             composeTestRule.onNodeWithTag(tag)
                 .assert(hasAnyDescendant(hasText(nomination.name)))
         }

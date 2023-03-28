@@ -14,28 +14,28 @@
  * limitations under the License.
  */
 
-package com.chrisa.theoscars.features.movie.domain.models
+package com.chrisa.theoscars.core.data.db.watchlist
 
-data class MovieDetailModel(
-    val id: Long,
-    val backdropImagePath: String?,
-    val overview: String,
-    val title: String,
-    val year: String,
-    val youTubeVideoKey: String?,
-    val nominations: List<NominationModel>,
+import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.PrimaryKey
+import com.chrisa.theoscars.core.data.db.movie.MovieEntity
+
+@Entity(
+    tableName = "watchlist",
+    foreignKeys = [
+        ForeignKey(
+            entity = MovieEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["movieId"],
+        ),
+    ],
 )
-
-data class NominationModel(
-    val category: String,
-    val name: String,
-    val winner: Boolean,
-)
-
-data class WatchlistDataModel(
-    val movieId: Long,
+data class WatchlistEntity(
+    @PrimaryKey
+    var movieId: Long,
     val isOnWatchlist: Boolean,
     val hasWatched: Boolean,
-    val rating: Int,
-    val notes: String,
+    var rating: Int,
+    var notes: String,
 )

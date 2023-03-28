@@ -31,6 +31,8 @@ import com.chrisa.theoscars.core.data.db.movie.MovieEntity
 import com.chrisa.theoscars.core.data.db.movie.MovieGenreEntity
 import com.chrisa.theoscars.core.data.db.nomination.NominationDao
 import com.chrisa.theoscars.core.data.db.nomination.NominationEntity
+import com.chrisa.theoscars.core.data.db.watchlist.WatchlistDao
+import com.chrisa.theoscars.core.data.db.watchlist.WatchlistEntity
 
 interface AppDatabase {
     fun nominationDao(): NominationDao
@@ -38,6 +40,8 @@ interface AppDatabase {
     fun categoryAliasDao(): CategoryAliasDao
     fun categoryDao(): CategoryDao
     fun genreDao(): GenreDao
+    fun watchlistDao(): WatchlistDao
+
     fun beginTransaction()
     fun setTransactionSuccessful()
     fun endTransaction()
@@ -51,6 +55,7 @@ interface AppDatabase {
         NominationEntity::class,
         MovieEntity::class,
         MovieGenreEntity::class,
+        WatchlistEntity::class,
     ],
     version = 1,
     exportSchema = true,
@@ -62,6 +67,7 @@ abstract class AndroidAppDatabase : RoomDatabase(), AppDatabase {
     abstract override fun categoryAliasDao(): CategoryAliasDao
     abstract override fun categoryDao(): CategoryDao
     abstract override fun genreDao(): GenreDao
+    abstract override fun watchlistDao(): WatchlistDao
 
     companion object {
         private const val databaseName = "the-oscars-db"

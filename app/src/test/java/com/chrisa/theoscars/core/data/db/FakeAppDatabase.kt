@@ -26,10 +26,13 @@ import com.chrisa.theoscars.core.data.db.movie.FakeMovieDao
 import com.chrisa.theoscars.core.data.db.movie.MovieDao
 import com.chrisa.theoscars.core.data.db.nomination.FakeNominationDao
 import com.chrisa.theoscars.core.data.db.nomination.NominationDao
+import com.chrisa.theoscars.core.data.db.watchlist.FakeWatchlistDao
+import com.chrisa.theoscars.core.data.db.watchlist.WatchlistDao
 
 class FakeAppDatabase(
     private val categoryAliasDao: CategoryAliasDao = FakeCategoryAliasDao(),
     private val categoryDao: CategoryDao = FakeCategoryDao(),
+    private val watchlistDao: WatchlistDao = FakeWatchlistDao(),
     private val genreDao: GenreDao = FakeGenreDao(),
     private val movieDao: MovieDao = FakeMovieDao(),
     private val nominationDao: NominationDao = FakeNominationDao(categoryDao, categoryAliasDao, movieDao),
@@ -40,6 +43,8 @@ class FakeAppDatabase(
     override fun categoryAliasDao(): CategoryAliasDao = categoryAliasDao
     override fun categoryDao(): CategoryDao = categoryDao
     override fun genreDao(): GenreDao = genreDao
+    override fun watchlistDao(): WatchlistDao = watchlistDao
+
     override fun beginTransaction() = Unit
     override fun setTransactionSuccessful() = Unit
     override fun endTransaction() = Unit

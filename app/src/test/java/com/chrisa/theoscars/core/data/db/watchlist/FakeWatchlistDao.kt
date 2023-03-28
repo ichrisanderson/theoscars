@@ -14,28 +14,23 @@
  * limitations under the License.
  */
 
-package com.chrisa.theoscars.features.movie.domain.models
+package com.chrisa.theoscars.core.data.db.watchlist
 
-data class MovieDetailModel(
-    val id: Long,
-    val backdropImagePath: String?,
-    val overview: String,
-    val title: String,
-    val year: String,
-    val youTubeVideoKey: String?,
-    val nominations: List<NominationModel>,
-)
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
-data class NominationModel(
-    val category: String,
-    val name: String,
-    val winner: Boolean,
-)
+class FakeWatchlistDao : WatchlistDao {
 
-data class WatchlistDataModel(
-    val movieId: Long,
-    val isOnWatchlist: Boolean,
-    val hasWatched: Boolean,
-    val rating: Int,
-    val notes: String,
-)
+    private val items = mutableListOf<WatchlistEntity>()
+
+    override fun insert(watchlist: WatchlistEntity) {
+        items.add(watchlist)
+    }
+
+    override fun loadWatchlistData(movieId: Long): Flow<WatchlistEntity?> {
+        return flow {
+            val item = items.firstOrNull { it.movieId == movieId }
+            emit(item)
+        }
+    }
+}

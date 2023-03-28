@@ -26,6 +26,8 @@ import com.chrisa.theoscars.core.util.coroutines.CloseableCoroutineScope
 import com.chrisa.theoscars.core.util.coroutines.TestCoroutineDispatchersImpl
 import com.chrisa.theoscars.features.movie.data.MovieDataRepository
 import com.chrisa.theoscars.features.movie.domain.LoadMovieDetailUseCase
+import com.chrisa.theoscars.features.movie.domain.LoadWatchlistDataUseCase
+import com.chrisa.theoscars.features.movie.domain.UpdateWatchlistDataUseCase
 import com.chrisa.theoscars.features.movie.domain.models.MovieDetailModel
 import com.chrisa.theoscars.features.movie.domain.models.NominationModel
 import com.google.common.truth.Truth.assertThat
@@ -67,13 +69,22 @@ class MovieViewModelTest {
     private fun movieViewModel(movieId: Long): MovieViewModel {
         val savedStateHandle = SavedStateHandle()
         savedStateHandle["movieId"] = movieId
+        val repository = MovieDataRepository(appDatabase)
         return MovieViewModel(
-            savedStateHandle,
-            dispatchers,
-            CloseableCoroutineScope(),
-            LoadMovieDetailUseCase(
-                dispatchers,
-                MovieDataRepository(appDatabase),
+            savedStateHandle = savedStateHandle,
+            dispatchers = dispatchers,
+            coroutineScope = CloseableCoroutineScope(),
+            loadMovieDetailUseCase = LoadMovieDetailUseCase(
+                coroutineDispatchers = dispatchers,
+                movieDataRepository = repository,
+            ),
+            loadWatchlistDataUseCase = LoadWatchlistDataUseCase(
+                coroutineDispatchers = dispatchers,
+                movieDataRepository = repository,
+            ),
+            updateWatchlistDataUseCase = UpdateWatchlistDataUseCase(
+                coroutineDispatchers = dispatchers,
+                movieDataRepository = repository,
             ),
         )
     }

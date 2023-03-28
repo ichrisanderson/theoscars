@@ -19,10 +19,11 @@ package com.chrisa.theoscars.features.movie
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.lifecycle.SavedStateHandle
 import com.chrisa.theoscars.MainActivity
-import com.chrisa.theoscars.core.data.db.AppDatabase
 import com.chrisa.theoscars.core.util.coroutines.CloseableCoroutineScope
 import com.chrisa.theoscars.core.util.coroutines.CoroutineDispatchers
 import com.chrisa.theoscars.features.movie.domain.LoadMovieDetailUseCase
+import com.chrisa.theoscars.features.movie.domain.LoadWatchlistDataUseCase
+import com.chrisa.theoscars.features.movie.domain.UpdateWatchlistDataUseCase
 import com.chrisa.theoscars.features.movie.domain.models.MovieDetailModel
 import com.chrisa.theoscars.features.movie.presentation.MovieViewModel
 import dagger.hilt.android.testing.HiltAndroidRule
@@ -43,9 +44,6 @@ class MovieScreenTest {
     val composeTestRule = createAndroidComposeRule<MainActivity>()
 
     @Inject
-    lateinit var appDatabase: AppDatabase
-
-    @Inject
     lateinit var dispatchers: CoroutineDispatchers
 
     @Inject
@@ -53,6 +51,13 @@ class MovieScreenTest {
 
     @Inject
     lateinit var loadMovieDetailUseCase: LoadMovieDetailUseCase
+
+    @Inject
+    lateinit var loadWatchlistDataUseCase: LoadWatchlistDataUseCase
+
+    @Inject
+    lateinit var updateWatchlistDataUseCase: UpdateWatchlistDataUseCase
+
     private lateinit var savedStateHandle: SavedStateHandle
     private lateinit var movie: MovieDetailModel
 
@@ -62,12 +67,19 @@ class MovieScreenTest {
         savedStateHandle = SavedStateHandle()
         savedStateHandle["movieId"] = movieId
         runBlocking {
-            movie = loadMovieDetailUseCase.execute(movieId)!!
+            movie = loadMovieDetailUseCase.execute(movieId)
         }
     }
 
     private fun movieViewModel() =
-        MovieViewModel(savedStateHandle, dispatchers, coroutineScope, loadMovieDetailUseCase)
+        MovieViewModel(
+            savedStateHandle = savedStateHandle,
+            dispatchers = dispatchers,
+            coroutineScope = coroutineScope,
+            loadMovieDetailUseCase = loadMovieDetailUseCase,
+            loadWatchlistDataUseCase = loadWatchlistDataUseCase,
+            updateWatchlistDataUseCase = updateWatchlistDataUseCase,
+        )
 
     @Test
     fun assertCloseAction() {

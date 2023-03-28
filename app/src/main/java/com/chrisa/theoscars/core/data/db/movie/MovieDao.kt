@@ -31,7 +31,7 @@ interface MovieDao {
     fun insert(item: MovieEntity)
 
     @Query("SELECT * FROM movie WHERE id = :id LIMIT 1")
-    fun loadMovie(id: Long): MovieEntity?
+    fun loadMovie(id: Long): MovieEntity
 
     @Query("SELECT * FROM movie")
     fun allMovies(): List<MovieEntity>

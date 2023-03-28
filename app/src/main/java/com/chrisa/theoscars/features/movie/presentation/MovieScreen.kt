@@ -17,6 +17,7 @@
 package com.chrisa.theoscars.features.movie.presentation
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -27,6 +28,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.paddingFromBaseline
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -48,9 +51,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.PlaceholderVerticalAlign
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.chrisa.theoscars.R
 import com.chrisa.theoscars.core.ui.common.TextUtil.prefixWithCeremonyEmoji
@@ -75,7 +83,7 @@ fun MovieScreen(
                 Icon(
                     imageVector = Icons.Filled.ArrowBack,
                     tint = Color.White,
-                    contentDescription = null,
+                    contentDescription = stringResource(id = R.string.close_button_description),
                     modifier = Modifier
                         .size(48.dp)
                         .padding(8.dp),
@@ -122,7 +130,7 @@ private fun MovieContent(
             ) {
                 AsyncImage(
                     model = "https://image.tmdb.org/t/p/w500/${movie.backdropImagePath}",
-                    contentDescription = null,
+                    contentDescription = stringResource(id = R.string.movie_image_description_format, movie.title),
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(16 / 9.0f),
@@ -139,7 +147,7 @@ private fun MovieContent(
                     Icon(
                         imageVector = Icons.Filled.PlayArrow,
                         tint = Color.White.copy(alpha = 0.9f),
-                        contentDescription = null,
+                        contentDescription = stringResource(id = R.string.play_button_description),
                         modifier = Modifier
                             .size(48.dp),
                     )
@@ -172,7 +180,7 @@ private fun MovieContent(
             ) {
                 Column {
                     movie.nominations.forEach {
-                        Nomination(category = it.category, name = it.name)
+                        Nomination(category = it.category, name = it.name, winner = it.winner)
                     }
                 }
             }
@@ -204,12 +212,32 @@ fun Nomination(
     category: String,
     name: String,
     modifier: Modifier = Modifier,
+    winner: Boolean,
 ) {
     Column(
         modifier = modifier,
     ) {
+        val annotatedString = buildAnnotatedString {
+            append(category)
+            if (winner) {
+                append(" ")
+                appendInlineContent(id = "winnerIcon")
+            }
+        }
+        val inlineContentMap = mapOf(
+            "winnerIcon" to InlineTextContent(
+                Placeholder(24.sp, 24.sp, PlaceholderVerticalAlign.TextCenter),
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.winner_badge),
+                    modifier = Modifier.fillMaxSize(),
+                    contentDescription = stringResource(id = R.string.winner_badge_description),
+                )
+            },
+        )
         Text(
-            text = category,
+            text = annotatedString,
+            inlineContent = inlineContentMap,
             style = MaterialTheme.typography.bodyLarge,
         )
         Text(
@@ -255,7 +283,7 @@ fun MovieContentPreview() {
                         NominationModel(
                             category = "International Feature Film",
                             name = "Germany",
-                            winner = false,
+                            winner = true,
                         ),
                     ),
                 ),
@@ -276,6 +304,7 @@ fun HeaderSectionPreview() {
                 Nomination(
                     category = "Best Picture",
                     name = "Steven Speilburg, Producer",
+                    winner = false,
                 )
             }
         }

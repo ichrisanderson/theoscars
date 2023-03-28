@@ -266,7 +266,7 @@ fun AppBar(
         navigationIcon = {
             Icon(
                 painter = painterResource(R.drawable.ic_oscar),
-                contentDescription = "",
+                contentDescription = stringResource(id = R.string.app_logo_description),
             )
         },
         actions = {
@@ -276,7 +276,7 @@ fun AppBar(
             ) {
                 Icon(
                     imageVector = Icons.Default.Search,
-                    contentDescription = null,
+                    contentDescription = stringResource(id = R.string.search_icon_description),
                     tint = MaterialTheme.colorScheme.onSurface,
                 )
             }
@@ -286,7 +286,7 @@ fun AppBar(
             ) {
                 Icon(
                     imageVector = Icons.Default.Tune,
-                    contentDescription = null,
+                    contentDescription = stringResource(id = R.string.filter_icon_description),
                     tint = MaterialTheme.colorScheme.onSurface,
                 )
             }
@@ -313,7 +313,10 @@ fun MovieCard(
                 Image(
                     painter = painterResource(R.drawable.show_reel),
                     colorFilter = ColorFilter.tint(Color.LightGray),
-                    contentDescription = null,
+                    contentDescription = stringResource(
+                        id = R.string.movie_image_default_format,
+                        movie.title,
+                    ),
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(Color.LightGray.copy(alpha = 0.3f))
@@ -323,7 +326,10 @@ fun MovieCard(
             } else {
                 AsyncImage(
                     model = "https://image.tmdb.org/t/p/w500/${movie.backdropImagePath}",
-                    contentDescription = null,
+                    contentDescription = stringResource(
+                        id = R.string.movie_image_description_format,
+                        movie.title,
+                    ),
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(16 / 9.0f),

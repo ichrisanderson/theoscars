@@ -193,7 +193,10 @@ fun SearchResultCard(
                 Image(
                     painter = painterResource(R.drawable.show_reel),
                     colorFilter = ColorFilter.tint(Color.LightGray),
-                    contentDescription = null,
+                    contentDescription = stringResource(
+                        id = R.string.movie_image_default_format,
+                        searchResultModel.title,
+                    ),
                     modifier = Modifier
                         .width(96.dp)
                         .background(Color.LightGray.copy(alpha = 0.3f))
@@ -203,7 +206,10 @@ fun SearchResultCard(
             } else {
                 AsyncImage(
                     model = "https://image.tmdb.org/t/p/w500/${searchResultModel.posterImagePath}",
-                    contentDescription = null,
+                    contentDescription = stringResource(
+                        id = R.string.movie_image_default_format,
+                        searchResultModel.title,
+                    ),
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .width(96.dp)
@@ -283,7 +289,7 @@ fun SearchBar(
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Close,
-                                contentDescription = null,
+                                contentDescription = stringResource(id = R.string.clear_query_button_description),
                             )
                         }
                     }
@@ -304,7 +310,7 @@ fun SearchBar(
                 Icon(
                     imageVector = Icons.Filled.ArrowBack,
                     modifier = Modifier,
-                    contentDescription = null,
+                    contentDescription = stringResource(id = R.string.close_button_description),
                 )
             }
         },

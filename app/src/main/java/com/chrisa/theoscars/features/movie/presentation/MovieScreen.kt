@@ -18,8 +18,13 @@ package com.chrisa.theoscars.features.movie.presentation
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,15 +32,23 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.paddingFromBaseline
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material.icons.outlined.StarOutline
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -44,22 +57,29 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -70,7 +90,9 @@ import com.chrisa.theoscars.core.ui.theme.OscarsTheme
 import com.chrisa.theoscars.features.movie.domain.models.MovieDetailModel
 import com.chrisa.theoscars.features.movie.domain.models.NominationModel
 import com.chrisa.theoscars.features.movie.domain.models.WatchlistDataModel
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MovieScreen(
     viewModel: MovieViewModel,
@@ -78,15 +100,42 @@ fun MovieScreen(
     onPlayClicked: (String) -> Unit,
 ) {
     val viewState by viewModel.viewState.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
 
-    MovieContent(
-        isLoading = viewState.isLoading,
-        movie = viewState.movie,
-        watchlistData = viewState.watchlistData,
-        onClose = onClose,
-        onToggleWatchlist = { viewModel.toggleWatchlist() },
-        onPlayClicked = onPlayClicked,
+    val modalSheetState = rememberModalBottomSheetState(
+        initialValue = ModalBottomSheetValue.Hidden,
+        confirmValueChange = { it != ModalBottomSheetValue.HalfExpanded },
+        skipHalfExpanded = true,
     )
+
+    ModalBottomSheetLayout(
+        sheetState = modalSheetState,
+        sheetContent = {
+            if (modalSheetState.isVisible) {
+                Surface {
+                    WatchListContent(
+                        viewState.watchlistData.hasWatched,
+                    )
+                }
+            }
+        },
+    ) {
+        MovieContent(
+            isLoading = viewState.isLoading,
+            movie = viewState.movie,
+            watchlistData = viewState.watchlistData,
+            onClose = onClose,
+            onToggleWatchlist = {
+                if (!viewState.watchlistData.isOnWatchlist) {
+                    coroutineScope.launch {
+                        modalSheetState.show()
+                    }
+                }
+                viewModel.toggleWatchlist()
+            },
+            onPlayClicked = onPlayClicked,
+        )
+    }
 }
 
 @Composable
@@ -237,7 +286,7 @@ fun AppBar(
                     if (isOnWatchlist) Icons.Filled.Bookmark else Icons.Default.BookmarkBorder
                 Icon(
                     imageVector = icon,
-                    contentDescription = stringResource(id = R.string.search_icon_description),
+                    contentDescription = stringResource(id = R.string.watchlist_icon_description),
                     tint = MaterialTheme.colorScheme.onSurface,
                 )
             }
@@ -301,6 +350,178 @@ fun Nomination(
             text = name,
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(top = 2.dp, bottom = 12.dp),
+        )
+    }
+}
+
+@Composable
+fun WatchListContent(
+    isWatched: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier,
+    ) {
+        Text(
+            text = stringResource(id = R.string.watchlist_title),
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .padding(vertical = 8.dp),
+        )
+        Divider(
+            modifier = Modifier
+                .padding(bottom = 8.dp),
+        )
+        WatchedSwitch(
+            isSelected = isWatched,
+            onSelectionChange = { },
+            modifier = Modifier
+                .padding(top = 8.dp),
+        )
+        Rating(
+            modifier = Modifier
+                .padding(top = 16.dp),
+        )
+        Notes(
+            notes = "",
+            onNotesChanged = { },
+            modifier = Modifier
+                .padding(top = 8.dp),
+        )
+        Button(
+            onClick = {
+            },
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .widthIn(128.dp)
+                .padding(vertical = 16.dp)
+                .testTag("applyButton"),
+        ) {
+            Text(
+                text = stringResource(id = R.string.apply_filter_cta),
+                style = MaterialTheme.typography.labelLarge,
+            )
+        }
+    }
+}
+
+@Composable
+private fun WatchedSwitch(
+    isSelected: Boolean,
+    onSelectionChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .testTag("watchedRow")
+            .clickable(
+                interactionSource = interactionSource,
+                indication = LocalIndication.current,
+                role = Role.Switch,
+                onClick = {
+                    onSelectionChange(!isSelected)
+                },
+            ),
+    ) {
+        Text(
+            text = stringResource(id = R.string.watched_label),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier
+                .padding(start = 16.dp)
+                .padding(vertical = 8.dp),
+        )
+        Spacer(modifier = Modifier.weight(1.0f))
+        Switch(
+            checked = isSelected,
+            onCheckedChange = onSelectionChange,
+            modifier = Modifier
+                .testTag("watchedSwitch")
+                .padding(horizontal = 16.dp),
+        )
+    }
+}
+
+@Composable
+private fun Rating(
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier,
+    ) {
+        Text(
+            text = stringResource(id = R.string.rating_label),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier
+                .padding(start = 16.dp),
+        )
+        Spacer(modifier = Modifier.weight(1.0f))
+        RatingBar(
+            modifier = Modifier.padding(horizontal = 16.dp),
+        )
+    }
+}
+
+@Composable
+fun RatingBar(
+    modifier: Modifier = Modifier,
+    rating: Int = 0,
+    stars: Int = 5,
+    starsColor: Color = MaterialTheme.colorScheme.secondary,
+) {
+    val unfilledStars = (stars - rating)
+    Row(modifier = modifier) {
+        repeat(rating) {
+            Icon(
+                imageVector = Icons.Outlined.Star,
+                contentDescription = null,
+                tint = starsColor,
+                modifier = Modifier.size(32.dp),
+            )
+        }
+        repeat(unfilledStars) {
+            Icon(
+                imageVector = Icons.Outlined.StarOutline,
+                contentDescription = null,
+                tint = starsColor,
+                modifier = Modifier.size(32.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun Notes(
+    notes: String,
+    onNotesChanged: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier,
+    ) {
+        Text(
+            text = stringResource(id = R.string.notes_title),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier
+                .padding(start = 16.dp, top = 8.dp, bottom = 8.dp),
+        )
+        Divider(
+            modifier = Modifier
+                .alpha(0.3f),
+        )
+        OutlinedTextField(
+            value = notes,
+            onValueChange = onNotesChanged,
+            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+            singleLine = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .testTag("notes"),
         )
     }
 }
@@ -392,6 +613,16 @@ fun HeaderSectionPreview() {
                     winner = false,
                 )
             }
+        }
+    }
+}
+
+@Preview
+@Composable
+fun WatchlistDialogPreview() {
+    OscarsTheme {
+        Surface {
+            WatchListContent(isWatched = true)
         }
     }
 }

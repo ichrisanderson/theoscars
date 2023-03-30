@@ -84,7 +84,20 @@ class MovieViewModel @Inject constructor(
     fun toggleWatchlist() {
         coroutineScope.launch(dispatchers.io) {
             val watchlistData = _viewState.value.watchlistData
-            val updatedWatchlistData = watchlistData.copy(isOnWatchlist = !watchlistData.isOnWatchlist)
+            val updatedWatchlistData =
+                watchlistData.copy(isOnWatchlist = !watchlistData.isOnWatchlist)
+            updateWatchlistDataUseCase.execute(updatedWatchlistData)
+        }
+    }
+
+    fun updateWatchlistData(watched: Boolean, rating: Int, notes: String) {
+        coroutineScope.launch(dispatchers.io) {
+            val watchlistData = _viewState.value.watchlistData
+            val updatedWatchlistData = watchlistData.copy(
+                hasWatched = watched,
+                rating = rating,
+                notes = notes,
+            )
             updateWatchlistDataUseCase.execute(updatedWatchlistData)
         }
     }

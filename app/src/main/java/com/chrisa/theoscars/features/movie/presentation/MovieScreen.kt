@@ -46,14 +46,14 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.outlined.Star
-import androidx.compose.material.icons.outlined.StarOutline
+import androidx.compose.material.icons.rounded.RateReview
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -65,9 +65,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -85,6 +88,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.chrisa.theoscars.R
+import com.chrisa.theoscars.core.ui.common.InteractiveRatingBar
 import com.chrisa.theoscars.core.ui.common.TextUtil.prefixWithCeremonyEmoji
 import com.chrisa.theoscars.core.ui.theme.OscarsTheme
 import com.chrisa.theoscars.features.movie.domain.models.MovieDetailModel
@@ -113,8 +117,17 @@ fun MovieScreen(
         sheetContent = {
             if (modalSheetState.isVisible) {
                 Surface {
+                    val data = viewState.watchlistData
                     WatchListContent(
-                        viewState.watchlistData.hasWatched,
+                        watched = data.hasWatched,
+                        rating = data.rating,
+                        notes = data.notes,
+                        onApplyChanges = { watched, rating, notes ->
+                            viewModel.updateWatchlistData(watched, rating, notes)
+                            coroutineScope.launch {
+                                modalSheetState.hide()
+                            }
+                        },
                     )
                 }
             }
@@ -125,15 +138,13 @@ fun MovieScreen(
             movie = viewState.movie,
             watchlistData = viewState.watchlistData,
             onClose = onClose,
-            onToggleWatchlist = {
-                if (!viewState.watchlistData.isOnWatchlist) {
-                    coroutineScope.launch {
-                        modalSheetState.show()
-                    }
-                }
-                viewModel.toggleWatchlist()
-            },
+            onToggleWatchlist = viewModel::toggleWatchlist,
             onPlayClicked = onPlayClicked,
+            onEditClicked = {
+                coroutineScope.launch {
+                    modalSheetState.show()
+                }
+            },
         )
     }
 }
@@ -146,8 +157,12 @@ private fun MovieContent(
     onClose: () -> Unit,
     onToggleWatchlist: () -> Unit,
     onPlayClicked: (String) -> Unit,
+    onEditClicked: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val scrollState = rememberScrollState()
+    val expandedFabState by remember { derivedStateOf { scrollState.canScrollForward } }
+
     Scaffold(
         contentWindowInsets = WindowInsets(top = 0.dp, bottom = 0.dp),
         topBar = {
@@ -156,6 +171,23 @@ private fun MovieContent(
                 onToggleWatchlist = onToggleWatchlist,
                 onClose = onClose,
             )
+        },
+        floatingActionButton = {
+            if (watchlistData.isOnWatchlist) {
+                ExtendedFloatingActionButton(
+                    text = {
+                        Text(text = "Review")
+                    },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Rounded.RateReview,
+                            contentDescription = "Edit Watchlist",
+                        )
+                    },
+                    onClick = onEditClicked,
+                    expanded = expandedFabState,
+                )
+            }
         },
     ) { padding ->
         Surface(
@@ -173,7 +205,7 @@ private fun MovieContent(
             } else {
                 Column(
                     modifier
-                        .verticalScroll(rememberScrollState())
+                        .verticalScroll(scrollState)
                         .testTag("movieContent_${movie.id}"),
                 ) {
                     Box(
@@ -356,14 +388,21 @@ fun Nomination(
 
 @Composable
 fun WatchListContent(
-    isWatched: Boolean,
+    watched: Boolean,
+    rating: Int,
+    notes: String,
+    onApplyChanges: (Boolean, Int, String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var watchedState by remember { mutableStateOf(watched) }
+    var notesState by remember { mutableStateOf(notes) }
+    var ratingState by remember { mutableStateOf(rating) }
+
     Column(
         modifier = modifier,
     ) {
         Text(
-            text = stringResource(id = R.string.watchlist_title),
+            text = stringResource(id = R.string.review_title),
             style = MaterialTheme.typography.titleLarge,
             modifier = Modifier
                 .padding(horizontal = 16.dp)
@@ -374,23 +413,26 @@ fun WatchListContent(
                 .padding(bottom = 8.dp),
         )
         WatchedSwitch(
-            isSelected = isWatched,
-            onSelectionChange = { },
+            isSelected = watchedState,
+            onSelectionChange = { watchedState = it },
             modifier = Modifier
                 .padding(top = 8.dp),
         )
         Rating(
+            rating = ratingState,
+            onRatingChange = { ratingState = it },
             modifier = Modifier
                 .padding(top = 16.dp),
         )
         Notes(
-            notes = "",
-            onNotesChanged = { },
+            notes = notesState,
+            onNotesChanged = { notesState = it },
             modifier = Modifier
                 .padding(top = 8.dp),
         )
         Button(
             onClick = {
+                onApplyChanges(watchedState, ratingState, notesState)
             },
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
@@ -447,6 +489,8 @@ private fun WatchedSwitch(
 
 @Composable
 private fun Rating(
+    rating: Int,
+    onRatingChange: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -460,37 +504,11 @@ private fun Rating(
                 .padding(start = 16.dp),
         )
         Spacer(modifier = Modifier.weight(1.0f))
-        RatingBar(
+        InteractiveRatingBar(
+            rating = rating,
             modifier = Modifier.padding(horizontal = 16.dp),
+            onRatingChange = onRatingChange,
         )
-    }
-}
-
-@Composable
-fun RatingBar(
-    modifier: Modifier = Modifier,
-    rating: Int = 0,
-    stars: Int = 5,
-    starsColor: Color = MaterialTheme.colorScheme.secondary,
-) {
-    val unfilledStars = (stars - rating)
-    Row(modifier = modifier) {
-        repeat(rating) {
-            Icon(
-                imageVector = Icons.Outlined.Star,
-                contentDescription = null,
-                tint = starsColor,
-                modifier = Modifier.size(32.dp),
-            )
-        }
-        repeat(unfilledStars) {
-            Icon(
-                imageVector = Icons.Outlined.StarOutline,
-                contentDescription = null,
-                tint = starsColor,
-                modifier = Modifier.size(32.dp),
-            )
-        }
     }
 }
 
@@ -516,8 +534,9 @@ private fun Notes(
         OutlinedTextField(
             value = notes,
             onValueChange = onNotesChanged,
-            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-            singleLine = true,
+            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text),
+            minLines = 5,
+            maxLines = 10,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
@@ -552,6 +571,7 @@ fun MovieLoadingContentPreview() {
                 onClose = { },
                 onToggleWatchlist = { },
                 onPlayClicked = { },
+                onEditClicked = { },
             )
         }
     }
@@ -594,6 +614,7 @@ fun MovieContentPreview() {
                 onClose = { },
                 onToggleWatchlist = { },
                 onPlayClicked = { },
+                onEditClicked = { },
             )
         }
     }
@@ -622,7 +643,12 @@ fun HeaderSectionPreview() {
 fun WatchlistDialogPreview() {
     OscarsTheme {
         Surface {
-            WatchListContent(isWatched = true)
+            WatchListContent(
+                watched = true,
+                rating = 3,
+                notes = "Great fun",
+                onApplyChanges = { _, _, _ -> },
+            )
         }
     }
 }

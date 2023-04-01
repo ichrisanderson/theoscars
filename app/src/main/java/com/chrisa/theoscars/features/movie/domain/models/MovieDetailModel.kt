@@ -36,6 +36,4 @@ data class WatchlistDataModel(
     val movieId: Long,
     val isOnWatchlist: Boolean,
     val hasWatched: Boolean,
-    val rating: Int,
-    val notes: String,
 )

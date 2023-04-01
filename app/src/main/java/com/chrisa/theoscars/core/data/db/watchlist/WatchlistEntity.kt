@@ -36,6 +36,4 @@ data class WatchlistEntity(
     var movieId: Long,
     val isOnWatchlist: Boolean,
     val hasWatched: Boolean,
-    var rating: Int,
-    var notes: String,
 )

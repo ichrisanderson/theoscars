@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "0c39ef230455bbb974bae88d8e13f5d0",
+    "identityHash": "9f300aebe0737cf23424f53deaa30a3b",
     "entities": [
       {
         "tableName": "categoryAlias",
@@ -354,7 +354,7 @@
       },
       {
         "tableName": "watchlist",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`movieId` INTEGER NOT NULL, `isOnWatchlist` INTEGER NOT NULL, `hasWatched` INTEGER NOT NULL, `rating` INTEGER NOT NULL, `notes` TEXT NOT NULL, PRIMARY KEY(`movieId`), FOREIGN KEY(`movieId`) REFERENCES `movie`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`movieId` INTEGER NOT NULL, `isOnWatchlist` INTEGER NOT NULL, `hasWatched` INTEGER NOT NULL, PRIMARY KEY(`movieId`), FOREIGN KEY(`movieId`) REFERENCES `movie`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
         "fields": [
           {
             "fieldPath": "movieId",
@@ -372,18 +372,6 @@
             "fieldPath": "hasWatched",
             "columnName": "hasWatched",
             "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "rating",
-            "columnName": "rating",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "notes",
-            "columnName": "notes",
-            "affinity": "TEXT",
             "notNull": true
           }
         ],
@@ -412,7 +400,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0c39ef230455bbb974bae88d8e13f5d0')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9f300aebe0737cf23424f53deaa30a3b')"
     ]
   }
 }

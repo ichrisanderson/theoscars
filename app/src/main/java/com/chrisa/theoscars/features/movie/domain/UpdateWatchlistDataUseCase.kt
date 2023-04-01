@@ -33,8 +33,6 @@ class UpdateWatchlistDataUseCase @Inject constructor(
                 movieId = watchlistDataModel.movieId,
                 isOnWatchlist = watchlistDataModel.isOnWatchlist,
                 hasWatched = watchlistDataModel.hasWatched,
-                rating = watchlistDataModel.rating,
-                notes = watchlistDataModel.notes,
             ),
         )
     }

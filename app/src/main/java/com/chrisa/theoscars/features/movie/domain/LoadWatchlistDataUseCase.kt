@@ -36,8 +36,6 @@ class LoadWatchlistDataUseCase @Inject constructor(
                     movieId = it?.movieId ?: movieId,
                     isOnWatchlist = it?.isOnWatchlist ?: false,
                     hasWatched = it?.hasWatched ?: false,
-                    rating = it?.rating ?: 0,
-                    notes = it?.notes ?: "",
                 )
             }
 }

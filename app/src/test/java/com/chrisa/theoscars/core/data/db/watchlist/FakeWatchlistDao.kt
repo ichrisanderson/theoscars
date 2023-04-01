@@ -17,20 +17,29 @@
 package com.chrisa.theoscars.core.data.db.watchlist
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.map
 
 class FakeWatchlistDao : WatchlistDao {
 
     private val items = mutableListOf<WatchlistEntity>()
 
+    private val itemFlow = MutableStateFlow<List<WatchlistEntity>>(emptyList())
+
     override fun insert(watchlist: WatchlistEntity) {
-        items.add(watchlist)
+        val item = items.firstOrNull { it.movieId == watchlist.movieId }
+        if (item == null) {
+            items.add(watchlist)
+        } else {
+            items.remove(item)
+            items.add(watchlist)
+        }
+        itemFlow.value = items
     }
 
     override fun loadWatchlistData(movieId: Long): Flow<WatchlistEntity?> {
-        return flow {
-            val item = items.firstOrNull { it.movieId == movieId }
-            emit(item)
+        return itemFlow.map { items ->
+            items.firstOrNull { it.movieId == movieId }
         }
     }
 }

@@ -30,6 +30,7 @@ import com.chrisa.theoscars.features.movie.domain.LoadWatchlistDataUseCase
 import com.chrisa.theoscars.features.movie.domain.UpdateWatchlistDataUseCase
 import com.chrisa.theoscars.features.movie.domain.models.MovieDetailModel
 import com.chrisa.theoscars.features.movie.domain.models.NominationModel
+import com.chrisa.theoscars.features.movie.domain.models.WatchlistDataModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -157,5 +158,36 @@ class MovieViewModelTest {
         val sut = movieViewModel(expectedMovie.id)
 
         assertThat(sut.viewState.value.movie).isEqualTo(expectedMovie)
+    }
+
+    @Test
+    fun `WHEN initialised THEN watchlist data uses defaults`() {
+        val sut = movieViewModel(49046)
+
+        assertThat(sut.viewState.value.watchlistData).isEqualTo(
+            WatchlistDataModel(
+                movieId = 49046,
+                hasWatched = false,
+                isOnWatchlist = false
+            )
+        )
+    }
+
+    @Test
+    fun `WHEN toggle watched THEN watchlist data updated`() {
+        val sut = movieViewModel(49046)
+
+        sut.toggleWatched()
+
+        assertThat(sut.viewState.value.watchlistData.hasWatched).isTrue()
+    }
+
+    @Test
+    fun `WHEN toggle watchlist THEN watchlist data updated`() {
+        val sut = movieViewModel(49046)
+
+        sut.toggleWatchlist()
+
+        assertThat(sut.viewState.value.watchlistData.isOnWatchlist).isTrue()
     }
 }

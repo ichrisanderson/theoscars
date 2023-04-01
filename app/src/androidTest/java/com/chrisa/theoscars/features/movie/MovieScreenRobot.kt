@@ -24,6 +24,7 @@ import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.rules.ActivityScenarioRule
@@ -32,11 +33,13 @@ import com.chrisa.theoscars.R
 import com.chrisa.theoscars.core.ui.common.TextUtil.prefixWithCeremonyEmoji
 import com.chrisa.theoscars.core.ui.theme.OscarsTheme
 import com.chrisa.theoscars.features.movie.domain.models.MovieDetailModel
+import com.chrisa.theoscars.features.movie.domain.models.NominationModel
 import com.chrisa.theoscars.features.movie.presentation.MovieScreen
 import com.chrisa.theoscars.features.movie.presentation.MovieViewModel
 import com.chrisa.theoscars.util.KeyboardHelper
 import com.chrisa.theoscars.util.getString
-import com.chrisa.theoscars.util.waitOnAllNodesWitTag
+import com.chrisa.theoscars.util.waitOnAllNodesWithContentDescription
+import com.chrisa.theoscars.util.waitOnAllNodesWithTag
 import com.google.common.truth.Truth.assertThat
 
 class MovieScreenRobot(
@@ -77,7 +80,7 @@ class MovieScreenRobot(
     }
 
     fun clickPlayAction() = apply {
-        composeTestRule.waitOnAllNodesWitTag(playButtonTestTag)
+        composeTestRule.waitOnAllNodesWithTag(playButtonTestTag)
         composeTestRule.onNodeWithTag(playButtonTestTag)
             .performClick()
     }
@@ -90,7 +93,15 @@ class MovieScreenRobot(
         movie: MovieDetailModel,
     ) = apply {
         val tag = "$movieContentTestTag${movie.id}"
-        composeTestRule.waitOnAllNodesWitTag(tag)
+        composeTestRule.waitOnAllNodesWithTag(tag)
+        assertMovieDetail(tag, movie)
+        assertNominations(tag, movie.nominations)
+    }
+
+    private fun assertMovieDetail(
+        tag: String,
+        movie: MovieDetailModel,
+    ) {
         composeTestRule.onNodeWithTag(tag)
             .assert(hasAnyDescendant(hasText(movie.title)))
         composeTestRule.onNodeWithTag(tag)
@@ -99,15 +110,72 @@ class MovieScreenRobot(
             .assert(hasAnyDescendant(hasText(movie.year.prefixWithCeremonyEmoji())))
         composeTestRule.onNodeWithTag(tag)
             .assert(hasAnyDescendant(hasText(movie.overview)))
+    }
 
+    private fun assertNominations(
+        tag: String,
+        nominations: List<NominationModel>,
+    ) {
         composeTestRule.onNodeWithTag(tag)
             .assert(hasAnyDescendant(hasText(composeTestRule.getString(R.string.nominations_title))))
-        movie.nominations.forEach { nomination ->
+        nominations.forEach { nomination ->
             composeTestRule.onNodeWithTag(tag)
                 .assert(hasAnyDescendant(hasText(nomination.category, substring = true)))
             composeTestRule.onNodeWithTag(tag)
                 .assert(hasAnyDescendant(hasText(nomination.name)))
         }
+    }
+
+    fun assertNotOnWatchlist() = apply {
+        val addDescription = composeTestRule.getString(R.string.add_to_watchlist_icon_description)
+        val removeDescription = composeTestRule.getString(R.string.remove_from_to_watchlist_icon_description)
+        composeTestRule.waitOnAllNodesWithContentDescription(addDescription)
+        composeTestRule.onNodeWithContentDescription(removeDescription)
+            .assertDoesNotExist()
+    }
+
+    fun clickAddToWatchlist() = apply {
+        composeTestRule.onNodeWithContentDescription(composeTestRule.getString(R.string.add_to_watchlist_icon_description))
+            .performClick()
+    }
+
+    fun assertOnWatchlist() = apply {
+        val addDescription = composeTestRule.getString(R.string.add_to_watchlist_icon_description)
+        val removeDescription = composeTestRule.getString(R.string.remove_from_to_watchlist_icon_description)
+        composeTestRule.waitOnAllNodesWithContentDescription(removeDescription)
+        composeTestRule.onNodeWithContentDescription(addDescription)
+            .assertDoesNotExist()
+    }
+
+    fun clickRemoveFromWatchlist() = apply {
+        composeTestRule.onNodeWithContentDescription(composeTestRule.getString(R.string.remove_from_to_watchlist_icon_description))
+            .performClick()
+    }
+
+    fun assertNotWatched() = apply {
+        val markAsWatchedDescription = composeTestRule.getString(R.string.mark_as_watched_icon_description)
+        val markAsUnwatchedDescription = composeTestRule.getString(R.string.mark_as_unwatched_icon_description)
+        composeTestRule.waitOnAllNodesWithContentDescription(markAsWatchedDescription)
+        composeTestRule.onNodeWithContentDescription(markAsUnwatchedDescription)
+            .assertDoesNotExist()
+    }
+
+    fun clickMarkAsWatched() = apply {
+        composeTestRule.onNodeWithContentDescription(composeTestRule.getString(R.string.mark_as_watched_icon_description))
+            .performClick()
+    }
+
+    fun assertWatched() = apply {
+        val markAsWatchedDescription = composeTestRule.getString(R.string.mark_as_watched_icon_description)
+        val markAsUnwatchedDescription = composeTestRule.getString(R.string.mark_as_unwatched_icon_description)
+        composeTestRule.waitOnAllNodesWithContentDescription(markAsUnwatchedDescription)
+        composeTestRule.onNodeWithContentDescription(markAsWatchedDescription)
+            .assertDoesNotExist()
+    }
+
+    fun clickMarkAsUnwatched() = apply {
+        composeTestRule.onNodeWithContentDescription(composeTestRule.getString(R.string.mark_as_unwatched_icon_description))
+            .performClick()
     }
 
     companion object {

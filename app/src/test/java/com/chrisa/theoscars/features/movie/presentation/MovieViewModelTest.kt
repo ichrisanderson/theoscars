@@ -168,8 +168,8 @@ class MovieViewModelTest {
             WatchlistDataModel(
                 movieId = 49046,
                 hasWatched = false,
-                isOnWatchlist = false
-            )
+                isOnWatchlist = false,
+            ),
         )
     }
 

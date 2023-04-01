@@ -104,6 +104,28 @@ class MovieScreenTest {
             .assertMovieDisplayed(movie)
     }
 
+    @Test
+    fun assertWatchListToggle() {
+        MovieScreenRobot(composeTestRule)
+            .setContent(movieViewModel())
+            .assertNotOnWatchlist()
+            .clickAddToWatchlist()
+            .assertOnWatchlist()
+            .clickRemoveFromWatchlist()
+            .assertNotOnWatchlist()
+    }
+
+    @Test
+    fun assertWatchedToggle() {
+        MovieScreenRobot(composeTestRule)
+            .setContent(movieViewModel())
+            .assertNotWatched()
+            .clickMarkAsWatched()
+            .assertWatched()
+            .clickMarkAsUnwatched()
+            .assertNotWatched()
+    }
+
     companion object {
         private const val movieId = 545611L
     }

@@ -248,7 +248,7 @@ fun AppBar(
                 val icon: Int =
                     if (hasWatched) R.drawable.watched else R.drawable.unwatched
                 val description: Int =
-                    if (hasWatched) R.string.unmark_as_watched_icon_description else R.string.mark_as_watched_icon_description
+                    if (hasWatched) R.string.mark_as_unwatched_icon_description else R.string.mark_as_watched_icon_description
                 Icon(
                     painter = painterResource(id = icon),
                     contentDescription = stringResource(id = description),
@@ -262,7 +262,7 @@ fun AppBar(
                 val icon =
                     if (isOnWatchlist) Icons.Filled.Bookmark else Icons.Default.BookmarkBorder
                 val description: Int =
-                    if (hasWatched) R.string.remove_from_to_watchlist_icon_description else R.string.add_to_watchlist_icon_description
+                    if (isOnWatchlist) R.string.remove_from_to_watchlist_icon_description else R.string.add_to_watchlist_icon_description
                 Icon(
                     imageVector = icon,
                     contentDescription = stringResource(id = description),

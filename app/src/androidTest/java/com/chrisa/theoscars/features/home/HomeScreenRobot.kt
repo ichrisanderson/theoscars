@@ -41,7 +41,7 @@ import com.chrisa.theoscars.features.home.presentation.HomeScreen
 import com.chrisa.theoscars.util.KeyboardHelper
 import com.chrisa.theoscars.util.onAllNodesWithStringResId
 import com.chrisa.theoscars.util.onNodeWithStringResId
-import com.chrisa.theoscars.util.waitOnAllNodesWitTag
+import com.chrisa.theoscars.util.waitOnAllNodesWithTag
 import com.chrisa.theoscars.util.waitOnAllNodesWithText
 import com.google.common.truth.Truth.assertThat
 
@@ -68,7 +68,7 @@ class HomeScreenRobot(
     }
 
     fun clickFilterButton() = apply {
-        composeTestRule.waitOnAllNodesWitTag(filterButtonTestTag, useUnmergedTree = true)
+        composeTestRule.waitOnAllNodesWithTag(filterButtonTestTag, useUnmergedTree = true)
         composeTestRule.onNodeWithTag(filterButtonTestTag).performClick()
         composeTestRule.waitUntil(timeoutMillis = 5000L) {
             composeTestRule
@@ -153,7 +153,7 @@ class HomeScreenRobot(
     }
 
     fun clickSearchButton() = apply {
-        composeTestRule.waitOnAllNodesWitTag(searchButtonTestTag, useUnmergedTree = true)
+        composeTestRule.waitOnAllNodesWithTag(searchButtonTestTag, useUnmergedTree = true)
         composeTestRule.onNodeWithTag(searchButtonTestTag).performClick()
     }
 
@@ -162,7 +162,7 @@ class HomeScreenRobot(
     }
 
     fun clickMovie(movieId: Long) = apply {
-        composeTestRule.waitOnAllNodesWitTag(movieListTestTag)
+        composeTestRule.waitOnAllNodesWithTag(movieListTestTag)
         composeTestRule.onNodeWithTag(movieListTestTag).performScrollToKey(movieId)
         val tag = "$movieCardTestTag$movieId"
         composeTestRule.onNodeWithTag(tag).performClick()

@@ -45,5 +45,5 @@
     <string name="add_to_watchlist_icon_description">Add to watchlist</string>
     <string name="remove_from_to_watchlist_icon_description">Remove from watchlist</string>
     <string name="mark_as_watched_icon_description">Mark as watched</string>
-    <string name="unmark_as_watched_icon_description">Unmark as watched</string>
+    <string name="mark_as_unwatched_icon_description">Mark as unwatched</string>
 </resources>

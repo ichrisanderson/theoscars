@@ -19,13 +19,15 @@ package com.chrisa.theoscars.features.movie.data
 import com.chrisa.theoscars.core.data.db.AppDatabase
 import com.chrisa.theoscars.core.data.db.movie.MovieEntity
 import com.chrisa.theoscars.core.data.db.nomination.NominationCategory
+import com.chrisa.theoscars.core.data.db.watchlist.WatchlistEntity
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class MovieDataRepository @Inject constructor(
     private val appDatabase: AppDatabase,
 ) {
 
-    fun loadMovie(id: Long): MovieEntity? {
+    fun loadMovie(id: Long): MovieEntity {
         val dao = appDatabase.movieDao()
         return dao.loadMovie(id)
     }
@@ -33,5 +35,15 @@ class MovieDataRepository @Inject constructor(
     fun loadNominations(movieId: Long): List<NominationCategory> {
         val dao = appDatabase.nominationDao()
         return dao.allNominationsCategoriesForMovie(movieId)
+    }
+
+    fun loadWatchlistData(id: Long): Flow<WatchlistEntity?> {
+        val dao = appDatabase.watchlistDao()
+        return dao.loadWatchlistData(id)
+    }
+
+    fun insertWatchlistData(watchlistEntity: WatchlistEntity) {
+        val dao = appDatabase.watchlistDao()
+        return dao.insert(watchlistEntity)
     }
 }

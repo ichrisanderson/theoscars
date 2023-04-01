@@ -7,6 +7,10 @@
 
     <!-- Movie Detail -->
     <string name="nominations_title">Nominations</string>
+    <string name="review_title">Review</string>
+    <string name="watched_label">Watched</string>
+    <string name="rating_label">Rating</string>
+    <string name="notes_title">Notes</string>
 
     <!-- Filter -->
     <string name="filter_title">Filter</string>
@@ -38,4 +42,8 @@
     <string name="play_button_description">Play Button</string>
     <string name="search_icon_description">Search Button</string>
     <string name="winner_badge_description">Winner</string>
+    <string name="add_to_watchlist_icon_description">Add to watchlist</string>
+    <string name="remove_from_to_watchlist_icon_description">Remove from watchlist</string>
+    <string name="mark_as_watched_icon_description">Mark as watched</string>
+    <string name="mark_as_unwatched_icon_description">Mark as unwatched</string>
 </resources>

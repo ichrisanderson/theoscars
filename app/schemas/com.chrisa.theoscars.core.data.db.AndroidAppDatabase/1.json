@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "cc057000340274a73478944c1d4ccf38",
+    "identityHash": "9f300aebe0737cf23424f53deaa30a3b",
     "entities": [
       {
         "tableName": "categoryAlias",
@@ -168,13 +168,13 @@
             "createSql": "CREATE INDEX IF NOT EXISTS `index_nomination_categoryId` ON `${TABLE_NAME}` (`categoryId`)"
           },
           {
-            "name": "index_nomination_categoryId",
+            "name": "index_nomination_movieId",
             "unique": false,
             "columnNames": [
-              "categoryId"
+              "movieId"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_nomination_categoryId` ON `${TABLE_NAME}` (`categoryId`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_nomination_movieId` ON `${TABLE_NAME}` (`movieId`)"
           }
         ],
         "foreignKeys": [
@@ -351,12 +351,56 @@
           }
         ],
         "foreignKeys": []
+      },
+      {
+        "tableName": "watchlist",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`movieId` INTEGER NOT NULL, `isOnWatchlist` INTEGER NOT NULL, `hasWatched` INTEGER NOT NULL, PRIMARY KEY(`movieId`), FOREIGN KEY(`movieId`) REFERENCES `movie`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "movieId",
+            "columnName": "movieId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isOnWatchlist",
+            "columnName": "isOnWatchlist",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hasWatched",
+            "columnName": "hasWatched",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "movieId"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": [
+          {
+            "table": "movie",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "movieId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'cc057000340274a73478944c1d4ccf38')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9f300aebe0737cf23424f53deaa30a3b')"
     ]
   }
 }

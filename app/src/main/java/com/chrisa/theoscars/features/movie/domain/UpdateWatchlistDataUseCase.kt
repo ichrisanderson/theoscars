@@ -16,36 +16,24 @@
 
 package com.chrisa.theoscars.features.movie.domain
 
+import com.chrisa.theoscars.core.data.db.watchlist.WatchlistEntity
 import com.chrisa.theoscars.core.util.coroutines.CoroutineDispatchers
 import com.chrisa.theoscars.features.movie.data.MovieDataRepository
-import com.chrisa.theoscars.features.movie.domain.models.MovieDetailModel
-import com.chrisa.theoscars.features.movie.domain.models.NominationModel
+import com.chrisa.theoscars.features.movie.domain.models.WatchlistDataModel
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class LoadMovieDetailUseCase @Inject constructor(
+class UpdateWatchlistDataUseCase @Inject constructor(
     private val coroutineDispatchers: CoroutineDispatchers,
     private val movieDataRepository: MovieDataRepository,
 ) {
-    suspend fun execute(id: Long): MovieDetailModel = withContext(coroutineDispatchers.io) {
-        val movie = movieDataRepository.loadMovie(id)
-        val movieNominations = movieDataRepository.loadNominations(movie.id)
-
-        val nominations = movieNominations.map {
-            NominationModel(
-                category = it.category,
-                name = it.nomination,
-                winner = it.winner,
-            )
-        }
-        return@withContext MovieDetailModel(
-            id = movie.id,
-            backdropImagePath = movie.backdropImagePath,
-            overview = movie.overview,
-            title = movie.title,
-            year = movieNominations.first().year.toString(10),
-            youTubeVideoKey = movie.youTubeVideoKey,
-            nominations = nominations,
+    suspend fun execute(watchlistDataModel: WatchlistDataModel) = withContext(coroutineDispatchers.io) {
+        movieDataRepository.insertWatchlistData(
+            WatchlistEntity(
+                movieId = watchlistDataModel.movieId,
+                isOnWatchlist = watchlistDataModel.isOnWatchlist,
+                hasWatched = watchlistDataModel.hasWatched,
+            ),
         )
     }
 }

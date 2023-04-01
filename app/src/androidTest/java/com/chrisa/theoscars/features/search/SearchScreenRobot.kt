@@ -41,8 +41,8 @@ import com.chrisa.theoscars.features.search.presentation.SearchScreen
 import com.chrisa.theoscars.util.KeyboardHelper
 import com.chrisa.theoscars.util.getString
 import com.chrisa.theoscars.util.onNodeWithStringResId
-import com.chrisa.theoscars.util.waitOnAllNodesWitTag
 import com.chrisa.theoscars.util.waitOnAllNodesWithStringResId
+import com.chrisa.theoscars.util.waitOnAllNodesWithTag
 import com.google.common.truth.Truth.assertThat
 
 class SearchScreenRobot(
@@ -76,12 +76,12 @@ class SearchScreenRobot(
     }
 
     fun assertSearchBarIsFocused() = apply {
-        composeTestRule.waitOnAllNodesWitTag(searchBarTestTag)
+        composeTestRule.waitOnAllNodesWithTag(searchBarTestTag)
         composeTestRule.onNodeWithTag(searchBarTestTag).assertIsFocused()
     }
 
     fun assertSearchBarHasPlaceholderText() = apply {
-        composeTestRule.waitOnAllNodesWitTag(
+        composeTestRule.waitOnAllNodesWithTag(
             searchBarPlaceholderTextTestTag,
             useUnmergedTree = true,
         )
@@ -117,7 +117,7 @@ class SearchScreenRobot(
 
     fun assertMovieDisplayed(movieId: Long, title: String, year: String) {
         val tag = "$movieCardTestTag$movieId"
-        composeTestRule.waitOnAllNodesWitTag(tag)
+        composeTestRule.waitOnAllNodesWithTag(tag)
         composeTestRule.onNodeWithTag(tag, useUnmergedTree = true)
             .assert(hasAnyDescendant(hasText(title)))
         composeTestRule.onNodeWithTag(tag, useUnmergedTree = true)
@@ -131,7 +131,7 @@ class SearchScreenRobot(
 
     fun clickMovie(movieId: Long) = apply {
         val tag = "$movieCardTestTag$movieId"
-        composeTestRule.waitOnAllNodesWitTag(tag)
+        composeTestRule.waitOnAllNodesWithTag(tag)
         composeTestRule.onNodeWithTag(tag, useUnmergedTree = true)
             .performClick()
     }

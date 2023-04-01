@@ -21,6 +21,7 @@ import androidx.annotation.StringRes
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.SemanticsNodeInteractionCollection
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
@@ -53,13 +54,13 @@ fun <A : ComponentActivity> AndroidComposeTestRule<ActivityScenarioRule<A>, A>.w
             .isNotEmpty()
     }
 
-fun <A : ComponentActivity> AndroidComposeTestRule<ActivityScenarioRule<A>, A>.waitOnAllNodesWitTag(
-    text: String,
+fun <A : ComponentActivity> AndroidComposeTestRule<ActivityScenarioRule<A>, A>.waitOnAllNodesWithTag(
+    tag: String,
     useUnmergedTree: Boolean = false,
     timeoutMillis: Long = defaultTimeoutMillis,
 ) =
     this.waitUntil(timeoutMillis = timeoutMillis) {
-        this.onAllNodesWithTag(testTag = text, useUnmergedTree = useUnmergedTree)
+        this.onAllNodesWithTag(testTag = tag, useUnmergedTree = useUnmergedTree)
             .fetchSemanticsNodes()
             .isNotEmpty()
     }
@@ -71,6 +72,17 @@ fun <A : ComponentActivity> AndroidComposeTestRule<ActivityScenarioRule<A>, A>.w
 ) =
     this.waitUntil(timeoutMillis = timeoutMillis) {
         this.onAllNodesWithText(text = activity.getString(id), useUnmergedTree = useUnmergedTree)
+            .fetchSemanticsNodes()
+            .isNotEmpty()
+    }
+
+fun <A : ComponentActivity> AndroidComposeTestRule<ActivityScenarioRule<A>, A>.waitOnAllNodesWithContentDescription(
+    contentDescription: String,
+    useUnmergedTree: Boolean = false,
+    timeoutMillis: Long = defaultTimeoutMillis,
+) =
+    this.waitUntil(timeoutMillis = timeoutMillis) {
+        this.onAllNodesWithContentDescription(label = contentDescription, useUnmergedTree = useUnmergedTree)
             .fetchSemanticsNodes()
             .isNotEmpty()
     }

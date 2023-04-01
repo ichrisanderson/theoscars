@@ -31,8 +31,8 @@ class FakeMovieDao : MovieDao {
         movies.add(item)
     }
 
-    override fun loadMovie(id: Long): MovieEntity? {
-        return movies.firstOrNull { it.id == id }
+    override fun loadMovie(id: Long): MovieEntity {
+        return movies.first { it.id == id }
     }
 
     override fun insertMovieGenres(items: List<MovieGenreEntity>) {

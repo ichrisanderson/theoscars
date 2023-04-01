@@ -21,10 +21,16 @@ import androidx.lifecycle.ViewModel
 import com.chrisa.theoscars.core.util.coroutines.CloseableCoroutineScope
 import com.chrisa.theoscars.core.util.coroutines.CoroutineDispatchers
 import com.chrisa.theoscars.features.movie.domain.LoadMovieDetailUseCase
+import com.chrisa.theoscars.features.movie.domain.LoadWatchlistDataUseCase
+import com.chrisa.theoscars.features.movie.domain.UpdateWatchlistDataUseCase
 import com.chrisa.theoscars.features.movie.domain.models.MovieDetailModel
+import com.chrisa.theoscars.features.movie.domain.models.WatchlistDataModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -35,17 +41,20 @@ class MovieViewModel @Inject constructor(
     private val dispatchers: CoroutineDispatchers,
     private val coroutineScope: CloseableCoroutineScope,
     private val loadMovieDetailUseCase: LoadMovieDetailUseCase,
+    private val loadWatchlistDataUseCase: LoadWatchlistDataUseCase,
+    private val updateWatchlistDataUseCase: UpdateWatchlistDataUseCase,
 ) : ViewModel(coroutineScope) {
 
     private val movieId: Long = checkNotNull(
         savedStateHandle["movieId"],
     )
 
-    private val _viewState = MutableStateFlow(ViewState.default())
-    val viewState: StateFlow<ViewState> = _viewState
+    private val _viewState = MutableStateFlow(MovieViewState.default())
+    val viewState: StateFlow<MovieViewState> = _viewState
 
     init {
         loadMovie()
+        subscribeToWatchListUpdates()
     }
 
     private fun loadMovie() {
@@ -60,17 +69,60 @@ class MovieViewModel @Inject constructor(
             }
         }
     }
+
+    private fun subscribeToWatchListUpdates() {
+        loadWatchlistDataUseCase.execute(movieId)
+            .distinctUntilChanged()
+            .onEach(::updateWatchlistDataModel)
+            .launchIn(coroutineScope)
+    }
+
+    private fun updateWatchlistDataModel(watchlistData: WatchlistDataModel) {
+        _viewState.update { it.copy(watchlistData = watchlistData) }
+    }
+
+    fun toggleWatchlist() {
+        coroutineScope.launch(dispatchers.io) {
+            val watchlistData = _viewState.value.watchlistData
+            val updatedWatchlistData =
+                watchlistData.copy(isOnWatchlist = !watchlistData.isOnWatchlist)
+            updateWatchlistDataUseCase.execute(updatedWatchlistData)
+        }
+    }
+
+    fun toggleWatched() {
+        coroutineScope.launch(dispatchers.io) {
+            val watchlistData = _viewState.value.watchlistData
+            val updatedWatchlistData =
+                watchlistData.copy(hasWatched = !watchlistData.hasWatched)
+            updateWatchlistDataUseCase.execute(updatedWatchlistData)
+        }
+    }
 }
 
-data class ViewState(
+data class MovieViewState(
     val isLoading: Boolean,
-    val movie: MovieDetailModel?,
+    val movie: MovieDetailModel,
+    val watchlistData: WatchlistDataModel,
 ) {
 
     companion object {
-        fun default() = ViewState(
+        fun default() = MovieViewState(
             isLoading = false,
-            movie = null,
+            movie = MovieDetailModel(
+                id = 0L,
+                backdropImagePath = null,
+                overview = "",
+                title = "",
+                year = "",
+                youTubeVideoKey = null,
+                nominations = emptyList(),
+            ),
+            watchlistData = WatchlistDataModel(
+                movieId = 0L,
+                isOnWatchlist = false,
+                hasWatched = false,
+            ),
         )
     }
 }

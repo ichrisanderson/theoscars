@@ -14,26 +14,20 @@
  * limitations under the License.
  */
 
-package com.chrisa.theoscars.features.movie.domain.models
+package com.chrisa.theoscars.core.data.db.watchlist
 
-data class MovieDetailModel(
-    val id: Long,
-    val backdropImagePath: String?,
-    val overview: String,
-    val title: String,
-    val year: String,
-    val youTubeVideoKey: String?,
-    val nominations: List<NominationModel>,
-)
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 
-data class NominationModel(
-    val category: String,
-    val name: String,
-    val winner: Boolean,
-)
+@Dao
+interface WatchlistDao {
 
-data class WatchlistDataModel(
-    val movieId: Long,
-    val isOnWatchlist: Boolean,
-    val hasWatched: Boolean,
-)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insert(watchlist: WatchlistEntity)
+
+    @Query("SELECT * FROM watchlist WHERE movieId = :movieId LIMIT 1")
+    fun loadWatchlistData(movieId: Long): Flow<WatchlistEntity?>
+}

@@ -26,8 +26,11 @@ import com.chrisa.theoscars.core.util.coroutines.CloseableCoroutineScope
 import com.chrisa.theoscars.core.util.coroutines.TestCoroutineDispatchersImpl
 import com.chrisa.theoscars.features.movie.data.MovieDataRepository
 import com.chrisa.theoscars.features.movie.domain.LoadMovieDetailUseCase
+import com.chrisa.theoscars.features.movie.domain.LoadWatchlistDataUseCase
+import com.chrisa.theoscars.features.movie.domain.UpdateWatchlistDataUseCase
 import com.chrisa.theoscars.features.movie.domain.models.MovieDetailModel
 import com.chrisa.theoscars.features.movie.domain.models.NominationModel
+import com.chrisa.theoscars.features.movie.domain.models.WatchlistDataModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -67,13 +70,22 @@ class MovieViewModelTest {
     private fun movieViewModel(movieId: Long): MovieViewModel {
         val savedStateHandle = SavedStateHandle()
         savedStateHandle["movieId"] = movieId
+        val repository = MovieDataRepository(appDatabase)
         return MovieViewModel(
-            savedStateHandle,
-            dispatchers,
-            CloseableCoroutineScope(),
-            LoadMovieDetailUseCase(
-                dispatchers,
-                MovieDataRepository(appDatabase),
+            savedStateHandle = savedStateHandle,
+            dispatchers = dispatchers,
+            coroutineScope = CloseableCoroutineScope(),
+            loadMovieDetailUseCase = LoadMovieDetailUseCase(
+                coroutineDispatchers = dispatchers,
+                movieDataRepository = repository,
+            ),
+            loadWatchlistDataUseCase = LoadWatchlistDataUseCase(
+                coroutineDispatchers = dispatchers,
+                movieDataRepository = repository,
+            ),
+            updateWatchlistDataUseCase = UpdateWatchlistDataUseCase(
+                coroutineDispatchers = dispatchers,
+                movieDataRepository = repository,
             ),
         )
     }
@@ -146,5 +158,36 @@ class MovieViewModelTest {
         val sut = movieViewModel(expectedMovie.id)
 
         assertThat(sut.viewState.value.movie).isEqualTo(expectedMovie)
+    }
+
+    @Test
+    fun `WHEN initialised THEN watchlist data uses defaults`() {
+        val sut = movieViewModel(49046)
+
+        assertThat(sut.viewState.value.watchlistData).isEqualTo(
+            WatchlistDataModel(
+                movieId = 49046,
+                hasWatched = false,
+                isOnWatchlist = false,
+            ),
+        )
+    }
+
+    @Test
+    fun `WHEN toggle watched THEN watchlist data updated`() {
+        val sut = movieViewModel(49046)
+
+        sut.toggleWatched()
+
+        assertThat(sut.viewState.value.watchlistData.hasWatched).isTrue()
+    }
+
+    @Test
+    fun `WHEN toggle watchlist THEN watchlist data updated`() {
+        val sut = movieViewModel(49046)
+
+        sut.toggleWatchlist()
+
+        assertThat(sut.viewState.value.watchlistData.isOnWatchlist).isTrue()
     }
 }

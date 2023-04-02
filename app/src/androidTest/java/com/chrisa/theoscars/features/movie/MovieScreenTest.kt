@@ -108,22 +108,29 @@ class MovieScreenTest {
     fun assertWatchListToggle() {
         MovieScreenRobot(composeTestRule)
             .setContent(movieViewModel())
-            .assertNotOnWatchlist()
+            .assertRemovedFromWatchlistIconDisplayed()
             .clickAddToWatchlist()
-            .assertOnWatchlist()
+            .assertAddedToWatchlistIconDislayed()
+            .clickDismissAction()
             .clickRemoveFromWatchlist()
-            .assertNotOnWatchlist()
+            .assertRemovedFromWatchlistIconDisplayed()
+            .assertRemovedFromWatchlistMessageDisplayed()
+            .clickDismissAction()
     }
 
     @Test
     fun assertWatchedToggle() {
         MovieScreenRobot(composeTestRule)
             .setContent(movieViewModel())
-            .assertNotWatched()
+            .assertUnwatchedIconDisplayed()
             .clickMarkAsWatched()
-            .assertWatched()
+            .assertWatchedIconDisplayed()
+            .assertMarkedAsWatchedMessageDisplayed()
+            .clickDismissAction()
             .clickMarkAsUnwatched()
-            .assertNotWatched()
+            .assertUnwatchedIconDisplayed()
+            .assertMarkedAsUnwatchedMessageDisplayed()
+            .clickDismissAction()
     }
 
     companion object {

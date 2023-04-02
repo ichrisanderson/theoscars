@@ -31,7 +31,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
@@ -46,17 +45,22 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -73,8 +77,8 @@ import com.chrisa.theoscars.core.ui.theme.OscarsTheme
 import com.chrisa.theoscars.features.movie.domain.models.MovieDetailModel
 import com.chrisa.theoscars.features.movie.domain.models.NominationModel
 import com.chrisa.theoscars.features.movie.domain.models.WatchlistDataModel
+import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MovieScreen(
     viewModel: MovieViewModel,
@@ -82,20 +86,53 @@ fun MovieScreen(
     onPlayClicked: (String) -> Unit,
 ) {
     val viewState by viewModel.viewState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
+    val resources = LocalContext.current.resources
 
     MovieContent(
+        snackbarHostState = snackbarHostState,
         isLoading = viewState.isLoading,
         movie = viewState.movie,
         watchlistData = viewState.watchlistData,
         onClose = onClose,
-        onToggleWatchlist = viewModel::toggleWatchlist,
-        onToggleWatched = viewModel::toggleWatched,
+        onToggleWatchlist = {
+            viewModel.toggleWatchlist()
+            val message = if (!viewState.watchlistData.isOnWatchlist) {
+                R.string.added_to_watchlist_message
+            } else {
+                R.string.removed_from_watchlist_message
+            }
+            coroutineScope.launch {
+                snackbarHostState.showSnackbar(
+                    message = resources.getString(message),
+                    actionLabel = resources.getString(R.string.dismiss_label),
+                    duration = SnackbarDuration.Short,
+                )
+            }
+        },
+        onToggleWatched = {
+            viewModel.toggleWatched()
+            coroutineScope.launch {
+                val message = if (!viewState.watchlistData.hasWatched) {
+                    R.string.marked_as_watched_message
+                } else {
+                    R.string.marked_as_unwatched_message
+                }
+                snackbarHostState.showSnackbar(
+                    message = resources.getString(message),
+                    actionLabel = resources.getString(R.string.dismiss_label),
+                    duration = SnackbarDuration.Short,
+                )
+            }
+        },
         onPlayClicked = onPlayClicked,
     )
 }
 
 @Composable
 private fun MovieContent(
+    snackbarHostState: SnackbarHostState,
     isLoading: Boolean,
     movie: MovieDetailModel,
     watchlistData: WatchlistDataModel,
@@ -108,9 +145,20 @@ private fun MovieContent(
     val scrollState = rememberScrollState()
 
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState) { data ->
+                Snackbar(
+                    snackbarData = data,
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    actionColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                )
+            }
+        },
         contentWindowInsets = WindowInsets(top = 0.dp, bottom = 0.dp),
         topBar = {
             AppBar(
+                isLoading = isLoading,
                 isOnWatchlist = watchlistData.isOnWatchlist,
                 hasWatched = watchlistData.hasWatched,
                 onToggleWatchlist = onToggleWatchlist,
@@ -214,6 +262,7 @@ private fun MovieContent(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppBar(
+    isLoading: Boolean,
     isOnWatchlist: Boolean,
     hasWatched: Boolean,
     onClose: () -> Unit,
@@ -241,33 +290,35 @@ fun AppBar(
             }
         },
         actions = {
-            IconButton(
-                onClick = onToggleWatched,
-                modifier = Modifier.testTag("watchedButton"),
-            ) {
-                val icon: Int =
-                    if (hasWatched) R.drawable.watched else R.drawable.unwatched
-                val description: Int =
-                    if (hasWatched) R.string.mark_as_unwatched_icon_description else R.string.mark_as_watched_icon_description
-                Icon(
-                    painter = painterResource(id = icon),
-                    contentDescription = stringResource(id = description),
-                    tint = MaterialTheme.colorScheme.onSurface,
-                )
-            }
-            IconButton(
-                onClick = onToggleWatchlist,
-                modifier = Modifier.testTag("watchlistButton"),
-            ) {
-                val icon =
-                    if (isOnWatchlist) Icons.Filled.Bookmark else Icons.Default.BookmarkBorder
-                val description: Int =
-                    if (isOnWatchlist) R.string.remove_from_to_watchlist_icon_description else R.string.add_to_watchlist_icon_description
-                Icon(
-                    imageVector = icon,
-                    contentDescription = stringResource(id = description),
-                    tint = MaterialTheme.colorScheme.onSurface,
-                )
+            if (!isLoading) {
+                IconButton(
+                    onClick = onToggleWatched,
+                    modifier = Modifier.testTag("watchedButton"),
+                ) {
+                    val icon: Int =
+                        if (hasWatched) R.drawable.watched else R.drawable.unwatched
+                    val description: Int =
+                        if (hasWatched) R.string.mark_as_unwatched_icon_description else R.string.mark_as_watched_icon_description
+                    Icon(
+                        painter = painterResource(id = icon),
+                        contentDescription = stringResource(id = description),
+                        tint = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+                IconButton(
+                    onClick = onToggleWatchlist,
+                    modifier = Modifier.testTag("watchlistButton"),
+                ) {
+                    val icon =
+                        if (isOnWatchlist) Icons.Filled.Bookmark else Icons.Default.BookmarkBorder
+                    val description: Int =
+                        if (isOnWatchlist) R.string.remove_from_to_watchlist_icon_description else R.string.add_to_watchlist_icon_description
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = stringResource(id = description),
+                        tint = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
             }
         },
     )
@@ -339,6 +390,7 @@ fun MovieLoadingContentPreview() {
     OscarsTheme {
         Surface {
             MovieContent(
+                snackbarHostState = SnackbarHostState(),
                 isLoading = true,
                 movie = MovieDetailModel(
                     id = 0L,
@@ -369,6 +421,7 @@ fun MovieContentPreview() {
     OscarsTheme {
         Surface {
             MovieContent(
+                snackbarHostState = SnackbarHostState(),
                 isLoading = false,
                 movie = MovieDetailModel(
                     id = 49046,

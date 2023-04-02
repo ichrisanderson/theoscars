@@ -11,6 +11,10 @@
     <string name="watched_label">Watched</string>
     <string name="rating_label">Rating</string>
     <string name="notes_title">Notes</string>
+    <string name="added_to_watchlist_message">Added to watchlist</string>
+    <string name="removed_from_watchlist_message">Removed from watchlist</string>
+    <string name="marked_as_watched_message">Marked as watched</string>
+    <string name="marked_as_unwatched_message">Marked as unwatched</string>
 
     <!-- Filter -->
     <string name="filter_title">Filter</string>
@@ -46,4 +50,5 @@
     <string name="remove_from_to_watchlist_icon_description">Remove from watchlist</string>
     <string name="mark_as_watched_icon_description">Mark as watched</string>
     <string name="mark_as_unwatched_icon_description">Mark as unwatched</string>
+    <string name="dismiss_label">Dismiss</string>
 </resources>

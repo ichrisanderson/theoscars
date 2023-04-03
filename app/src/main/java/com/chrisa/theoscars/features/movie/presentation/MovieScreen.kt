@@ -20,7 +20,6 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -155,7 +154,6 @@ private fun MovieContent(
                 )
             }
         },
-        contentWindowInsets = WindowInsets(top = 0.dp, bottom = 0.dp),
         topBar = {
             AppBar(
                 isLoading = isLoading,
@@ -272,7 +270,6 @@ fun AppBar(
 ) {
     TopAppBar(
         modifier = modifier,
-        windowInsets = WindowInsets(top = 0.dp),
         title = { },
         navigationIcon = {
             IconButton(

@@ -21,6 +21,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.chrisa.theoscars.MainActivity
 import com.chrisa.theoscars.core.util.coroutines.CloseableCoroutineScope
 import com.chrisa.theoscars.core.util.coroutines.CoroutineDispatchers
+import com.chrisa.theoscars.features.home.domain.InitializeDataUseCase
 import com.chrisa.theoscars.features.movie.domain.LoadMovieDetailUseCase
 import com.chrisa.theoscars.features.movie.domain.LoadWatchlistDataUseCase
 import com.chrisa.theoscars.features.movie.domain.UpdateWatchlistDataUseCase
@@ -50,6 +51,9 @@ class MovieScreenTest {
     lateinit var coroutineScope: CloseableCoroutineScope
 
     @Inject
+    lateinit var initializeDataUseCase: InitializeDataUseCase
+
+    @Inject
     lateinit var loadMovieDetailUseCase: LoadMovieDetailUseCase
 
     @Inject
@@ -67,6 +71,7 @@ class MovieScreenTest {
         savedStateHandle = SavedStateHandle()
         savedStateHandle["movieId"] = movieId
         runBlocking {
+            initializeDataUseCase.execute()
             movie = loadMovieDetailUseCase.execute(movieId)
         }
     }

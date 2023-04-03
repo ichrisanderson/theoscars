@@ -5,6 +5,10 @@
     <string name="empty_screen_title">Coming Soon</string>
     <string name="empty_screen_subtitle">Under Construction</string>
 
+    <!-- Main Screen -->
+    <string name="home_tab">Home</string>
+    <string name="watchlist_tab">Watchlist</string>
+
     <!-- Movie Detail -->
     <string name="nominations_title">Nominations</string>
     <string name="review_title">Review</string>

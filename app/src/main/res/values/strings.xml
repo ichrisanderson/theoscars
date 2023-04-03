@@ -40,6 +40,9 @@
     <string name="empty_search_results_title">No movies found</string>
     <string name="empty_search_results_subtitle">Please try a different search query…</string>
 
+    <!-- Watchlist -->
+    <string name="empty_watchlist_results_subtitle">To add movies you want to watch, tap the watchlist icon.</string>
+
     <!-- Content Descriptions -->
     <string name="app_logo_description">The Oscars App Logo</string>
     <string name="clear_query_button_description">Clear Search Query</string>

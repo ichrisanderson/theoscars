@@ -126,7 +126,11 @@ private fun SearchScreenContent(
         },
     ) { padding ->
         if (searchResults.isEmpty()) {
-            EmptySearchResults(modifier = Modifier.padding(padding))
+            EmptySearchResults(
+                modifier = Modifier.padding(
+                    padding,
+                ),
+            )
         } else {
             LazyColumn(
                 modifier = Modifier.padding(padding),

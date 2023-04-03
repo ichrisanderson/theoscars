@@ -20,6 +20,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface NominationDao {
@@ -29,13 +30,6 @@ interface NominationDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(item: NominationEntity)
-
-    @Query(
-        "SELECT DISTINCT category.name FROM nomination " +
-            "INNER JOIN category ON category.id = nomination.categoryId " +
-            "WHERE year = :ceremonyYear",
-    )
-    fun allCategoriesForCeremony(ceremonyYear: Int): List<String>
 
     @Query(
         "SELECT DISTINCT nomination.content as 'nomination', category.name as 'category', nomination.winner, nomination.year FROM nomination " +
@@ -80,6 +74,14 @@ interface NominationDao {
     fun searchMovies(
         query: String,
     ): List<MovieSearchSummary>
+
+    @Query(
+        "SELECT DISTINCT movie.id, movie.posterImagePath, movie.title, movie.overview, nomination.year FROM nomination " +
+            "INNER JOIN movie ON movie.id = nomination.movieId " +
+            "INNER JOIN watchlist ON watchlist.movieId = movie.id " +
+            "WHERE watchlist.isOnWatchlist = 1",
+    )
+    fun watchlistMovies(): Flow<List<MovieWatchlistSummary>>
 }
 
 data class NominationCategory(
@@ -98,6 +100,14 @@ data class MovieSummary(
 )
 
 data class MovieSearchSummary(
+    val id: Long,
+    val posterImagePath: String?,
+    val title: String,
+    val overview: String,
+    val year: Int,
+)
+
+data class MovieWatchlistSummary(
     val id: Long,
     val posterImagePath: String?,
     val title: String,

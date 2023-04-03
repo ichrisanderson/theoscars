@@ -14,23 +14,18 @@
  * limitations under the License.
  */
 
-package com.chrisa.theoscars.core.data.db.category
+package com.chrisa.theoscars.features.watchlist.data
 
-class FakeCategoryDao : CategoryDao {
+import com.chrisa.theoscars.core.data.db.AppDatabase
+import com.chrisa.theoscars.core.data.db.nomination.MovieWatchlistSummary
+import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-    private val categoryList = mutableListOf<CategoryEntity>()
-
-    override fun countAll(): Int = categoryList.size
-
-    override fun allCategories(): List<CategoryEntity> {
-        return categoryList
-    }
-
-    override fun insert(category: CategoryEntity) {
-        categoryList.add(category)
-    }
-
-    override fun insertAll(categories: List<CategoryEntity>) {
-        categoryList.addAll(categories)
+class WatchlistDataRepository @Inject constructor(
+    private val appDatabase: AppDatabase,
+) {
+    fun watchlistMovies(): Flow<List<MovieWatchlistSummary>> {
+        val dao = appDatabase.nominationDao()
+        return dao.watchlistMovies()
     }
 }

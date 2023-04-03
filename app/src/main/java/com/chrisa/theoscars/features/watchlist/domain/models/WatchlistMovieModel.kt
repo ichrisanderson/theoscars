@@ -14,21 +14,11 @@
  * limitations under the License.
  */
 
-package com.chrisa.theoscars.core.data.db.categoryalias
+package com.chrisa.theoscars.features.watchlist.domain.models
 
-class FakeCategoryAliasDao : CategoryAliasDao {
-
-    private val categoryAliasList = mutableListOf<CategoryAliasEntity>()
-
-    override fun countAll(): Int = categoryAliasList.size
-
-    override fun allCategoryAliases(): List<CategoryAliasEntity> = categoryAliasList
-
-    override fun insert(categoryAlias: CategoryAliasEntity) {
-        categoryAliasList.add(categoryAlias)
-    }
-
-    override fun insertAll(categoryAliases: List<CategoryAliasEntity>) {
-        categoryAliasList.addAll(categoryAliases)
-    }
-}
+data class WatchlistMovieModel(
+    val movieId: Long,
+    val title: String,
+    val year: String,
+    val posterImagePath: String?,
+)

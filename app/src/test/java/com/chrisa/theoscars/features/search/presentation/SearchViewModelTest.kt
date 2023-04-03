@@ -16,13 +16,17 @@
 
 package com.chrisa.theoscars.features.search.presentation
 
+import android.content.Context
+import androidx.room.Room
+import androidx.test.core.app.ApplicationProvider
+import com.chrisa.theoscars.core.data.db.AndroidAppDatabase
 import com.chrisa.theoscars.core.data.db.AppDatabase
 import com.chrisa.theoscars.core.data.db.Bootstrapper
 import com.chrisa.theoscars.core.data.db.BootstrapperBuilder
-import com.chrisa.theoscars.core.data.db.FakeAppDatabase
 import com.chrisa.theoscars.core.data.db.FakeAssetFileManager
 import com.chrisa.theoscars.core.util.coroutines.CloseableCoroutineScope
 import com.chrisa.theoscars.core.util.coroutines.TestCoroutineDispatchersImpl
+import com.chrisa.theoscars.core.util.coroutines.TestExecutor
 import com.chrisa.theoscars.features.search.data.SearchDataRepository
 import com.chrisa.theoscars.features.search.domain.SearchMoviesUseCase
 import com.chrisa.theoscars.features.search.domain.models.SearchResultModel
@@ -35,8 +39,13 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 @OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [27])
 class SearchViewModelTest {
     private val testDispatcher = UnconfinedTestDispatcher()
     private val dispatchers = TestCoroutineDispatchersImpl(testDispatcher)
@@ -48,7 +57,13 @@ class SearchViewModelTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
 
-        this.appDatabase = FakeAppDatabase()
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        this.appDatabase = Room.inMemoryDatabaseBuilder(context, AndroidAppDatabase::class.java)
+            .setQueryExecutor(TestExecutor())
+            .allowMainThreadQueries()
+            .build()
+
+//        this.appDatabase = FakeAppDatabase()
         val assetManager = FakeAssetFileManager()
 
         this.bootstrapper = BootstrapperBuilder()

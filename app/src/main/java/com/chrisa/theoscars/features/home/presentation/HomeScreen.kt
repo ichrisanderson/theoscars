@@ -16,12 +16,6 @@
 
 package com.chrisa.theoscars.features.home.presentation
 
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateDp
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.LocalIndication
@@ -33,10 +27,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -47,34 +41,21 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -88,7 +69,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.chrisa.theoscars.R
@@ -99,84 +79,28 @@ import com.chrisa.theoscars.core.util.YearValidator
 import com.chrisa.theoscars.features.home.domain.models.CategoryModel
 import com.chrisa.theoscars.features.home.domain.models.GenreModel
 import com.chrisa.theoscars.features.home.domain.models.MovieSummaryModel
-import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
     onMovieClick: (Long) -> Unit,
-    onSearchClick: () -> Unit,
 ) {
     val viewState by viewModel.viewState.collectAsState()
-    val coroutineScope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
-    val transition = updateTransition(viewState, label = "splashTransition")
-    val contentAlpha by transition.animateFloat(
-        transitionSpec = { tween(durationMillis = 300) },
-        label = "contentAlpha",
-    ) { vs ->
-        if (vs.isLoading) 0f else 1f
-    }
-    val contentTopPadding by transition.animateDp(
-        transitionSpec = { spring(stiffness = Spring.StiffnessLow) },
-        label = "contentTopPadding",
-    ) { vs ->
-        if (vs.isLoading) 100.dp else 0.dp
-    }
-    val modalSheetState = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden,
-        confirmValueChange = { it != ModalBottomSheetValue.HalfExpanded },
-        skipHalfExpanded = true,
-    )
 
-    ModalBottomSheetLayout(
-        sheetState = modalSheetState,
-        sheetContent = {
-            if (modalSheetState.isVisible) {
-                val filterModel = viewState.filterModel
-                Surface {
-                    FilterContent(
-                        categories = filterModel.categories,
-                        selectedCategory = filterModel.selectedCategory,
-                        genres = filterModel.genres,
-                        selectedGenre = filterModel.selectedGenre,
-                        currentStartYear = filterModel.startYearString,
-                        currentEndYear = filterModel.endYearString,
-                        winnersOnly = filterModel.winnersOnly,
-                        onApplySelection = { newFilter ->
-                            viewModel.updateFilter(newFilter)
-                            coroutineScope.launch {
-                                modalSheetState.hide()
-                            }
-                        },
-                    )
-                }
-            }
-        },
-    ) {
-        if (viewState.isLoading) {
-            Box(Modifier.fillMaxSize()) {
-                CircularProgressIndicator(
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.align(Alignment.Center),
-                )
-            }
-        } else {
-            HomeContent(
-                listState = lazyListState,
-                movies = viewState.movies,
-                onMovieClick = onMovieClick,
-                onSearchClick = onSearchClick,
-                onFilterClick = {
-                    coroutineScope.launch {
-                        modalSheetState.show()
-                    }
-                },
-                modifier = Modifier.alpha(contentAlpha),
-                topPadding = contentTopPadding,
+    if (viewState.isLoading) {
+        Box(Modifier.fillMaxSize()) {
+            CircularProgressIndicator(
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.align(Alignment.Center),
             )
         }
+    } else {
+        HomeContent(
+            listState = lazyListState,
+            movies = viewState.movies,
+            onMovieClick = onMovieClick,
+        )
     }
 }
 
@@ -186,17 +110,9 @@ private fun HomeContent(
     listState: LazyListState,
     movies: List<MovieSummaryModel>,
     onMovieClick: (Long) -> Unit,
-    onSearchClick: () -> Unit,
-    onFilterClick: () -> Unit,
     modifier: Modifier = Modifier,
-    topPadding: Dp = 0.dp,
 ) {
     Column(modifier = modifier) {
-        Spacer(modifier = Modifier.padding(top = topPadding))
-        AppBar(
-            onSearchClick = onSearchClick,
-            onFilterClick = onFilterClick,
-        )
         if (movies.isEmpty()) {
             EmptyMovies()
         } else {
@@ -242,56 +158,6 @@ fun EmptyMovies(
             color = MaterialTheme.colorScheme.outline,
         )
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AppBar(
-    onSearchClick: () -> Unit,
-    onFilterClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    TopAppBar(
-        modifier = modifier,
-        windowInsets = WindowInsets(top = 0.dp),
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-        ),
-        title = {
-            Text(
-                text = stringResource(id = R.string.app_name),
-                style = MaterialTheme.typography.headlineSmall,
-            )
-        },
-        navigationIcon = {
-            Icon(
-                painter = painterResource(R.drawable.ic_oscar),
-                contentDescription = stringResource(id = R.string.app_logo_description),
-            )
-        },
-        actions = {
-            IconButton(
-                onClick = onSearchClick,
-                modifier = Modifier.testTag("searchButton"),
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = stringResource(id = R.string.search_icon_description),
-                    tint = MaterialTheme.colorScheme.onSurface,
-                )
-            }
-            IconButton(
-                onClick = onFilterClick,
-                modifier = Modifier.testTag("filterButton"),
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Tune,
-                    contentDescription = stringResource(id = R.string.filter_icon_description),
-                    tint = MaterialTheme.colorScheme.onSurface,
-                )
-            }
-        },
-    )
 }
 
 @Composable
@@ -376,7 +242,7 @@ fun FilterContent(
     val scrollState = rememberScrollState()
 
     Column(
-        modifier = modifier,
+        modifier = modifier.navigationBarsPadding(),
     ) {
         Text(
             text = stringResource(id = R.string.filter_title),
@@ -601,8 +467,6 @@ fun HomeContentPreview() {
                     ),
                 ),
                 onMovieClick = { },
-                onSearchClick = { },
-                onFilterClick = { },
             )
         }
     }
@@ -616,8 +480,6 @@ fun HomeContentEmptyMoviesPreview() {
             HomeContent(
                 listState = rememberLazyListState(),
                 movies = emptyList(),
-                onFilterClick = { },
-                onSearchClick = { },
                 onMovieClick = { },
             )
         }

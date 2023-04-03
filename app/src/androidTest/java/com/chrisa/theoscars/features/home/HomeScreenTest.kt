@@ -18,10 +18,14 @@ package com.chrisa.theoscars.features.home
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import com.chrisa.theoscars.MainActivity
+import com.chrisa.theoscars.features.home.domain.InitializeDataUseCase
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
+import kotlinx.coroutines.runBlocking
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import javax.inject.Inject
 
 @HiltAndroidTest
 class HomeScreenTest {
@@ -31,6 +35,17 @@ class HomeScreenTest {
 
     @get:Rule(order = 2)
     val composeTestRule = createAndroidComposeRule<MainActivity>()
+
+    @Inject
+    lateinit var initializeDataUseCase: InitializeDataUseCase
+
+    @Before
+    fun setup() {
+        hiltRule.inject()
+        runBlocking {
+            initializeDataUseCase.execute()
+        }
+    }
 
     @Test
     fun filterIsDisplayed() {

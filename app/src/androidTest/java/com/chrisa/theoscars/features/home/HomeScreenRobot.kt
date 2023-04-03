@@ -35,9 +35,9 @@ import androidx.compose.ui.test.performTextInput
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.chrisa.theoscars.MainActivity
+import com.chrisa.theoscars.MainScreen
 import com.chrisa.theoscars.R
 import com.chrisa.theoscars.core.ui.theme.OscarsTheme
-import com.chrisa.theoscars.features.home.presentation.HomeScreen
 import com.chrisa.theoscars.util.KeyboardHelper
 import com.chrisa.theoscars.util.onAllNodesWithStringResId
 import com.chrisa.theoscars.util.onNodeWithStringResId
@@ -57,8 +57,8 @@ class HomeScreenRobot(
             keyboardHelper.initialize()
             OscarsTheme {
                 Surface(modifier = Modifier.statusBarsPadding()) {
-                    HomeScreen(
-                        viewModel = hiltViewModel(),
+                    MainScreen(
+                        homeViewModel = hiltViewModel(),
                         onMovieClick = { screenAction = ScreenAction.MovieClick(it) },
                         onSearchClick = { screenAction = ScreenAction.Search },
                     )

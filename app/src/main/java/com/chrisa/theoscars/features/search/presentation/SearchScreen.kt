@@ -27,7 +27,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -116,7 +115,6 @@ private fun SearchScreenContent(
     Timber.tag("UI_TEST").d("searchQuery=$searchQuery;searchResults=${searchResults.size}")
     Scaffold(
         modifier = modifier,
-        contentWindowInsets = WindowInsets(top = 0.dp, bottom = 0.dp),
         topBar = {
             SearchBar(
                 searchText = searchQuery,
@@ -249,7 +247,6 @@ fun SearchBar(
     val focusRequester = remember { FocusRequester() }
 
     TopAppBar(
-        windowInsets = WindowInsets(top = 0.dp),
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.secondaryContainer,
         ),

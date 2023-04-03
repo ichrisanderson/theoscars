@@ -16,31 +16,12 @@
 
 package com.chrisa.theoscars
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
-import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.chrisa.theoscars.core.ui.theme.OscarsTheme
-import com.chrisa.theoscars.features.home.presentation.HomeScreen
-import com.chrisa.theoscars.features.home.presentation.HomeViewModel
-import com.chrisa.theoscars.features.movie.presentation.MovieScreen
-import com.chrisa.theoscars.features.movie.presentation.MovieViewModel
-import com.chrisa.theoscars.features.search.presentation.SearchScreen
-import com.chrisa.theoscars.features.search.presentation.SearchViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -52,79 +33,8 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             OscarsTheme {
-                val navController = rememberNavController()
-                OscarsApp(navController)
+                AppNavGraph(this)
             }
         }
     }
-
-    @Composable
-    private fun OscarsApp(navController: NavHostController) {
-        Scaffold { innerPaddingModifier ->
-            NavGraph(navController, Modifier.padding(innerPaddingModifier))
-        }
-    }
-
-    @Composable
-    private fun NavGraph(
-        navController: NavHostController,
-        modifier: Modifier = Modifier,
-    ) {
-        NavHost(
-            navController = navController,
-            startDestination = AppDestinations.HOME,
-            modifier = modifier,
-        ) {
-            composable(AppDestinations.HOME) {
-                val viewModel = hiltViewModel<HomeViewModel>()
-                HomeScreen(
-                    viewModel = viewModel,
-                    onMovieClick = { movieId ->
-                        navController.navigate("movie/$movieId")
-                    },
-                    onSearchClick = {
-                        navController.navigate(AppDestinations.SEARCH)
-                    },
-                )
-            }
-            composable(
-                AppDestinations.MOVIE_DETAIL,
-                arguments = listOf(navArgument("movieId") { type = NavType.LongType }),
-            ) {
-                val viewModel = hiltViewModel<MovieViewModel>()
-                MovieScreen(
-                    viewModel = viewModel,
-                    onClose = {
-                        navController.popBackStack()
-                    },
-                    onPlayClicked = { videoId ->
-                        startActivity(
-                            Intent(
-                                Intent.ACTION_VIEW,
-                                Uri.parse("http://www.youtube.com/watch?v=$videoId"),
-                            ),
-                        )
-                    },
-                )
-            }
-            composable(AppDestinations.SEARCH) {
-                val viewModel = hiltViewModel<SearchViewModel>()
-                SearchScreen(
-                    viewModel,
-                    onMovieClick = { movieId ->
-                        navController.navigate("movie/$movieId")
-                    },
-                    onClose = {
-                        navController.popBackStack()
-                    },
-                )
-            }
-        }
-    }
-}
-
-private object AppDestinations {
-    const val HOME = "home"
-    const val MOVIE_DETAIL = "movie/{movieId}"
-    const val SEARCH = "search"
 }

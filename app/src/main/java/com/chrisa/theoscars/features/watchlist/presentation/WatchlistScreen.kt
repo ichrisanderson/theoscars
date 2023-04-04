@@ -109,7 +109,7 @@ private fun EmptyWatchlistResults(
     ) {
         Icon(
             imageVector = Icons.Default.BookmarkBorder,
-            contentDescription = "",
+            contentDescription = stringResource(id = R.string.empty_watchlist_icon_description),
             tint = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.size(32.dp),
         )

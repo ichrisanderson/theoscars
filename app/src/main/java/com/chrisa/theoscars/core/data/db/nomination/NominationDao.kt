@@ -103,7 +103,6 @@ data class MovieSearchSummary(
     val id: Long,
     val posterImagePath: String?,
     val title: String,
-    val overview: String,
     val year: Int,
 )
 
@@ -111,6 +110,5 @@ data class MovieWatchlistSummary(
     val id: Long,
     val posterImagePath: String?,
     val title: String,
-    val overview: String,
     val year: Int,
 )

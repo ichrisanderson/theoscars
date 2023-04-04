@@ -63,7 +63,6 @@ class SearchViewModelTest {
             .allowMainThreadQueries()
             .build()
 
-//        this.appDatabase = FakeAppDatabase()
         val assetManager = FakeAssetFileManager()
 
         this.bootstrapper = BootstrapperBuilder()

@@ -32,8 +32,9 @@ import com.chrisa.theoscars.core.data.db.movie.MovieEntity
     ],
 )
 data class WatchlistEntity(
-    @PrimaryKey
-    var movieId: Long,
+    @PrimaryKey(autoGenerate = true)
+    var id: Long = 0L,
+    val movieId: Long,
     val isOnWatchlist: Boolean,
     val hasWatched: Boolean,
 )

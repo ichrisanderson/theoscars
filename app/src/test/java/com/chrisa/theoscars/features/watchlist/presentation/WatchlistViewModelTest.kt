@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.chrisa.theoscars.features.search.presentation
+package com.chrisa.theoscars.features.watchlist.presentation
 
 import android.content.Context
 import androidx.room.Room
@@ -24,12 +24,13 @@ import com.chrisa.theoscars.core.data.db.AppDatabase
 import com.chrisa.theoscars.core.data.db.Bootstrapper
 import com.chrisa.theoscars.core.data.db.BootstrapperBuilder
 import com.chrisa.theoscars.core.data.db.FakeAssetFileManager
+import com.chrisa.theoscars.core.data.db.watchlist.WatchlistEntity
 import com.chrisa.theoscars.core.util.coroutines.CloseableCoroutineScope
 import com.chrisa.theoscars.core.util.coroutines.TestCoroutineDispatchersImpl
 import com.chrisa.theoscars.core.util.coroutines.TestExecutor
-import com.chrisa.theoscars.features.search.data.SearchDataRepository
-import com.chrisa.theoscars.features.search.domain.SearchMoviesUseCase
-import com.chrisa.theoscars.features.search.domain.models.SearchResultModel
+import com.chrisa.theoscars.features.watchlist.data.WatchlistDataRepository
+import com.chrisa.theoscars.features.watchlist.domain.WatchlistMoviesUseCase
+import com.chrisa.theoscars.features.watchlist.domain.models.WatchlistMovieModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -46,7 +47,7 @@ import org.robolectric.annotation.Config
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [27])
-class SearchViewModelTest {
+class WatchlistViewModelTest {
     private val testDispatcher = UnconfinedTestDispatcher()
     private val dispatchers = TestCoroutineDispatchersImpl(testDispatcher)
 
@@ -76,46 +77,61 @@ class SearchViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun searchViewModel(): SearchViewModel {
-        return SearchViewModel(
-            dispatchers,
+    private fun watchlistViewModel(): WatchlistViewModel {
+        return WatchlistViewModel(
             CloseableCoroutineScope(),
-            SearchMoviesUseCase(
+            WatchlistMoviesUseCase(
                 dispatchers,
-                SearchDataRepository(appDatabase),
+                WatchlistDataRepository(appDatabase),
             ),
         )
     }
 
     @Test
-    fun `WHEN initialised THEN query is empty`() {
-        val sut = searchViewModel()
+    fun `WHEN initialised THEN watchlist is empty`() {
+        val sut = watchlistViewModel()
 
-        assertThat(sut.viewState.value.searchQuery).isEmpty()
+        assertThat(sut.viewState.value.movies).isEmpty()
     }
 
     @Test
-    fun `WHEN initialised THEN results are empty`() {
-        val sut = searchViewModel()
+    fun `WHEN item added to watchlist THEN watchlist movies updated`() {
+        val sut = watchlistViewModel()
 
-        assertThat(sut.viewState.value.searchResults).isEmpty()
-    }
+        appDatabase.watchlistDao().insert(
+            WatchlistEntity(
+                id = 0,
+                movieId = 661374,
+                isOnWatchlist = true,
+                hasWatched = false,
+            ),
+        )
 
-    @Test
-    fun `WHEN query updated THEN matched results are returned`() {
-        val sut = searchViewModel()
-
-        sut.updateQuery("Everything Everywhere")
-
-        assertThat(sut.viewState.value.searchResults).isEqualTo(
+        assertThat(sut.viewState.value.movies).isEqualTo(
             listOf(
-                SearchResultModel(
-                    movieId = 545611,
-                    title = "Everything Everywhere All at Once",
-                    posterImagePath = "/w3LxiVYdWWRvEVdn5RYq6jIqkb1.jpg",
+                WatchlistMovieModel(
+                    movieId = 661374,
+                    posterImagePath = "/vDGr1YdrlfbU9wxTOdpf3zChmv9.jpg",
+                    title = "Glass Onion: A Knives Out Mystery",
                     year = "2023",
                 ),
             ),
         )
+    }
+
+    @Test
+    fun `WHEN item removed from watchlist THEN watchlist movies updated`() {
+        val sut = watchlistViewModel()
+        val entity = WatchlistEntity(
+            id = 0,
+            movieId = 661374,
+            isOnWatchlist = false,
+            hasWatched = false,
+        )
+
+        appDatabase.watchlistDao().insert(entity.copy(isOnWatchlist = true))
+        appDatabase.watchlistDao().insert(entity.copy(id = 1, isOnWatchlist = false))
+
+        assertThat(sut.viewState.value.movies).isEmpty()
     }
 }

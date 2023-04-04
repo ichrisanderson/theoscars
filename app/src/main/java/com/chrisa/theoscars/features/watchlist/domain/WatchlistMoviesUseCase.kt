@@ -14,29 +14,31 @@
  * limitations under the License.
  */
 
-package com.chrisa.theoscars.features.movie.domain
+package com.chrisa.theoscars.features.watchlist.domain
 
 import com.chrisa.theoscars.core.util.coroutines.CoroutineDispatchers
-import com.chrisa.theoscars.features.movie.data.MovieDataRepository
-import com.chrisa.theoscars.features.movie.domain.models.WatchlistDataModel
+import com.chrisa.theoscars.features.watchlist.data.WatchlistDataRepository
+import com.chrisa.theoscars.features.watchlist.domain.models.WatchlistMovieModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-class LoadWatchlistDataUseCase @Inject constructor(
+class WatchlistMoviesUseCase @Inject constructor(
     private val coroutineDispatchers: CoroutineDispatchers,
-    private val movieDataRepository: MovieDataRepository,
+    private val repository: WatchlistDataRepository,
 ) {
-    fun execute(movieId: Long): Flow<WatchlistDataModel> =
-        movieDataRepository.loadWatchlistData(movieId)
+    fun execute(): Flow<List<WatchlistMovieModel>> =
+        repository.watchlistMovies()
             .flowOn(coroutineDispatchers.io)
-            .map {
-                WatchlistDataModel(
-                    id = it?.id ?: 0L,
-                    movieId = it?.movieId ?: movieId,
-                    isOnWatchlist = it?.isOnWatchlist ?: false,
-                    hasWatched = it?.hasWatched ?: false,
-                )
+            .map { items ->
+                items.map {
+                    WatchlistMovieModel(
+                        movieId = it.id,
+                        title = it.title,
+                        posterImagePath = it.posterImagePath,
+                        year = it.year.toString(10),
+                    )
+                }
             }
 }

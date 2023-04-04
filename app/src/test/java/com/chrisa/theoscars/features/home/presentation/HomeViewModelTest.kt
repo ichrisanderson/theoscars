@@ -16,13 +16,17 @@
 
 package com.chrisa.theoscars.features.home.presentation
 
+import android.content.Context
+import androidx.room.Room
+import androidx.test.core.app.ApplicationProvider
+import com.chrisa.theoscars.core.data.db.AndroidAppDatabase
 import com.chrisa.theoscars.core.data.db.AppDatabase
 import com.chrisa.theoscars.core.data.db.Bootstrapper
 import com.chrisa.theoscars.core.data.db.BootstrapperBuilder
-import com.chrisa.theoscars.core.data.db.FakeAppDatabase
 import com.chrisa.theoscars.core.data.db.FakeAssetFileManager
 import com.chrisa.theoscars.core.util.coroutines.CloseableCoroutineScope
 import com.chrisa.theoscars.core.util.coroutines.TestCoroutineDispatchersImpl
+import com.chrisa.theoscars.core.util.coroutines.TestExecutor
 import com.chrisa.theoscars.features.home.data.HomeDataRepository
 import com.chrisa.theoscars.features.home.domain.FilterMoviesUseCase
 import com.chrisa.theoscars.features.home.domain.InitializeDataUseCase
@@ -39,8 +43,13 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 @ExperimentalCoroutinesApi
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [27])
 class HomeViewModelTest {
     private val testDispatcher = UnconfinedTestDispatcher()
     private val dispatchers = TestCoroutineDispatchersImpl(testDispatcher)
@@ -52,7 +61,12 @@ class HomeViewModelTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
 
-        this.appDatabase = FakeAppDatabase()
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        this.appDatabase = Room.inMemoryDatabaseBuilder(context, AndroidAppDatabase::class.java)
+            .setQueryExecutor(TestExecutor())
+            .allowMainThreadQueries()
+            .build()
+
         val assetManager = FakeAssetFileManager()
 
         this.bootstrapper = BootstrapperBuilder()
@@ -112,19 +126,19 @@ class HomeViewModelTest {
 
         assertThat(sut.viewState.value.movies.first()).isEqualTo(
             MovieSummaryModel(
-                id = 49046,
-                backdropImagePath = "/mqsPyyeDCBAghXyjbw4TfEYwljw.jpg",
-                overview = "Paul Baumer and his friends Albert and Muller, egged on by romantic dreams of heroism, voluntarily enlist in the German army. Full of excitement and patriotic fervour, the boys enthusiastically march into a war they believe in. But once on the Western Front, they discover the soul-destroying horror of World War I.",
-                title = "All Quiet on the Western Front",
+                id = 614934,
+                backdropImagePath = "/kaoTwHrJDmCPDLriN68pjlgx4R.jpg",
+                overview = "The life story of Elvis Presley as seen through the complicated relationship with his enigmatic manager, Colonel Tom Parker.",
+                title = "Elvis",
                 year = "2023",
             ),
         )
         assertThat(sut.viewState.value.movies.last()).isEqualTo(
             MovieSummaryModel(
-                id = 1042171,
-                backdropImagePath = "/572w5U3T7CiyAswyshiS48vO7uR.jpg",
-                overview = "Ivalu is gone. Her little sister is desperate to find her and her father does not care. The vast Greenlandic nature holds secrets. Where is Ivalu?",
-                title = "Ivalu",
+                id = 661374,
+                backdropImagePath = "/dKqa850uvbNSCaQCV4Im1XlzEtQ.jpg",
+                overview = "World-famous detective Benoit Blanc heads to Greece to peel back the layers of a mystery surrounding a tech billionaire and his eclectic crew of friends.",
+                title = "Glass Onion: A Knives Out Mystery",
                 year = "2023",
             ),
         )
@@ -174,9 +188,9 @@ class HomeViewModelTest {
         assertThat(sut.viewState.value.movies.map { it.title }).isEqualTo(
             listOf(
                 "Black Panther: Wakanda Forever",
-                "Everything Everywhere All at Once",
-                "The Banshees of Inisherin",
                 "The Whale",
+                "The Banshees of Inisherin",
+                "Everything Everywhere All at Once",
             ),
         )
     }

@@ -399,6 +399,7 @@ fun MovieLoadingContentPreview() {
                     nominations = emptyList(),
                 ),
                 watchlistData = WatchlistDataModel(
+                    id = -1,
                     movieId = -1,
                     isOnWatchlist = false,
                     hasWatched = false,
@@ -441,6 +442,7 @@ fun MovieContentPreview() {
                     ),
                 ),
                 watchlistData = WatchlistDataModel(
+                    id = -1,
                     movieId = -1,
                     isOnWatchlist = false,
                     hasWatched = false,

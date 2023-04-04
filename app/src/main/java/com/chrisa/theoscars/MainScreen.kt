@@ -56,10 +56,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.chrisa.theoscars.core.ui.common.ComingSoon
 import com.chrisa.theoscars.features.home.presentation.FilterContent
 import com.chrisa.theoscars.features.home.presentation.HomeScreen
 import com.chrisa.theoscars.features.home.presentation.HomeViewModel
+import com.chrisa.theoscars.features.watchlist.presentation.WatchlistScreen
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -135,7 +135,10 @@ fun MainScreen(
                     )
                 }
                 composable(MainDestinations.WATCHLIST) {
-                    ComingSoon()
+                    WatchlistScreen(
+                        viewModel = hiltViewModel(),
+                        onMovieClick = onMovieClick,
+                    )
                 }
             }
         }

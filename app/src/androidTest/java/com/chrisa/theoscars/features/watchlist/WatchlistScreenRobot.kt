@@ -20,20 +20,30 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasAnyDescendant
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToKey
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.chrisa.theoscars.MainActivity
+import com.chrisa.theoscars.MainScreen
 import com.chrisa.theoscars.R
 import com.chrisa.theoscars.core.ui.theme.OscarsTheme
-import com.chrisa.theoscars.features.watchlist.presentation.WatchlistScreen
 import com.chrisa.theoscars.util.KeyboardHelper
 import com.chrisa.theoscars.util.getString
 import com.chrisa.theoscars.util.onNodeWithStringResId
 import com.chrisa.theoscars.util.waitOnAllNodesWithStringResId
+import com.chrisa.theoscars.util.waitOnAllNodesWithTag
 import com.chrisa.theoscars.util.waitOnAllNodesWithText
 
 class WatchlistScreenRobot(
@@ -48,15 +58,16 @@ class WatchlistScreenRobot(
             keyboardHelper.initialize()
             OscarsTheme {
                 Surface(modifier = Modifier.statusBarsPadding()) {
-                    WatchlistScreen(
-                        viewModel = hiltViewModel(),
-                        onMovieClick = {
-                            screenAction = ScreenAction.MovieClick(it)
-                        },
+                    MainScreen(
+                        watchlistViewModel = hiltViewModel(),
+                        onMovieClick = { screenAction = ScreenAction.MovieClick(it) },
+                        onSearchClick = { },
                     )
                 }
             }
         }
+        composeTestRule.onNodeWithStringResId(R.string.watchlist_tab)
+            .performClick()
     }
 
     fun assertEmptyWatchlistTextDisplayed() = apply {
@@ -72,16 +83,74 @@ class WatchlistScreenRobot(
         composeTestRule.onNodeWithText(movieTitle).assertIsDisplayed()
     }
 
+    fun longPressMovie(movieId: Long) = apply {
+        composeTestRule.waitOnAllNodesWithTag(watchlistItemsTestTag)
+        composeTestRule.onNodeWithTag(watchlistItemsTestTag).performScrollToKey(movieId)
+        val tag = "$movieCardTestTag$movieId"
+        composeTestRule.onNodeWithTag(tag)
+            .performSemanticsAction(SemanticsActions.OnLongClick)
+    }
+
+    fun assertSelectionCountDisplayed(numberOfItemsSelected: Int) = apply {
+        val selectionString = composeTestRule.getString(R.string.item_selection_title, numberOfItemsSelected)
+        composeTestRule.waitOnAllNodesWithTag(selectionAppBarTestTag)
+        composeTestRule.onNodeWithTag(selectionAppBarTestTag)
+            .assert(hasAnyDescendant(hasText(selectionString)))
+    }
+
+    fun assertRemoveAllFromWatchlistButtonDisplayed() = apply {
+        composeTestRule.onNodeWithTag(selectionAppBarTestTag)
+            .assert(hasAnyDescendant(hasTestTag(removeAllFromWatchlistButtonTestTag)))
+    }
+
+    fun clickMovie(movieId: Long) = apply {
+        composeTestRule.onNodeWithTag(watchlistItemsTestTag).performScrollToKey(movieId)
+        val tag = "$movieCardTestTag$movieId"
+        composeTestRule.onNodeWithTag(tag)
+            .performClick()
+    }
+
+    fun assertMovieSelected(movieId: Long, movieTitle: String) = apply {
+        val movieSelectorTestTag = "$movieSelectedIndicatorTestTag$movieId"
+        val selectionString = composeTestRule.getString(R.string.movie_selected_description_format, movieTitle)
+        composeTestRule.waitOnAllNodesWithTag(movieSelectorTestTag, useUnmergedTree = true)
+        composeTestRule.onNodeWithContentDescription(selectionString, useUnmergedTree = true).assertIsDisplayed()
+    }
+
+    fun clickRemoveAllFromWatchlistButton() = apply {
+        composeTestRule.waitOnAllNodesWithTag(removeAllFromWatchlistButtonTestTag)
+        composeTestRule.onNodeWithTag(removeAllFromWatchlistButtonTestTag)
+            .performClick()
+    }
+
+    fun clickCloseButton() = apply {
+        composeTestRule.onNodeWithTag(closeButtonTestTag)
+            .performClick()
+    }
+
+    fun assertMainAppBarDisplayed() = apply {
+        composeTestRule.onNodeWithTag(mainAppBarTestTag)
+            .assertIsDisplayed()
+    }
+
+    fun assertMovieNotSelected(movieId: Long, movieTitle: String) = apply {
+        val movieSelectorTestTag = "$movieSelectedIndicatorTestTag$movieId"
+        val selectionString = composeTestRule.getString(R.string.movie_selected_description_format, movieTitle)
+        composeTestRule.onNodeWithTag(movieSelectorTestTag, useUnmergedTree = true).assertDoesNotExist()
+        composeTestRule.onNodeWithContentDescription(selectionString, useUnmergedTree = true).assertDoesNotExist()
+    }
+
     companion object {
-        private const val searchBarTestTag = "searchBar"
-        private const val searchBarPlaceholderTextTestTag = "searchBarPlaceholderText"
+        private const val watchlistItemsTestTag = "watchlistItems"
+        private const val movieCardTestTag = "watchListMovieCard_"
+        private const val movieSelectedIndicatorTestTag = "movieSelectedIndicator_"
+        private const val selectionAppBarTestTag = "selectionAppBar"
+        private const val mainAppBarTestTag = "mainAppBar"
         private const val closeButtonTestTag = "closeButton"
-        private const val clearSearchButtonTestTag = "clearSearchButton"
-        private const val movieCardTestTag = "movieCard_"
+        private const val removeAllFromWatchlistButtonTestTag = "removeAllFromWatchlistButton"
 
         sealed class ScreenAction {
             data class MovieClick(val id: Long) : ScreenAction()
-            object Close : ScreenAction()
         }
     }
 }

@@ -45,6 +45,7 @@ interface AppDatabase {
     fun beginTransaction()
     fun setTransactionSuccessful()
     fun endTransaction()
+    fun close()
 }
 
 @Database(

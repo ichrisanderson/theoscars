@@ -78,6 +78,7 @@ class MovieViewModelTest {
 
     @After
     fun tearDown() {
+        this.appDatabase.close()
         Dispatchers.resetMain()
     }
 

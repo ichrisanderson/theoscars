@@ -28,4 +28,9 @@ class WatchlistDataRepository @Inject constructor(
         val dao = appDatabase.nominationDao()
         return dao.watchlistMovies()
     }
+
+    fun removeFromWatchList(ids: Set<Long>) {
+        val dao = appDatabase.watchlistDao()
+        return dao.removeFromWatchList(ids)
+    }
 }

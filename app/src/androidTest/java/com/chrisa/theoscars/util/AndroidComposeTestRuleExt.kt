@@ -37,8 +37,9 @@ fun <A : ComponentActivity> AndroidComposeTestRule<ActivityScenarioRule<A>, A>.o
 
 fun <A : ComponentActivity> AndroidComposeTestRule<ActivityScenarioRule<A>, A>.getString(
     @StringRes id: Int,
+    vararg args: Any,
 ): String {
-    return activity.getString(id)
+    return activity.getString(id, *args)
 }
 
 private const val defaultTimeoutMillis = 5000L

@@ -180,6 +180,7 @@ class MovieViewModelTest {
 
         assertThat(sut.viewState.value.watchlistData).isEqualTo(
             WatchlistDataModel(
+                id = 0,
                 movieId = 49046,
                 hasWatched = false,
                 isOnWatchlist = false,

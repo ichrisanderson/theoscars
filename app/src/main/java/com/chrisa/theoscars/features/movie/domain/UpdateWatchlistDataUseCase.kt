@@ -30,6 +30,7 @@ class UpdateWatchlistDataUseCase @Inject constructor(
     suspend fun execute(watchlistDataModel: WatchlistDataModel) = withContext(coroutineDispatchers.io) {
         movieDataRepository.insertWatchlistData(
             WatchlistEntity(
+                id = watchlistDataModel.id,
                 movieId = watchlistDataModel.movieId,
                 isOnWatchlist = watchlistDataModel.isOnWatchlist,
                 hasWatched = watchlistDataModel.hasWatched,

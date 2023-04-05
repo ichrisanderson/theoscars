@@ -91,4 +91,84 @@ class WatchlistScreenTest {
             .also { updateWatchlistItem(id = 1L, movieId = 661374, isOnWatchlist = false) }
             .assertEmptyWatchlistTextDisplayed()
     }
+
+    @Test
+    fun longClickEnablesSelectionMode() {
+        WatchlistScreenRobot(composeTestRule)
+            .setContent()
+            .assertEmptyWatchlistTextDisplayed()
+            .also {
+                updateWatchlistItem(id = 0L, movieId = 661374, isOnWatchlist = true)
+                updateWatchlistItem(id = 0L, movieId = 674324, isOnWatchlist = true)
+                updateWatchlistItem(id = 0L, movieId = 615777, isOnWatchlist = true)
+                updateWatchlistItem(id = 0L, movieId = 614934, isOnWatchlist = true)
+                updateWatchlistItem(id = 0L, movieId = 595586, isOnWatchlist = true)
+            }
+            .longPressMovie(661374)
+            .assertSelectionCountDisplayed(1)
+            .assertRemoveAllFromWatchlistButtonDisplayed()
+            .assertMovieSelected(661374, "Glass Onion: A Knives Out Mystery")
+    }
+
+    @Test
+    fun clickInSelectionModeSelectsMovie() {
+        WatchlistScreenRobot(composeTestRule)
+            .setContent()
+            .assertEmptyWatchlistTextDisplayed()
+            .also {
+                updateWatchlistItem(id = 0L, movieId = 661374, isOnWatchlist = true)
+                updateWatchlistItem(id = 0L, movieId = 674324, isOnWatchlist = true)
+                updateWatchlistItem(id = 0L, movieId = 615777, isOnWatchlist = true)
+                updateWatchlistItem(id = 0L, movieId = 614934, isOnWatchlist = true)
+                updateWatchlistItem(id = 0L, movieId = 595586, isOnWatchlist = true)
+            }
+            .longPressMovie(661374)
+            .clickMovie(674324)
+            .assertSelectionCountDisplayed(2)
+            .assertMovieSelected(674324, "The Banshees of Inisherin")
+    }
+
+    @Test
+    fun selectedMoviesRemovedFromWatchlist() {
+        WatchlistScreenRobot(composeTestRule)
+            .setContent()
+            .assertEmptyWatchlistTextDisplayed()
+            .also {
+                updateWatchlistItem(id = 0L, movieId = 661374, isOnWatchlist = true)
+                updateWatchlistItem(id = 0L, movieId = 674324, isOnWatchlist = true)
+                updateWatchlistItem(id = 0L, movieId = 615777, isOnWatchlist = true)
+                updateWatchlistItem(id = 0L, movieId = 614934, isOnWatchlist = true)
+                updateWatchlistItem(id = 0L, movieId = 595586, isOnWatchlist = true)
+            }
+            .longPressMovie(661374)
+            .clickMovie(674324)
+            .clickMovie(615777)
+            .clickMovie(614934)
+            .clickMovie(595586)
+            .clickRemoveAllFromWatchlistButton()
+            .assertEmptyWatchlistTextDisplayed()
+            .assertMainAppBarDisplayed()
+    }
+
+    @Test
+    fun selectionModeCancelled() {
+        WatchlistScreenRobot(composeTestRule)
+            .setContent()
+            .assertEmptyWatchlistTextDisplayed()
+            .also {
+                updateWatchlistItem(id = 0L, movieId = 661374, isOnWatchlist = true)
+                updateWatchlistItem(id = 0L, movieId = 674324, isOnWatchlist = true)
+                updateWatchlistItem(id = 0L, movieId = 615777, isOnWatchlist = true)
+                updateWatchlistItem(id = 0L, movieId = 614934, isOnWatchlist = true)
+                updateWatchlistItem(id = 0L, movieId = 595586, isOnWatchlist = true)
+            }
+            .longPressMovie(661374)
+            .clickMovie(674324)
+            .clickMovie(615777)
+            .clickMovie(614934)
+            .clickMovie(595586)
+            .clickCloseButton()
+            .assertMainAppBarDisplayed()
+            .assertMovieNotSelected(674324, "The Banshees of Inisherin")
+    }
 }

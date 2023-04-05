@@ -75,6 +75,7 @@ class HomeViewModelTest {
 
     @After
     fun tearDown() {
+        this.appDatabase.close()
         Dispatchers.resetMain()
     }
 

@@ -18,28 +18,14 @@ package com.chrisa.theoscars.features.watchlist.domain
 
 import com.chrisa.theoscars.core.util.coroutines.CoroutineDispatchers
 import com.chrisa.theoscars.features.watchlist.data.WatchlistDataRepository
-import com.chrisa.theoscars.features.watchlist.domain.models.WatchlistMovieModel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class WatchlistMoviesUseCase @Inject constructor(
+class RemoveFromWatchlistDataUseCase @Inject constructor(
     private val coroutineDispatchers: CoroutineDispatchers,
     private val repository: WatchlistDataRepository,
 ) {
-    fun execute(): Flow<List<WatchlistMovieModel>> =
-        repository.watchlistMovies()
-            .flowOn(coroutineDispatchers.io)
-            .map { items ->
-                items.map {
-                    WatchlistMovieModel(
-                        id = it.id,
-                        movieId = it.movieId,
-                        title = it.title,
-                        posterImagePath = it.posterImagePath,
-                        year = it.year.toString(10),
-                    )
-                }
-            }
+    suspend fun execute(ids: Set<Long>) = withContext(coroutineDispatchers.io) {
+        repository.removeFromWatchList(ids)
+    }
 }

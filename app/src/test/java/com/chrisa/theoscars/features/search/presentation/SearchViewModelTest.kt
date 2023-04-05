@@ -73,6 +73,7 @@ class SearchViewModelTest {
 
     @After
     fun tearDown() {
+        this.appDatabase.close()
         Dispatchers.resetMain()
     }
 

@@ -17,6 +17,7 @@
 package com.chrisa.theoscars.features.watchlist.domain.models
 
 data class WatchlistMovieModel(
+    val id: Long,
     val movieId: Long,
     val title: String,
     val year: String,

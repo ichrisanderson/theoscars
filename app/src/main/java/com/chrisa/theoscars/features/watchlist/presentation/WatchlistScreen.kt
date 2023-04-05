@@ -16,10 +16,12 @@
 
 package com.chrisa.theoscars.features.watchlist.presentation
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
@@ -35,7 +37,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -51,6 +55,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -69,7 +74,10 @@ fun WatchlistScreen(
 
     WatchlistScreenContent(
         movies = viewState.movies,
+        hasSelectedIds = viewState.hasSelectedIds,
+        selectedIds = viewState.selectedIds,
         onMovieClick = onMovieClick,
+        onMovieLongClick = viewModel::toggleItemSelection,
         modifier = Modifier.testTag("watchlistScreenContent"),
     )
 }
@@ -77,21 +85,27 @@ fun WatchlistScreen(
 @Composable
 private fun WatchlistScreenContent(
     movies: List<WatchlistMovieModel>,
+    hasSelectedIds: Boolean,
+    selectedIds: Set<Long>,
     onMovieClick: (Long) -> Unit,
+    onMovieLongClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     if (movies.isEmpty()) {
         EmptyWatchlistResults(modifier = modifier)
     } else {
         LazyColumn(
-            modifier = modifier,
+            modifier = Modifier.testTag("watchlistItems"),
             verticalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
         ) {
             items(items = movies, key = { it.movieId }) { model ->
                 WatchlistResultCard(
                     movieModel = model,
+                    isInSelectionMode = hasSelectedIds,
+                    isSelected = selectedIds.contains(model.id),
                     onClick = onMovieClick,
+                    onLongClick = onMovieLongClick,
                 )
             }
         }
@@ -125,49 +139,95 @@ private fun EmptyWatchlistResults(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun WatchlistResultCard(
     movieModel: WatchlistMovieModel,
+    isInSelectionMode: Boolean,
+    isSelected: Boolean,
     onClick: (Long) -> Unit,
+    onLongClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Card(
         shape = MaterialTheme.shapes.small,
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) {
+                MaterialTheme.colorScheme.primaryContainer
+            } else {
+                MaterialTheme.colorScheme.surfaceVariant
+            },
+        ),
         modifier = modifier
-            .clickable { onClick(movieModel.movieId) }
-            .testTag("movieCard_${movieModel.movieId}"),
+            .combinedClickable(
+                onClick = {
+                    if (!isInSelectionMode) {
+                        onClick(movieModel.movieId)
+                    } else {
+                        onLongClick(movieModel.id)
+                    }
+                },
+                onLongClick = {
+                    onLongClick(movieModel.id)
+                },
+            )
+            .testTag("watchListMovieCard_${movieModel.movieId}"),
     ) {
         Row(
             Modifier
                 .height(IntrinsicSize.Min)
                 .fillMaxWidth(),
         ) {
-            if (movieModel.posterImagePath == null) {
-                Image(
-                    painter = painterResource(R.drawable.show_reel),
-                    colorFilter = ColorFilter.tint(Color.LightGray),
-                    contentDescription = stringResource(
-                        id = R.string.movie_image_default_format,
-                        movieModel.title,
-                    ),
-                    modifier = Modifier
-                        .width(96.dp)
-                        .background(Color.LightGray.copy(alpha = 0.3f))
-                        .aspectRatio(3 / 4.0f)
-                        .padding(16.dp),
-                )
-            } else {
-                AsyncImage(
-                    model = "https://image.tmdb.org/t/p/w500/${movieModel.posterImagePath}",
-                    contentDescription = stringResource(
-                        id = R.string.movie_image_default_format,
-                        movieModel.title,
-                    ),
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .width(96.dp)
-                        .aspectRatio(3 / 4.0f),
-                )
+            Box {
+                if (movieModel.posterImagePath == null) {
+                    Image(
+                        painter = painterResource(R.drawable.show_reel),
+                        colorFilter = ColorFilter.tint(Color.LightGray),
+                        contentDescription = stringResource(
+                            id = R.string.movie_image_default_format,
+                            movieModel.title,
+                        ),
+                        modifier = Modifier
+                            .width(96.dp)
+                            .background(Color.LightGray.copy(alpha = 0.3f))
+                            .aspectRatio(3 / 4.0f)
+                            .padding(16.dp),
+                    )
+                } else {
+                    AsyncImage(
+                        model = "https://image.tmdb.org/t/p/w500/${movieModel.posterImagePath}",
+                        contentDescription = stringResource(
+                            id = R.string.movie_image_default_format,
+                            movieModel.title,
+                        ),
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .width(96.dp)
+                            .aspectRatio(3 / 4.0f),
+                    )
+                }
+                if (isSelected) {
+                    Column(
+                        modifier = Modifier
+                            .width(96.dp)
+                            .aspectRatio(3 / 4.0f)
+                            .background(Color.Black.copy(alpha = 0.66f)),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = stringResource(
+                                id = R.string.movie_selected_description_format,
+                                movieModel.title,
+                            ),
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier
+                                .testTag("movieSelectedIndicator_${movieModel.movieId}")
+                                .size(48.dp),
+                        )
+                    }
+                }
             }
             Column(
                 modifier = Modifier
@@ -195,7 +255,10 @@ fun WatchlistEmptyScreenPreview() {
         Surface {
             WatchlistScreenContent(
                 movies = emptyList(),
+                hasSelectedIds = false,
+                selectedIds = emptySet(),
                 onMovieClick = { },
+                onMovieLongClick = { },
             )
         }
     }
@@ -208,12 +271,39 @@ fun WatchlistResultCardPreview() {
         Surface {
             WatchlistResultCard(
                 movieModel = WatchlistMovieModel(
+                    id = 1,
                     movieId = 1234,
                     posterImagePath = null,
                     title = "All Quiet on the Western Front",
                     year = "2023",
                 ),
+                isInSelectionMode = false,
+                isSelected = false,
                 onClick = { },
+                onLongClick = { },
+                modifier = Modifier.padding(8.dp),
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+fun WatchlistResultCardSelectedPreview() {
+    OscarsTheme {
+        Surface {
+            WatchlistResultCard(
+                movieModel = WatchlistMovieModel(
+                    id = 1,
+                    movieId = 1234,
+                    posterImagePath = null,
+                    title = "All Quiet on the Western Front",
+                    year = "2023",
+                ),
+                isInSelectionMode = false,
+                isSelected = true,
+                onClick = { },
+                onLongClick = { },
                 modifier = Modifier.padding(8.dp),
             )
         }

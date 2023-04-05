@@ -30,4 +30,7 @@ interface WatchlistDao {
 
     @Query("SELECT * FROM watchlist WHERE movieId = :movieId LIMIT 1")
     fun loadWatchlistData(movieId: Long): Flow<WatchlistEntity?>
+
+    @Query("DELETE FROM watchlist WHERE id IN (:ids)")
+    fun removeFromWatchList(ids: Set<Long>)
 }

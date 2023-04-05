@@ -29,6 +29,7 @@ import com.chrisa.theoscars.core.util.coroutines.CloseableCoroutineScope
 import com.chrisa.theoscars.core.util.coroutines.TestCoroutineDispatchersImpl
 import com.chrisa.theoscars.core.util.coroutines.TestExecutor
 import com.chrisa.theoscars.features.watchlist.data.WatchlistDataRepository
+import com.chrisa.theoscars.features.watchlist.domain.RemoveFromWatchlistDataUseCase
 import com.chrisa.theoscars.features.watchlist.domain.WatchlistMoviesUseCase
 import com.chrisa.theoscars.features.watchlist.domain.models.WatchlistMovieModel
 import com.google.common.truth.Truth.assertThat
@@ -74,13 +75,19 @@ class WatchlistViewModelTest {
 
     @After
     fun tearDown() {
+        this.appDatabase.close()
         Dispatchers.resetMain()
     }
 
     private fun watchlistViewModel(): WatchlistViewModel {
         return WatchlistViewModel(
+            dispatchers,
             CloseableCoroutineScope(),
             WatchlistMoviesUseCase(
+                dispatchers,
+                WatchlistDataRepository(appDatabase),
+            ),
+            RemoveFromWatchlistDataUseCase(
                 dispatchers,
                 WatchlistDataRepository(appDatabase),
             ),
@@ -110,6 +117,7 @@ class WatchlistViewModelTest {
         assertThat(sut.viewState.value.movies).isEqualTo(
             listOf(
                 WatchlistMovieModel(
+                    id = 1,
                     movieId = 661374,
                     posterImagePath = "/vDGr1YdrlfbU9wxTOdpf3zChmv9.jpg",
                     title = "Glass Onion: A Knives Out Mystery",
@@ -131,6 +139,104 @@ class WatchlistViewModelTest {
 
         appDatabase.watchlistDao().insert(entity.copy(isOnWatchlist = true))
         appDatabase.watchlistDao().insert(entity.copy(id = 1, isOnWatchlist = false))
+
+        assertThat(sut.viewState.value.movies).isEmpty()
+    }
+
+    @Test
+    fun `WHEN viewmodel loaded THEN selection is empty`() {
+        val entity = WatchlistEntity(
+            id = 0,
+            movieId = 661374,
+            isOnWatchlist = false,
+            hasWatched = false,
+        )
+        appDatabase.watchlistDao().insert(entity.copy(isOnWatchlist = true))
+        val sut = watchlistViewModel()
+
+        assertThat(sut.viewState.value.selectedIds).isEmpty()
+    }
+
+    @Test
+    fun `WHEN item selected on watchlist THEN selected items updated`() {
+        val entity = WatchlistEntity(
+            id = 0,
+            movieId = 661374,
+            isOnWatchlist = false,
+            hasWatched = false,
+        )
+        appDatabase.watchlistDao().insert(entity.copy(isOnWatchlist = true))
+        val sut = watchlistViewModel()
+
+        sut.toggleItemSelection(1)
+
+        assertThat(sut.viewState.value.selectedIds).isEqualTo(setOf(1L))
+    }
+
+    @Test
+    fun `WHEN item unselected from watchlist THEN selected items updated`() {
+        val entity = WatchlistEntity(
+            id = 0,
+            movieId = 661374,
+            isOnWatchlist = false,
+            hasWatched = false,
+        )
+        appDatabase.watchlistDao().insert(entity.copy(isOnWatchlist = true))
+        val sut = watchlistViewModel()
+        sut.toggleItemSelection(1)
+
+        sut.toggleItemSelection(1)
+
+        assertThat(sut.viewState.value.selectedIds).isEmpty()
+    }
+
+    @Test
+    fun `WHEN item selection cleared THEN selected items updated`() {
+        val entity = WatchlistEntity(
+            id = 0,
+            movieId = 661374,
+            isOnWatchlist = false,
+            hasWatched = false,
+        )
+        appDatabase.watchlistDao().insert(entity.copy(isOnWatchlist = true))
+        val sut = watchlistViewModel()
+        sut.toggleItemSelection(1)
+
+        sut.clearItemSelection()
+
+        assertThat(sut.viewState.value.selectedIds).isEmpty()
+    }
+
+    @Test
+    fun `WHEN item selection removed THEN selected items updated`() {
+        val entity = WatchlistEntity(
+            id = 0,
+            movieId = 661374,
+            isOnWatchlist = false,
+            hasWatched = false,
+        )
+        appDatabase.watchlistDao().insert(entity.copy(isOnWatchlist = true))
+        val sut = watchlistViewModel()
+        sut.toggleItemSelection(1)
+
+        sut.removeAllFromWatchlist()
+
+        assertThat(sut.viewState.value.selectedIds).isEmpty()
+    }
+
+    @Test
+    fun `WHEN item selection removed THEN watchlist updated`() {
+        val entity = WatchlistEntity(
+            id = 0,
+            movieId = 661374,
+            isOnWatchlist = false,
+            hasWatched = false,
+        )
+        appDatabase.watchlistDao().insert(entity.copy(isOnWatchlist = true))
+        val sut = watchlistViewModel()
+        sut.toggleItemSelection(1)
+
+        sut.removeAllFromWatchlist()
 
         assertThat(sut.viewState.value.movies).isEmpty()
     }

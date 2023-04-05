@@ -18,11 +18,14 @@ package com.chrisa.theoscars
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CollectionsBookmark
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Tune
@@ -39,15 +42,18 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -60,6 +66,7 @@ import com.chrisa.theoscars.features.home.presentation.FilterContent
 import com.chrisa.theoscars.features.home.presentation.HomeScreen
 import com.chrisa.theoscars.features.home.presentation.HomeViewModel
 import com.chrisa.theoscars.features.watchlist.presentation.WatchlistScreen
+import com.chrisa.theoscars.features.watchlist.presentation.WatchlistViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -67,10 +74,13 @@ import kotlinx.coroutines.launch
 fun MainScreen(
     onMovieClick: (Long) -> Unit,
     onSearchClick: () -> Unit,
-    homeViewModel: HomeViewModel = hiltViewModel<HomeViewModel>(),
+    homeViewModel: HomeViewModel = hiltViewModel(),
+    watchlistViewModel: WatchlistViewModel = hiltViewModel(),
     navController: NavHostController = rememberNavController(),
 ) {
     val homeViewState by homeViewModel.viewState.collectAsState()
+    val watchlistViewState by watchlistViewModel.viewState.collectAsState()
+
     val tabs = remember { MainTabs.values() }
     val coroutineScope = rememberCoroutineScope()
     val modalSheetState = rememberModalBottomSheetState(
@@ -81,6 +91,7 @@ fun MainScreen(
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentTabDestination = navBackStackEntry?.destination
+    val isWatchlistTab = currentTabDestination?.route == MainDestinations.WATCHLIST
 
     ModalBottomSheetLayout(
         sheetState = modalSheetState,
@@ -109,15 +120,26 @@ fun MainScreen(
     ) {
         Scaffold(
             topBar = {
-                AppBar(
-                    isFilterVisible = currentTabDestination?.route == MainDestinations.HOME,
-                    onSearchClick = onSearchClick,
-                    onFilterClick = {
-                        coroutineScope.launch {
-                            modalSheetState.show()
-                        }
-                    },
-                )
+                if (isWatchlistTab && watchlistViewState.hasSelectedIds) {
+                    SelectionAppBar(
+                        selectionCount = watchlistViewState.selectedIdCount,
+                        onRemoveAllFromWatchlist = watchlistViewModel::removeAllFromWatchlist,
+                        onClose = watchlistViewModel::clearItemSelection,
+                    )
+                } else {
+                    AppBar(
+                        isFilterVisible = currentTabDestination?.route == MainDestinations.HOME,
+                        onSearchClick = onSearchClick,
+                        onFilterClick = {
+                            coroutineScope.launch {
+                                modalSheetState.show()
+                            }
+                        },
+                    )
+                    LaunchedEffect(watchlistViewModel) {
+                        watchlistViewModel.clearItemSelection()
+                    }
+                }
             },
             bottomBar = {
                 BottomBar(navController, tabs)
@@ -136,7 +158,7 @@ fun MainScreen(
                 }
                 composable(MainDestinations.WATCHLIST) {
                     WatchlistScreen(
-                        viewModel = hiltViewModel(),
+                        viewModel = watchlistViewModel,
                         onMovieClick = onMovieClick,
                     )
                 }
@@ -154,7 +176,7 @@ private fun AppBar(
     modifier: Modifier = Modifier,
 ) {
     TopAppBar(
-        modifier = modifier,
+        modifier = modifier.testTag("mainAppBar"),
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.secondaryContainer,
         ),
@@ -197,6 +219,55 @@ private fun AppBar(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SelectionAppBar(
+    onRemoveAllFromWatchlist: () -> Unit,
+    onClose: () -> Unit,
+    modifier: Modifier = Modifier,
+    selectionCount: Int,
+) {
+    TopAppBar(
+        modifier = modifier.testTag("selectionAppBar"),
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+        ),
+        title = {
+            Text(
+                text = stringResource(id = R.string.item_selection_title, selectionCount),
+                style = MaterialTheme.typography.headlineSmall,
+            )
+        },
+        navigationIcon = {
+            IconButton(
+                onClick = onClose,
+                modifier = Modifier.testTag("closeButton"),
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.ArrowBack,
+                    tint = Color.White,
+                    contentDescription = stringResource(id = R.string.close_button_description),
+                    modifier = Modifier
+                        .size(48.dp)
+                        .padding(8.dp),
+                )
+            }
+        },
+        actions = {
+            IconButton(
+                onClick = onRemoveAllFromWatchlist,
+                modifier = Modifier.testTag("removeAllFromWatchlistButton"),
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = stringResource(id = R.string.remove_from_to_watchlist_icon_description),
+                    tint = MaterialTheme.colorScheme.onSurface,
+                )
+            }
+        },
+    )
+}
+
 @Composable
 private fun BottomBar(
     navController: NavHostController,
@@ -205,19 +276,19 @@ private fun BottomBar(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
     NavigationBar {
-        tabs.forEach { screen ->
+        tabs.forEach { tab ->
             NavigationBarItem(
                 icon = {
                     Icon(
-                        screen.icon,
+                        tab.icon,
                         tint = MaterialTheme.colorScheme.onPrimaryContainer,
                         contentDescription = null,
                     )
                 },
-                label = { Text(stringResource(screen.title)) },
-                selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
+                label = { Text(stringResource(tab.title)) },
+                selected = currentDestination?.hierarchy?.any { it.route == tab.route } == true,
                 onClick = {
-                    navController.navigate(screen.route) {
+                    navController.navigate(tab.route) {
                         // Pop up to the start destination of the graph to
                         // avoid building up a large stack of destinations
                         // on the back stack as users select items

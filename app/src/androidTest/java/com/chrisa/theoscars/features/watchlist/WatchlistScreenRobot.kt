@@ -71,10 +71,10 @@ class WatchlistScreenRobot(
     }
 
     fun assertEmptyWatchlistTextDisplayed() = apply {
-        composeTestRule.waitOnAllNodesWithStringResId(R.string.empty_watchlist_title)
-        composeTestRule.onNodeWithStringResId(R.string.empty_watchlist_title)
+        composeTestRule.waitOnAllNodesWithStringResId(R.string.empty_watch_list_title)
+        composeTestRule.onNodeWithStringResId(R.string.empty_watch_list_title)
             .assertIsDisplayed()
-        composeTestRule.onNodeWithContentDescription(composeTestRule.getString(R.string.empty_watchlist_icon_description))
+        composeTestRule.onNodeWithContentDescription(composeTestRule.getString(R.string.empty_watch_list_icon_description))
             .assertIsDisplayed()
     }
 
@@ -136,6 +136,7 @@ class WatchlistScreenRobot(
     fun assertMovieNotSelected(movieId: Long, movieTitle: String) = apply {
         val movieSelectorTestTag = "$movieSelectedIndicatorTestTag$movieId"
         val selectionString = composeTestRule.getString(R.string.movie_selected_description_format, movieTitle)
+        composeTestRule.waitOnAllNodesWithTag(movieSelectorTestTag, true)
         composeTestRule.onNodeWithTag(movieSelectorTestTag, useUnmergedTree = true).assertDoesNotExist()
         composeTestRule.onNodeWithContentDescription(selectionString, useUnmergedTree = true).assertDoesNotExist()
     }

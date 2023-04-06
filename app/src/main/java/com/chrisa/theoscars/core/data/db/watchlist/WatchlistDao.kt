@@ -32,5 +32,14 @@ interface WatchlistDao {
     fun loadWatchlistData(movieId: Long): Flow<WatchlistEntity?>
 
     @Query("DELETE FROM watchlist WHERE id IN (:ids)")
-    fun removeFromWatchList(ids: Set<Long>)
+    fun deleteAll(ids: Set<Long>)
+
+    @Query("DELETE FROM watchlist WHERE id = :id")
+    fun delete(id: Long)
+
+    @Query("UPDATE watchlist SET hasWatched = 1 WHERE id IN (:ids)")
+    fun setAllAsWatched(ids: Set<Long>)
+
+    @Query("UPDATE watchlist SET hasWatched = 0 WHERE id IN (:ids)")
+    fun setAllAsUnwatched(ids: Set<Long>)
 }

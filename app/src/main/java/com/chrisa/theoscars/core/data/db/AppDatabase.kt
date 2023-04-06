@@ -78,7 +78,7 @@ abstract class AndroidAppDatabase : RoomDatabase(), AppDatabase {
             return Room.databaseBuilder(context, AndroidAppDatabase::class.java, databaseName)
                 .apply {
                     if (seedDBExists) {
-                        createFromAsset(databaseName)
+//                        createFromAsset(databaseName)
                     }
                 }
                 .build()

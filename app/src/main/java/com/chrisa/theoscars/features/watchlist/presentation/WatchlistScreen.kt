@@ -27,7 +27,6 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -40,6 +39,7 @@ import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -49,13 +49,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -73,68 +73,142 @@ fun WatchlistScreen(
     val viewState by viewModel.viewState.collectAsState()
 
     WatchlistScreenContent(
-        movies = viewState.movies,
+        moviesToWatch = viewState.moviesToWatch,
+        moviesWatched = viewState.moviesWatched,
         hasSelectedIds = viewState.hasSelectedIds,
         selectedIds = viewState.selectedIds,
         onMovieClick = onMovieClick,
         onMovieLongClick = viewModel::toggleItemSelection,
-        modifier = Modifier.testTag("watchlistScreenContent"),
     )
 }
 
 @Composable
 private fun WatchlistScreenContent(
-    movies: List<WatchlistMovieModel>,
+    moviesToWatch: List<WatchlistMovieModel>,
+    moviesWatched: List<WatchlistMovieModel>,
     hasSelectedIds: Boolean,
     selectedIds: Set<Long>,
     onMovieClick: (Long) -> Unit,
     onMovieLongClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    if (movies.isEmpty()) {
-        EmptyWatchlistResults(modifier = modifier)
-    } else {
-        LazyColumn(
-            modifier = Modifier.testTag("watchlistItems"),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-        ) {
-            items(items = movies, key = { it.movieId }) { model ->
-                WatchlistResultCard(
-                    movieModel = model,
-                    isInSelectionMode = hasSelectedIds,
-                    isSelected = selectedIds.contains(model.id),
-                    onClick = onMovieClick,
-                    onLongClick = onMovieLongClick,
-                )
+    LazyColumn(
+        modifier = modifier.testTag("watchlistItems"),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+    ) {
+        item {
+            Text(
+                modifier = Modifier.padding(top = 8.dp),
+                text = "To Watch",
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
+        item {
+            Divider(
+                modifier = Modifier
+                    .padding(bottom = 8.dp)
+                    .alpha(0.3f),
+            )
+        }
+        if (moviesToWatch.isEmpty()) {
+            item {
+                EmptyWatchlist()
             }
+        }
+        items(items = moviesToWatch, key = { it.movieId }) { model ->
+            WatchlistResultCard(
+                movieModel = model,
+                isInSelectionMode = hasSelectedIds,
+                isSelected = selectedIds.contains(model.id),
+                onClick = onMovieClick,
+                onLongClick = onMovieLongClick,
+            )
+        }
+        item {
+            Text(
+                modifier = Modifier
+                    .padding(top = 32.dp),
+                text = "Watched",
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
+        item {
+            Divider(
+                modifier = Modifier
+                    .padding(bottom = 8.dp)
+                    .alpha(0.3f),
+            )
+        }
+        if (moviesWatched.isEmpty()) {
+            item {
+                EmptyWatchedList()
+            }
+        }
+        items(items = moviesWatched, key = { it.movieId }) { model ->
+            WatchlistResultCard(
+                movieModel = model,
+                isInSelectionMode = hasSelectedIds,
+                isSelected = selectedIds.contains(model.id),
+                onClick = onMovieClick,
+                onLongClick = onMovieLongClick,
+            )
         }
     }
 }
 
 @Composable
-private fun EmptyWatchlistResults(
+private fun EmptyWatchlist(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier,
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Icon(
             imageVector = Icons.Default.BookmarkBorder,
-            contentDescription = stringResource(id = R.string.empty_watchlist_icon_description),
-            tint = MaterialTheme.colorScheme.onSurface,
+            contentDescription = stringResource(id = R.string.empty_watch_list_icon_description),
+            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
             modifier = Modifier.size(32.dp),
         )
         Text(
             modifier = Modifier
                 .padding(top = 16.dp)
                 .padding(horizontal = 16.dp),
-            text = stringResource(id = R.string.empty_watchlist_title),
+            text = stringResource(id = R.string.empty_watch_list_title),
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurface,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+        )
+    }
+}
+
+@Composable
+private fun EmptyWatchedList(
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.unwatched),
+            contentDescription = stringResource(id = R.string.empty_watched_list_icon_description),
+            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+            modifier = Modifier.size(32.dp),
+        )
+        Text(
+            modifier = Modifier
+                .padding(top = 16.dp)
+                .padding(horizontal = 16.dp),
+            text = stringResource(id = R.string.empty_watched_list_title),
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
         )
     }
 }
@@ -250,11 +324,51 @@ fun WatchlistResultCard(
 
 @Preview
 @Composable
+fun WatchlistScreenPreview() {
+    OscarsTheme {
+        Surface {
+            WatchlistScreenContent(
+                moviesToWatch = listOf(
+                    WatchlistMovieModel(
+                        id = 1,
+                        movieId = 1,
+                        posterImagePath = null,
+                        title = "All Quiet on the Western Front",
+                        year = "2023",
+                    ),
+                    WatchlistMovieModel(
+                        id = 2,
+                        movieId = 2,
+                        posterImagePath = null,
+                        title = "Avatar",
+                        year = "2023",
+                    ),
+                    WatchlistMovieModel(
+                        id = 2,
+                        movieId = 3,
+                        posterImagePath = null,
+                        title = "Everything Everywhere All At Once",
+                        year = "2023",
+                    ),
+                ),
+                moviesWatched = emptyList(),
+                hasSelectedIds = false,
+                selectedIds = emptySet(),
+                onMovieClick = { },
+                onMovieLongClick = { },
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
 fun WatchlistEmptyScreenPreview() {
     OscarsTheme {
         Surface {
             WatchlistScreenContent(
-                movies = emptyList(),
+                moviesToWatch = emptyList(),
+                moviesWatched = emptyList(),
                 hasSelectedIds = false,
                 selectedIds = emptySet(),
                 onMovieClick = { },

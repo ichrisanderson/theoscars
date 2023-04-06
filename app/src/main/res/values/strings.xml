@@ -41,7 +41,8 @@
     <string name="empty_search_results_subtitle">Please try a different search query…</string>
 
     <!-- Watchlist -->
-    <string name="empty_watchlist_title">To add movies you want to watch, tap the watchlist icon.</string>
+    <string name="empty_watch_list_title">To add movies you want to watch, tap the watchlist icon.</string>
+    <string name="empty_watched_list_title">To record movies as watched, tap the watch icon.</string>
     <string name="item_selection_title">%1$d Selected</string>
 
     <!-- Content Descriptions -->
@@ -54,9 +55,12 @@
     <string name="play_button_description">Play Button</string>
     <string name="search_icon_description">Search Button</string>
     <string name="winner_badge_description">Winner</string>
-    <string name="empty_watchlist_icon_description">Watchlist icon</string>
+    <string name="empty_watch_list_icon_description">Watchlist icon</string>
+    <string name="empty_watched_list_icon_description">Watched icon</string>
     <string name="add_to_watchlist_icon_description">Add to watchlist</string>
-    <string name="remove_from_to_watchlist_icon_description">Remove from watchlist</string>
+    <string name="remove_from_watchlist_icon_description">Remove from watchlist</string>
+    <string name="remove_from_watched_list_icon_description">Remove from watched list</string>
+    <string name="add_to_watched_list_icon_description">Add to watched list</string>
     <string name="mark_as_watched_icon_description">Mark as watched</string>
     <string name="mark_as_unwatched_icon_description">Mark as unwatched</string>
     <string name="dismiss_label">Dismiss</string>

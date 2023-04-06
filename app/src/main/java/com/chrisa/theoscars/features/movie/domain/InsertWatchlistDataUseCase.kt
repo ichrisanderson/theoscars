@@ -14,18 +14,27 @@
  * limitations under the License.
  */
 
-package com.chrisa.theoscars.features.watchlist.domain
+package com.chrisa.theoscars.features.movie.domain
 
+import com.chrisa.theoscars.core.data.db.watchlist.WatchlistEntity
 import com.chrisa.theoscars.core.util.coroutines.CoroutineDispatchers
-import com.chrisa.theoscars.features.watchlist.data.WatchlistDataRepository
+import com.chrisa.theoscars.features.movie.data.MovieDataRepository
+import com.chrisa.theoscars.features.movie.domain.models.WatchlistDataModel
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class RemoveFromWatchlistDataUseCase @Inject constructor(
+class InsertWatchlistDataUseCase @Inject constructor(
     private val coroutineDispatchers: CoroutineDispatchers,
-    private val repository: WatchlistDataRepository,
+    private val movieDataRepository: MovieDataRepository,
 ) {
-    suspend fun execute(ids: Set<Long>) = withContext(coroutineDispatchers.io) {
-        repository.removeFromWatchList(ids)
-    }
+    suspend fun execute(watchlistDataModel: WatchlistDataModel) =
+        withContext(coroutineDispatchers.io) {
+            movieDataRepository.insertWatchlistData(
+                WatchlistEntity(
+                    id = watchlistDataModel.id,
+                    movieId = watchlistDataModel.movieId,
+                    hasWatched = watchlistDataModel.hasWatched,
+                ),
+            )
+        }
 }

@@ -19,7 +19,8 @@ package com.chrisa.theoscars.features.watchlist
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import com.chrisa.theoscars.MainActivity
 import com.chrisa.theoscars.features.home.domain.InitializeDataUseCase
-import com.chrisa.theoscars.features.movie.domain.UpdateWatchlistDataUseCase
+import com.chrisa.theoscars.features.movie.domain.DeleteWatchlistDataUseCase
+import com.chrisa.theoscars.features.movie.domain.InsertWatchlistDataUseCase
 import com.chrisa.theoscars.features.movie.domain.models.WatchlistDataModel
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -42,7 +43,10 @@ class WatchlistScreenTest {
     lateinit var initializeDataUseCase: InitializeDataUseCase
 
     @Inject
-    lateinit var updateWatchlistDataUseCase: UpdateWatchlistDataUseCase
+    lateinit var updateWatchlistDataUseCase: InsertWatchlistDataUseCase
+
+    @Inject
+    lateinit var deleteWatchlistDataUseCase: DeleteWatchlistDataUseCase
 
     @Before
     fun setup() {
@@ -62,6 +66,12 @@ class WatchlistScreenTest {
                     hasWatched = false,
                 ),
             )
+        }
+    }
+
+    private fun deleteWatchlistItem(id: Long) {
+        runBlocking {
+            deleteWatchlistDataUseCase.execute(id)
         }
     }
 
@@ -88,7 +98,7 @@ class WatchlistScreenTest {
             .assertEmptyWatchlistTextDisplayed()
             .also { updateWatchlistItem(id = 0L, movieId = 661374, isOnWatchlist = true) }
             .assertMovieTitleDisplayed("Glass Onion: A Knives Out Mystery")
-            .also { updateWatchlistItem(id = 1L, movieId = 661374, isOnWatchlist = false) }
+            .also { deleteWatchlistItem(1L) }
             .assertEmptyWatchlistTextDisplayed()
     }
 

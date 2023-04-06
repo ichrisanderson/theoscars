@@ -46,4 +46,9 @@ class MovieDataRepository @Inject constructor(
         val dao = appDatabase.watchlistDao()
         return dao.insert(watchlistEntity)
     }
+
+    fun deleteWatchlistData(id: Long) {
+        val dao = appDatabase.watchlistDao()
+        return dao.delete(id)
+    }
 }

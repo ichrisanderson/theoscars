@@ -370,7 +370,6 @@ fun MovieLoadingContentPreview() {
                 watchlistData = WatchlistDataModel(
                     id = -1,
                     movieId = -1,
-                    isOnWatchlist = false,
                     hasWatched = false,
                 ),
                 onClose = { },
@@ -412,7 +411,6 @@ fun MovieContentPreview() {
                 watchlistData = WatchlistDataModel(
                     id = -1,
                     movieId = -1,
-                    isOnWatchlist = false,
                     hasWatched = false,
                 ),
                 onClose = { },

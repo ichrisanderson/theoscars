@@ -260,7 +260,7 @@ private fun SelectionAppBar(
         actions = {
             IconButton(
                 onClick = onRemoveFromWatchedList,
-                modifier = Modifier.testTag("markAsUnWatched"),
+                modifier = Modifier.testTag("removeFromWatchedListButton"),
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.watch_off),
@@ -270,7 +270,7 @@ private fun SelectionAppBar(
             }
             IconButton(
                 onClick = onAddToWatchedList,
-                modifier = Modifier.testTag("markAsWatched"),
+                modifier = Modifier.testTag("addToWatchedListButton"),
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.watched),
@@ -280,7 +280,7 @@ private fun SelectionAppBar(
             }
             IconButton(
                 onClick = onRemoveAllFromWatchlist,
-                modifier = Modifier.testTag("removeAllFromWatchlistButton"),
+                modifier = Modifier.testTag("removeFromWatchlistButton"),
             ) {
                 Icon(
                     imageVector = Icons.Default.Delete,

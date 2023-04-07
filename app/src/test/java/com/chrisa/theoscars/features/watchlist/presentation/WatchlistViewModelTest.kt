@@ -242,4 +242,40 @@ class WatchlistViewModelTest {
 
         assertThat(sut.viewState.value.moviesToWatch).isEmpty()
     }
+
+    @Test
+    fun `WHEN item selection added to watched list THEN watched list updated`() {
+        val entity = WatchlistEntity(
+            id = 0,
+            movieId = 661374,
+            hasWatched = false,
+        )
+        appDatabase.watchlistDao().insert(entity)
+        val sut = watchlistViewModel()
+        sut.toggleItemSelection(1)
+
+        sut.addSelectionToWatchedList()
+
+        assertThat(sut.viewState.value.moviesToWatch).isEmpty()
+        assertThat(sut.viewState.value.moviesWatched.map { it.movieId })
+            .isEqualTo(listOf(661374L))
+    }
+
+    @Test
+    fun `WHEN item selection removed from watched list THEN watched list updated`() {
+        val entity = WatchlistEntity(
+            id = 0,
+            movieId = 661374,
+            hasWatched = true,
+        )
+        appDatabase.watchlistDao().insert(entity)
+        val sut = watchlistViewModel()
+        sut.toggleItemSelection(1)
+
+        sut.removeSelectionFromWatchedList()
+
+        assertThat(sut.viewState.value.moviesToWatch.map { it.movieId })
+            .isEqualTo(listOf(661374L))
+        assertThat(sut.viewState.value.moviesWatched).isEmpty()
+    }
 }

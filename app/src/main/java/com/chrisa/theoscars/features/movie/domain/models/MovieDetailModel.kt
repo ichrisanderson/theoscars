@@ -35,6 +35,7 @@ data class NominationModel(
 data class WatchlistDataModel(
     val id: Long,
     val movieId: Long,
-    val isOnWatchlist: Boolean,
     val hasWatched: Boolean,
-)
+) {
+    val isOnWatchlist = id > 0L
+}

@@ -189,7 +189,6 @@ class MovieViewModelTest {
                 id = 0,
                 movieId = 49046,
                 hasWatched = false,
-                isOnWatchlist = false,
             ),
         )
     }

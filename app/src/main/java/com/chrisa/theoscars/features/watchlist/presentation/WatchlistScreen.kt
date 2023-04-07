@@ -97,7 +97,7 @@ private fun WatchlistScreenContent(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
     ) {
-        item {
+        item(key = "toWatchListTitle") {
             Text(
                 modifier = Modifier.padding(top = 8.dp),
                 text = "To Watch",
@@ -113,7 +113,7 @@ private fun WatchlistScreenContent(
             )
         }
         if (moviesToWatch.isEmpty()) {
-            item {
+            item(key = "emptyWatchlist") {
                 EmptyWatchlist()
             }
         }
@@ -126,7 +126,7 @@ private fun WatchlistScreenContent(
                 onLongClick = onMovieLongClick,
             )
         }
-        item {
+        item(key = "watchedListTitle") {
             Text(
                 modifier = Modifier
                     .padding(top = 32.dp),
@@ -143,7 +143,7 @@ private fun WatchlistScreenContent(
             )
         }
         if (moviesWatched.isEmpty()) {
-            item {
+            item(key = "emptyWatchedList") {
                 EmptyWatchedList()
             }
         }

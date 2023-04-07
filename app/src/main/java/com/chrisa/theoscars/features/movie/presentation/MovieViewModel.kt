@@ -125,7 +125,6 @@ data class MovieViewState(
             watchlistData = WatchlistDataModel(
                 id = 0L,
                 movieId = 0L,
-                isOnWatchlist = false,
                 hasWatched = false,
             ),
         )

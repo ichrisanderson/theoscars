@@ -86,12 +86,14 @@ class WatchlistViewModel @Inject constructor(
     fun addSelectionToWatchedList() {
         coroutineScope.launch(dispatchers.io) {
             setAllAsWatchedUseCase.execute(_viewState.value.selectedIds)
+            _viewState.update { it.copy(selectedIds = emptySet()) }
         }
     }
 
     fun removeSelectionFromWatchedList() {
         coroutineScope.launch(dispatchers.io) {
             setAllAsUnwatchedUseCase.execute(_viewState.value.selectedIds)
+            _viewState.update { it.copy(selectedIds = emptySet()) }
         }
     }
 }

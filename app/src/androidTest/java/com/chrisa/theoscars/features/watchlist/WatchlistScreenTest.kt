@@ -43,7 +43,7 @@ class WatchlistScreenTest {
     lateinit var initializeDataUseCase: InitializeDataUseCase
 
     @Inject
-    lateinit var updateWatchlistDataUseCase: InsertWatchlistDataUseCase
+    lateinit var insertWatchlistDataUseCase: InsertWatchlistDataUseCase
 
     @Inject
     lateinit var deleteWatchlistDataUseCase: DeleteWatchlistDataUseCase
@@ -56,14 +56,13 @@ class WatchlistScreenTest {
         }
     }
 
-    private fun updateWatchlistItem(id: Long, movieId: Long, isOnWatchlist: Boolean) {
+    private fun insertWatchlistItem(movieId: Long, hasWatched: Boolean = false) {
         runBlocking {
-            updateWatchlistDataUseCase.execute(
+            insertWatchlistDataUseCase.execute(
                 WatchlistDataModel(
-                    id = id,
+                    id = 0L,
                     movieId = movieId,
-                    isOnWatchlist = isOnWatchlist,
-                    hasWatched = false,
+                    hasWatched = hasWatched,
                 ),
             )
         }
@@ -76,10 +75,11 @@ class WatchlistScreenTest {
     }
 
     @Test
-    fun assertEmptyMovieText() {
+    fun assertEmptyWatchlistText() {
         WatchlistScreenRobot(composeTestRule)
             .setContent()
             .assertEmptyWatchlistTextDisplayed()
+            .assertEmptyWatchedListTextDisplayed()
     }
 
     @Test
@@ -87,7 +87,8 @@ class WatchlistScreenTest {
         WatchlistScreenRobot(composeTestRule)
             .setContent()
             .assertEmptyWatchlistTextDisplayed()
-            .also { updateWatchlistItem(id = 0L, movieId = 661374, isOnWatchlist = true) }
+            .assertEmptyWatchedListTextDisplayed()
+            .also { insertWatchlistItem(movieId = 661374) }
             .assertMovieTitleDisplayed("Glass Onion: A Knives Out Mystery")
     }
 
@@ -96,7 +97,8 @@ class WatchlistScreenTest {
         WatchlistScreenRobot(composeTestRule)
             .setContent()
             .assertEmptyWatchlistTextDisplayed()
-            .also { updateWatchlistItem(id = 0L, movieId = 661374, isOnWatchlist = true) }
+            .assertEmptyWatchedListTextDisplayed()
+            .also { insertWatchlistItem(movieId = 661374) }
             .assertMovieTitleDisplayed("Glass Onion: A Knives Out Mystery")
             .also { deleteWatchlistItem(1L) }
             .assertEmptyWatchlistTextDisplayed()
@@ -107,16 +109,17 @@ class WatchlistScreenTest {
         WatchlistScreenRobot(composeTestRule)
             .setContent()
             .assertEmptyWatchlistTextDisplayed()
+            .assertEmptyWatchedListTextDisplayed()
             .also {
-                updateWatchlistItem(id = 0L, movieId = 661374, isOnWatchlist = true)
-                updateWatchlistItem(id = 0L, movieId = 674324, isOnWatchlist = true)
-                updateWatchlistItem(id = 0L, movieId = 615777, isOnWatchlist = true)
-                updateWatchlistItem(id = 0L, movieId = 614934, isOnWatchlist = true)
-                updateWatchlistItem(id = 0L, movieId = 595586, isOnWatchlist = true)
+                insertWatchlistItem(movieId = 661374)
+                insertWatchlistItem(movieId = 674324)
+                insertWatchlistItem(movieId = 615777)
+                insertWatchlistItem(movieId = 614934)
+                insertWatchlistItem(movieId = 595586)
             }
             .longPressMovie(661374)
             .assertSelectionCountDisplayed(1)
-            .assertRemoveAllFromWatchlistButtonDisplayed()
+            .assertRemoveFromWatchlistButtonDisplayed()
             .assertMovieSelected(661374, "Glass Onion: A Knives Out Mystery")
     }
 
@@ -125,12 +128,13 @@ class WatchlistScreenTest {
         WatchlistScreenRobot(composeTestRule)
             .setContent()
             .assertEmptyWatchlistTextDisplayed()
+            .assertEmptyWatchedListTextDisplayed()
             .also {
-                updateWatchlistItem(id = 0L, movieId = 661374, isOnWatchlist = true)
-                updateWatchlistItem(id = 0L, movieId = 674324, isOnWatchlist = true)
-                updateWatchlistItem(id = 0L, movieId = 615777, isOnWatchlist = true)
-                updateWatchlistItem(id = 0L, movieId = 614934, isOnWatchlist = true)
-                updateWatchlistItem(id = 0L, movieId = 595586, isOnWatchlist = true)
+                insertWatchlistItem(movieId = 661374)
+                insertWatchlistItem(movieId = 674324)
+                insertWatchlistItem(movieId = 615777)
+                insertWatchlistItem(movieId = 614934)
+                insertWatchlistItem(movieId = 595586)
             }
             .longPressMovie(661374)
             .clickMovie(674324)
@@ -143,12 +147,13 @@ class WatchlistScreenTest {
         WatchlistScreenRobot(composeTestRule)
             .setContent()
             .assertEmptyWatchlistTextDisplayed()
+            .assertEmptyWatchedListTextDisplayed()
             .also {
-                updateWatchlistItem(id = 0L, movieId = 661374, isOnWatchlist = true)
-                updateWatchlistItem(id = 0L, movieId = 674324, isOnWatchlist = true)
-                updateWatchlistItem(id = 0L, movieId = 615777, isOnWatchlist = true)
-                updateWatchlistItem(id = 0L, movieId = 614934, isOnWatchlist = true)
-                updateWatchlistItem(id = 0L, movieId = 595586, isOnWatchlist = true)
+                insertWatchlistItem(movieId = 661374)
+                insertWatchlistItem(movieId = 674324)
+                insertWatchlistItem(movieId = 615777)
+                insertWatchlistItem(movieId = 614934)
+                insertWatchlistItem(movieId = 595586)
             }
             .longPressMovie(661374)
             .clickMovie(674324)
@@ -157,7 +162,86 @@ class WatchlistScreenTest {
             .clickMovie(595586)
             .clickRemoveAllFromWatchlistButton()
             .assertEmptyWatchlistTextDisplayed()
+            .assertEmptyWatchedListTextDisplayed()
             .assertMainAppBarDisplayed()
+    }
+
+    @Test
+    fun selectedMoviesAddedToWatchedList() {
+        WatchlistScreenRobot(composeTestRule)
+            .setContent()
+            .assertEmptyWatchlistTextDisplayed()
+            .assertEmptyWatchedListTextDisplayed()
+            .also {
+                insertWatchlistItem(movieId = 661374)
+                insertWatchlistItem(movieId = 674324)
+                insertWatchlistItem(movieId = 615777)
+                insertWatchlistItem(movieId = 614934)
+                insertWatchlistItem(movieId = 595586)
+            }
+            .longPressMovie(661374)
+            .clickMovie(674324)
+            .clickMovie(615777)
+            .clickMovie(614934)
+            .clickMovie(595586)
+            .clickAddToWatchedListButton()
+            .scrollToWatchlistTitle()
+            .assertEmptyWatchlistTextDisplayed()
+            .assertEmptyWatchedListTextNotDisplayed()
+            .assertMainAppBarDisplayed()
+            .assertMovieNotSelected(661374, "Glass Onion: A Knives Out Mystery")
+    }
+
+    @Test
+    fun selectedMoviesKeptOnWatchedList() {
+        WatchlistScreenRobot(composeTestRule)
+            .setContent()
+            .assertEmptyWatchlistTextDisplayed()
+            .assertEmptyWatchedListTextDisplayed()
+            .also {
+                insertWatchlistItem(movieId = 661374, hasWatched = false)
+                insertWatchlistItem(movieId = 674324, hasWatched = true)
+                insertWatchlistItem(movieId = 615777, hasWatched = true)
+                insertWatchlistItem(movieId = 614934, hasWatched = true)
+                insertWatchlistItem(movieId = 595586, hasWatched = true)
+            }
+            .longPressMovie(661374)
+            .clickMovie(674324)
+            .clickMovie(615777)
+            .clickMovie(614934)
+            .clickMovie(595586)
+            .clickAddToWatchedListButton()
+            .scrollToWatchlistTitle()
+            .assertEmptyWatchlistTextDisplayed()
+            .assertEmptyWatchedListTextNotDisplayed()
+            .assertMainAppBarDisplayed()
+            .assertMovieNotSelected(661374, "Glass Onion: A Knives Out Mystery")
+    }
+
+    @Test
+    fun selectedMoviesRemovedFromWatchedList() {
+        WatchlistScreenRobot(composeTestRule)
+            .setContent()
+            .assertEmptyWatchlistTextDisplayed()
+            .assertEmptyWatchedListTextDisplayed()
+            .also {
+                insertWatchlistItem(movieId = 661374, hasWatched = false)
+                insertWatchlistItem(movieId = 674324, hasWatched = true)
+                insertWatchlistItem(movieId = 615777, hasWatched = true)
+                insertWatchlistItem(movieId = 614934, hasWatched = true)
+                insertWatchlistItem(movieId = 595586, hasWatched = true)
+            }
+            .longPressMovie(661374)
+            .clickMovie(674324)
+            .clickMovie(615777)
+            .clickMovie(614934)
+            .clickMovie(595586)
+            .clickRemoveFromWatchedListButton()
+            .scrollToWatchedListTitle()
+            .assertEmptyWatchlistTextNotDisplayed()
+            .assertEmptyWatchedListTextDisplayed()
+            .assertMainAppBarDisplayed()
+            .assertMovieNotSelected(661374, "Glass Onion: A Knives Out Mystery")
     }
 
     @Test
@@ -165,12 +249,13 @@ class WatchlistScreenTest {
         WatchlistScreenRobot(composeTestRule)
             .setContent()
             .assertEmptyWatchlistTextDisplayed()
+            .assertEmptyWatchedListTextDisplayed()
             .also {
-                updateWatchlistItem(id = 0L, movieId = 661374, isOnWatchlist = true)
-                updateWatchlistItem(id = 0L, movieId = 674324, isOnWatchlist = true)
-                updateWatchlistItem(id = 0L, movieId = 615777, isOnWatchlist = true)
-                updateWatchlistItem(id = 0L, movieId = 614934, isOnWatchlist = true)
-                updateWatchlistItem(id = 0L, movieId = 595586, isOnWatchlist = true)
+                insertWatchlistItem(movieId = 661374)
+                insertWatchlistItem(movieId = 674324)
+                insertWatchlistItem(movieId = 615777)
+                insertWatchlistItem(movieId = 614934)
+                insertWatchlistItem(movieId = 595586)
             }
             .longPressMovie(661374)
             .clickMovie(674324)
@@ -179,6 +264,7 @@ class WatchlistScreenTest {
             .clickMovie(595586)
             .clickCloseButton()
             .assertMainAppBarDisplayed()
+            .assertEmptyWatchedListTextDisplayed()
             .assertMovieNotSelected(674324, "The Banshees of Inisherin")
     }
 }

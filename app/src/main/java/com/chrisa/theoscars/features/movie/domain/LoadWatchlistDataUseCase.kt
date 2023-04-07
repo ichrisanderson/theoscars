@@ -35,7 +35,6 @@ class LoadWatchlistDataUseCase @Inject constructor(
                 WatchlistDataModel(
                     id = it?.id ?: 0L,
                     movieId = it?.movieId ?: movieId,
-                    isOnWatchlist = it != null,
                     hasWatched = it?.hasWatched ?: false,
                 )
             }

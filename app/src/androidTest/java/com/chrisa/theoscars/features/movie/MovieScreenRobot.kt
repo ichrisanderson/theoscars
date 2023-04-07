@@ -136,7 +136,7 @@ class MovieScreenRobot(
     fun assertRemovedFromWatchlistIconDisplayed() = apply {
         val addDescription = composeTestRule.getString(R.string.add_to_watchlist_icon_description)
         val removeDescription =
-            composeTestRule.getString(R.string.remove_from_to_watchlist_icon_description)
+            composeTestRule.getString(R.string.remove_from_watchlist_icon_description)
         composeTestRule.waitOnAllNodesWithContentDescription(addDescription)
         composeTestRule.onNodeWithContentDescription(removeDescription)
             .assertDoesNotExist()
@@ -152,31 +152,20 @@ class MovieScreenRobot(
     fun assertAddedToWatchlistIconDislayed() = apply {
         val addDescription = composeTestRule.getString(R.string.add_to_watchlist_icon_description)
         val removeDescription =
-            composeTestRule.getString(R.string.remove_from_to_watchlist_icon_description)
+            composeTestRule.getString(R.string.remove_from_watchlist_icon_description)
         composeTestRule.waitOnAllNodesWithContentDescription(removeDescription)
         composeTestRule.onNodeWithContentDescription(addDescription)
             .assertDoesNotExist()
     }
 
     fun clickRemoveFromWatchlist() = apply {
-        composeTestRule.onNodeWithContentDescription(composeTestRule.getString(R.string.remove_from_to_watchlist_icon_description))
+        composeTestRule.onNodeWithContentDescription(composeTestRule.getString(R.string.remove_from_watchlist_icon_description))
             .performClick()
     }
 
     fun assertAddedToWatchlistMessageDisplayed() = apply {
         composeTestRule.waitOnAllNodesWithStringResId(R.string.added_to_watchlist_message)
         composeTestRule.onNodeWithStringResId(R.string.added_to_watchlist_message)
-            .assertIsDisplayed()
-    }
-
-    fun clickDismissAction() = apply {
-        composeTestRule.onNodeWithStringResId(R.string.dismiss_label)
-            .performClick()
-    }
-
-    fun assertRemovedFromWatchlistMessageDisplayed() = apply {
-        composeTestRule.waitOnAllNodesWithStringResId(R.string.removed_from_watchlist_message, useUnmergedTree = true)
-        composeTestRule.onNodeWithStringResId(R.string.removed_from_watchlist_message)
             .assertIsDisplayed()
     }
 
@@ -203,18 +192,6 @@ class MovieScreenRobot(
         composeTestRule.waitOnAllNodesWithContentDescription(markAsUnwatchedDescription)
         composeTestRule.onNodeWithContentDescription(markAsWatchedDescription)
             .assertDoesNotExist()
-    }
-
-    fun assertMarkedAsWatchedMessageDisplayed() = apply {
-        composeTestRule.waitOnAllNodesWithStringResId(R.string.marked_as_watched_message)
-        composeTestRule.onNodeWithStringResId(R.string.marked_as_watched_message)
-            .assertIsDisplayed()
-    }
-
-    fun assertMarkedAsUnwatchedMessageDisplayed() = apply {
-        composeTestRule.waitOnAllNodesWithStringResId(R.string.marked_as_unwatched_message)
-        composeTestRule.onNodeWithStringResId(R.string.marked_as_unwatched_message)
-            .assertIsDisplayed()
     }
 
     fun clickMarkAsUnwatched() = apply {

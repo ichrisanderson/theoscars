@@ -19,8 +19,11 @@ package com.chrisa.theoscars.features.watchlist.presentation
 import androidx.lifecycle.ViewModel
 import com.chrisa.theoscars.core.util.coroutines.CloseableCoroutineScope
 import com.chrisa.theoscars.core.util.coroutines.CoroutineDispatchers
-import com.chrisa.theoscars.features.watchlist.domain.RemoveFromWatchlistDataUseCase
+import com.chrisa.theoscars.features.watchlist.domain.RemoveAllFromWatchlistUseCase
+import com.chrisa.theoscars.features.watchlist.domain.SetAllAsUnwatchedUseCase
+import com.chrisa.theoscars.features.watchlist.domain.SetAllAsWatchedUseCase
 import com.chrisa.theoscars.features.watchlist.domain.WatchlistMoviesUseCase
+import com.chrisa.theoscars.features.watchlist.domain.models.WatchlistModel
 import com.chrisa.theoscars.features.watchlist.domain.models.WatchlistMovieModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,7 +39,9 @@ class WatchlistViewModel @Inject constructor(
     private val dispatchers: CoroutineDispatchers,
     private val coroutineScope: CloseableCoroutineScope,
     watchlistMoviesUseCase: WatchlistMoviesUseCase,
-    private val removeFromWatchlistDataUseCase: RemoveFromWatchlistDataUseCase,
+    private val removeAllFromWatchlistUseCase: RemoveAllFromWatchlistUseCase,
+    private val setAllAsWatchedUseCase: SetAllAsWatchedUseCase,
+    private val setAllAsUnwatchedUseCase: SetAllAsUnwatchedUseCase,
 ) : ViewModel(coroutineScope) {
 
     private val _viewState = MutableStateFlow(ViewState.default())
@@ -48,8 +53,13 @@ class WatchlistViewModel @Inject constructor(
             .launchIn(coroutineScope)
     }
 
-    private fun updateMovies(movies: List<WatchlistMovieModel>) {
-        _viewState.update { it.copy(movies = movies) }
+    private fun updateMovies(watchlist: WatchlistModel) {
+        _viewState.update {
+            it.copy(
+                moviesToWatch = watchlist.moviesToWatch,
+                moviesWatched = watchlist.moviesWatched,
+            )
+        }
     }
 
     fun toggleItemSelection(id: Long) {
@@ -66,16 +76,31 @@ class WatchlistViewModel @Inject constructor(
         _viewState.update { it.copy(selectedIds = emptySet()) }
     }
 
-    fun removeAllFromWatchlist() {
+    fun removeSelectionFromWatchlist() {
         coroutineScope.launch(dispatchers.io) {
-            removeFromWatchlistDataUseCase.execute(_viewState.value.selectedIds)
+            removeAllFromWatchlistUseCase.execute(_viewState.value.selectedIds)
+            _viewState.update { it.copy(selectedIds = emptySet()) }
+        }
+    }
+
+    fun addSelectionToWatchedList() {
+        coroutineScope.launch(dispatchers.io) {
+            setAllAsWatchedUseCase.execute(_viewState.value.selectedIds)
+            _viewState.update { it.copy(selectedIds = emptySet()) }
+        }
+    }
+
+    fun removeSelectionFromWatchedList() {
+        coroutineScope.launch(dispatchers.io) {
+            setAllAsUnwatchedUseCase.execute(_viewState.value.selectedIds)
             _viewState.update { it.copy(selectedIds = emptySet()) }
         }
     }
 }
 
 data class ViewState(
-    val movies: List<WatchlistMovieModel>,
+    val moviesToWatch: List<WatchlistMovieModel>,
+    val moviesWatched: List<WatchlistMovieModel>,
     val selectedIds: Set<Long>,
 ) {
     val hasSelectedIds = selectedIds.isNotEmpty()
@@ -83,7 +108,8 @@ data class ViewState(
 
     companion object {
         fun default() = ViewState(
-            movies = emptyList(),
+            moviesToWatch = emptyList(),
+            moviesWatched = emptyList(),
             selectedIds = emptySet(),
         )
     }

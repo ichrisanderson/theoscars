@@ -20,9 +20,10 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.chrisa.theoscars.core.util.coroutines.CloseableCoroutineScope
 import com.chrisa.theoscars.core.util.coroutines.CoroutineDispatchers
+import com.chrisa.theoscars.features.movie.domain.DeleteWatchlistDataUseCase
+import com.chrisa.theoscars.features.movie.domain.InsertWatchlistDataUseCase
 import com.chrisa.theoscars.features.movie.domain.LoadMovieDetailUseCase
 import com.chrisa.theoscars.features.movie.domain.LoadWatchlistDataUseCase
-import com.chrisa.theoscars.features.movie.domain.UpdateWatchlistDataUseCase
 import com.chrisa.theoscars.features.movie.domain.models.MovieDetailModel
 import com.chrisa.theoscars.features.movie.domain.models.WatchlistDataModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -42,7 +43,8 @@ class MovieViewModel @Inject constructor(
     private val coroutineScope: CloseableCoroutineScope,
     private val loadMovieDetailUseCase: LoadMovieDetailUseCase,
     private val loadWatchlistDataUseCase: LoadWatchlistDataUseCase,
-    private val updateWatchlistDataUseCase: UpdateWatchlistDataUseCase,
+    private val insertWatchlistDataUseCase: InsertWatchlistDataUseCase,
+    private val deleteWatchlistDataUseCase: DeleteWatchlistDataUseCase,
 ) : ViewModel(coroutineScope) {
 
     private val movieId: Long = checkNotNull(
@@ -84,9 +86,11 @@ class MovieViewModel @Inject constructor(
     fun toggleWatchlist() {
         coroutineScope.launch(dispatchers.io) {
             val watchlistData = _viewState.value.watchlistData
-            val updatedWatchlistData =
-                watchlistData.copy(isOnWatchlist = !watchlistData.isOnWatchlist)
-            updateWatchlistDataUseCase.execute(updatedWatchlistData)
+            if (watchlistData.isOnWatchlist) {
+                deleteWatchlistDataUseCase.execute(watchlistData.id)
+            } else {
+                insertWatchlistDataUseCase.execute(watchlistData)
+            }
         }
     }
 
@@ -95,7 +99,7 @@ class MovieViewModel @Inject constructor(
             val watchlistData = _viewState.value.watchlistData
             val updatedWatchlistData =
                 watchlistData.copy(hasWatched = !watchlistData.hasWatched)
-            updateWatchlistDataUseCase.execute(updatedWatchlistData)
+            insertWatchlistDataUseCase.execute(updatedWatchlistData)
         }
     }
 }
@@ -121,7 +125,6 @@ data class MovieViewState(
             watchlistData = WatchlistDataModel(
                 id = 0L,
                 movieId = 0L,
-                isOnWatchlist = false,
                 hasWatched = false,
             ),
         )

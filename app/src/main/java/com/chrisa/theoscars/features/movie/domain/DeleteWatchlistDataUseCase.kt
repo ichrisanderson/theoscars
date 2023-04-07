@@ -16,25 +16,17 @@
 
 package com.chrisa.theoscars.features.movie.domain
 
-import com.chrisa.theoscars.core.data.db.watchlist.WatchlistEntity
 import com.chrisa.theoscars.core.util.coroutines.CoroutineDispatchers
 import com.chrisa.theoscars.features.movie.data.MovieDataRepository
-import com.chrisa.theoscars.features.movie.domain.models.WatchlistDataModel
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class UpdateWatchlistDataUseCase @Inject constructor(
+class DeleteWatchlistDataUseCase @Inject constructor(
     private val coroutineDispatchers: CoroutineDispatchers,
     private val movieDataRepository: MovieDataRepository,
 ) {
-    suspend fun execute(watchlistDataModel: WatchlistDataModel) = withContext(coroutineDispatchers.io) {
-        movieDataRepository.insertWatchlistData(
-            WatchlistEntity(
-                id = watchlistDataModel.id,
-                movieId = watchlistDataModel.movieId,
-                isOnWatchlist = watchlistDataModel.isOnWatchlist,
-                hasWatched = watchlistDataModel.hasWatched,
-            ),
-        )
-    }
+    suspend fun execute(id: Long) =
+        withContext(coroutineDispatchers.io) {
+            movieDataRepository.deleteWatchlistData(id)
+        }
 }

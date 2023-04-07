@@ -35,6 +35,5 @@ data class WatchlistEntity(
     @PrimaryKey(autoGenerate = true)
     var id: Long = 0L,
     val movieId: Long,
-    val isOnWatchlist: Boolean,
     val hasWatched: Boolean,
 )

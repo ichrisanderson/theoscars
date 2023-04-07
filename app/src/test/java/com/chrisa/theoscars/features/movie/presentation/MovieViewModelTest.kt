@@ -29,9 +29,10 @@ import com.chrisa.theoscars.core.util.coroutines.CloseableCoroutineScope
 import com.chrisa.theoscars.core.util.coroutines.TestCoroutineDispatchersImpl
 import com.chrisa.theoscars.core.util.coroutines.TestExecutor
 import com.chrisa.theoscars.features.movie.data.MovieDataRepository
+import com.chrisa.theoscars.features.movie.domain.DeleteWatchlistDataUseCase
+import com.chrisa.theoscars.features.movie.domain.InsertWatchlistDataUseCase
 import com.chrisa.theoscars.features.movie.domain.LoadMovieDetailUseCase
 import com.chrisa.theoscars.features.movie.domain.LoadWatchlistDataUseCase
-import com.chrisa.theoscars.features.movie.domain.UpdateWatchlistDataUseCase
 import com.chrisa.theoscars.features.movie.domain.models.MovieDetailModel
 import com.chrisa.theoscars.features.movie.domain.models.NominationModel
 import com.chrisa.theoscars.features.movie.domain.models.WatchlistDataModel
@@ -98,7 +99,11 @@ class MovieViewModelTest {
                 coroutineDispatchers = dispatchers,
                 movieDataRepository = repository,
             ),
-            updateWatchlistDataUseCase = UpdateWatchlistDataUseCase(
+            insertWatchlistDataUseCase = InsertWatchlistDataUseCase(
+                coroutineDispatchers = dispatchers,
+                movieDataRepository = repository,
+            ),
+            deleteWatchlistDataUseCase = DeleteWatchlistDataUseCase(
                 coroutineDispatchers = dispatchers,
                 movieDataRepository = repository,
             ),
@@ -184,7 +189,6 @@ class MovieViewModelTest {
                 id = 0,
                 movieId = 49046,
                 hasWatched = false,
-                isOnWatchlist = false,
             ),
         )
     }

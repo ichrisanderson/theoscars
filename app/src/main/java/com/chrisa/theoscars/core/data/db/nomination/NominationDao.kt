@@ -76,10 +76,9 @@ interface NominationDao {
     ): List<MovieSearchSummary>
 
     @Query(
-        "SELECT DISTINCT watchlist.id, watchlist.movieId, movie.posterImagePath, movie.title, movie.overview, nomination.year FROM nomination " +
+        "SELECT DISTINCT watchlist.id, watchlist.movieId, movie.posterImagePath, movie.title, movie.overview, nomination.year, watchlist.hasWatched FROM nomination " +
             "INNER JOIN movie ON movie.id = nomination.movieId " +
-            "INNER JOIN watchlist ON watchlist.movieId = movie.id " +
-            "WHERE watchlist.isOnWatchlist = 1",
+            "INNER JOIN watchlist ON watchlist.movieId = movie.id ",
     )
     fun watchlistMovies(): Flow<List<MovieWatchlistSummary>>
 }
@@ -112,4 +111,5 @@ data class MovieWatchlistSummary(
     val posterImagePath: String?,
     val title: String,
     val year: Int,
+    val hasWatched: Boolean,
 )

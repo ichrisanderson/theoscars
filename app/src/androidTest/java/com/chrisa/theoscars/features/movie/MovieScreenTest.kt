@@ -22,9 +22,10 @@ import com.chrisa.theoscars.MainActivity
 import com.chrisa.theoscars.core.util.coroutines.CloseableCoroutineScope
 import com.chrisa.theoscars.core.util.coroutines.CoroutineDispatchers
 import com.chrisa.theoscars.features.home.domain.InitializeDataUseCase
+import com.chrisa.theoscars.features.movie.domain.DeleteWatchlistDataUseCase
+import com.chrisa.theoscars.features.movie.domain.InsertWatchlistDataUseCase
 import com.chrisa.theoscars.features.movie.domain.LoadMovieDetailUseCase
 import com.chrisa.theoscars.features.movie.domain.LoadWatchlistDataUseCase
-import com.chrisa.theoscars.features.movie.domain.UpdateWatchlistDataUseCase
 import com.chrisa.theoscars.features.movie.domain.models.MovieDetailModel
 import com.chrisa.theoscars.features.movie.presentation.MovieViewModel
 import dagger.hilt.android.testing.HiltAndroidRule
@@ -60,7 +61,10 @@ class MovieScreenTest {
     lateinit var loadWatchlistDataUseCase: LoadWatchlistDataUseCase
 
     @Inject
-    lateinit var updateWatchlistDataUseCase: UpdateWatchlistDataUseCase
+    lateinit var insertWatchlistDataUseCase: InsertWatchlistDataUseCase
+
+    @Inject
+    lateinit var deleteWatchlistDataUseCase: DeleteWatchlistDataUseCase
 
     private lateinit var savedStateHandle: SavedStateHandle
     private lateinit var movie: MovieDetailModel
@@ -83,7 +87,8 @@ class MovieScreenTest {
             coroutineScope = coroutineScope,
             loadMovieDetailUseCase = loadMovieDetailUseCase,
             loadWatchlistDataUseCase = loadWatchlistDataUseCase,
-            updateWatchlistDataUseCase = updateWatchlistDataUseCase,
+            insertWatchlistDataUseCase = insertWatchlistDataUseCase,
+            deleteWatchlistDataUseCase = deleteWatchlistDataUseCase,
         )
 
     @Test
@@ -116,11 +121,8 @@ class MovieScreenTest {
             .assertRemovedFromWatchlistIconDisplayed()
             .clickAddToWatchlist()
             .assertAddedToWatchlistIconDislayed()
-            .clickDismissAction()
             .clickRemoveFromWatchlist()
             .assertRemovedFromWatchlistIconDisplayed()
-            .assertRemovedFromWatchlistMessageDisplayed()
-            .clickDismissAction()
     }
 
     @Test
@@ -130,12 +132,8 @@ class MovieScreenTest {
             .assertUnwatchedIconDisplayed()
             .clickMarkAsWatched()
             .assertWatchedIconDisplayed()
-            .assertMarkedAsWatchedMessageDisplayed()
-            .clickDismissAction()
             .clickMarkAsUnwatched()
             .assertUnwatchedIconDisplayed()
-            .assertMarkedAsUnwatchedMessageDisplayed()
-            .clickDismissAction()
     }
 
     companion object {

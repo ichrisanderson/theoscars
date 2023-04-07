@@ -87,3 +87,14 @@ fun <A : ComponentActivity> AndroidComposeTestRule<ActivityScenarioRule<A>, A>.w
             .fetchSemanticsNodes()
             .isNotEmpty()
     }
+
+fun <A : ComponentActivity> AndroidComposeTestRule<ActivityScenarioRule<A>, A>.assertNodeWithStringResIdDoesNotExist(
+    @StringRes id: Int,
+    useUnmergedTree: Boolean = false,
+    timeoutMillis: Long = defaultTimeoutMillis,
+) =
+    this.waitUntil(timeoutMillis = timeoutMillis) {
+        this.onAllNodesWithText(text = activity.getString(id), useUnmergedTree = useUnmergedTree)
+            .fetchSemanticsNodes()
+            .isEmpty()
+    }

@@ -123,7 +123,9 @@ fun MainScreen(
                 if (isWatchlistTab && watchlistViewState.hasSelectedIds) {
                     SelectionAppBar(
                         selectionCount = watchlistViewState.selectedIdCount,
-                        onRemoveAllFromWatchlist = watchlistViewModel::removeAllFromWatchlist,
+                        onRemoveFromWatchedList = watchlistViewModel::removeSelectionFromWatchedList,
+                        onAddToWatchedList = watchlistViewModel::addSelectionToWatchedList,
+                        onRemoveAllFromWatchlist = watchlistViewModel::removeSelectionFromWatchlist,
                         onClose = watchlistViewModel::clearItemSelection,
                     )
                 } else {
@@ -222,6 +224,8 @@ private fun AppBar(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SelectionAppBar(
+    onRemoveFromWatchedList: () -> Unit,
+    onAddToWatchedList: () -> Unit,
     onRemoveAllFromWatchlist: () -> Unit,
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
@@ -255,12 +259,32 @@ private fun SelectionAppBar(
         },
         actions = {
             IconButton(
+                onClick = onRemoveFromWatchedList,
+                modifier = Modifier.testTag("removeFromWatchedListButton"),
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.watch_off),
+                    contentDescription = stringResource(id = R.string.remove_from_watched_list_icon_description),
+                    tint = MaterialTheme.colorScheme.onSurface,
+                )
+            }
+            IconButton(
+                onClick = onAddToWatchedList,
+                modifier = Modifier.testTag("addToWatchedListButton"),
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.watched),
+                    contentDescription = stringResource(id = R.string.add_to_watched_list_icon_description),
+                    tint = MaterialTheme.colorScheme.onSurface,
+                )
+            }
+            IconButton(
                 onClick = onRemoveAllFromWatchlist,
-                modifier = Modifier.testTag("removeAllFromWatchlistButton"),
+                modifier = Modifier.testTag("removeFromWatchlistButton"),
             ) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = stringResource(id = R.string.remove_from_to_watchlist_icon_description),
+                    contentDescription = stringResource(id = R.string.remove_from_watchlist_icon_description),
                     tint = MaterialTheme.colorScheme.onSurface,
                 )
             }

@@ -40,6 +40,7 @@ import com.chrisa.theoscars.MainScreen
 import com.chrisa.theoscars.R
 import com.chrisa.theoscars.core.ui.theme.OscarsTheme
 import com.chrisa.theoscars.util.KeyboardHelper
+import com.chrisa.theoscars.util.assertNodeWithStringResIdDoesNotExist
 import com.chrisa.theoscars.util.getString
 import com.chrisa.theoscars.util.onNodeWithStringResId
 import com.chrisa.theoscars.util.waitOnAllNodesWithStringResId
@@ -70,12 +71,36 @@ class WatchlistScreenRobot(
             .performClick()
     }
 
+    fun scrollToWatchlistTitle() = apply {
+        composeTestRule.onNodeWithTag(watchlistItemsTestTag).performScrollToKey("emptyWatchlist")
+    }
+
+    fun scrollToWatchedListTitle() = apply {
+        composeTestRule.onNodeWithTag(watchlistItemsTestTag).performScrollToKey("emptyWatchedList")
+    }
+
     fun assertEmptyWatchlistTextDisplayed() = apply {
-        composeTestRule.waitOnAllNodesWithStringResId(R.string.empty_watchlist_title)
-        composeTestRule.onNodeWithStringResId(R.string.empty_watchlist_title)
+        composeTestRule.waitOnAllNodesWithStringResId(R.string.empty_watch_list_title)
+        composeTestRule.onNodeWithStringResId(R.string.empty_watch_list_title)
             .assertIsDisplayed()
-        composeTestRule.onNodeWithContentDescription(composeTestRule.getString(R.string.empty_watchlist_icon_description))
+        composeTestRule.onNodeWithContentDescription(composeTestRule.getString(R.string.empty_watch_list_icon_description))
             .assertIsDisplayed()
+    }
+
+    fun assertEmptyWatchlistTextNotDisplayed() = apply {
+        composeTestRule.assertNodeWithStringResIdDoesNotExist(R.string.empty_watch_list_title)
+    }
+
+    fun assertEmptyWatchedListTextDisplayed() = apply {
+        composeTestRule.waitOnAllNodesWithStringResId(R.string.empty_watched_list_title)
+        composeTestRule.onNodeWithStringResId(R.string.empty_watched_list_title)
+            .assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription(composeTestRule.getString(R.string.empty_watched_list_icon_description))
+            .assertIsDisplayed()
+    }
+
+    fun assertEmptyWatchedListTextNotDisplayed() = apply {
+        composeTestRule.assertNodeWithStringResIdDoesNotExist(R.string.empty_watched_list_title)
     }
 
     fun assertMovieTitleDisplayed(movieTitle: String) = apply {
@@ -92,15 +117,16 @@ class WatchlistScreenRobot(
     }
 
     fun assertSelectionCountDisplayed(numberOfItemsSelected: Int) = apply {
-        val selectionString = composeTestRule.getString(R.string.item_selection_title, numberOfItemsSelected)
+        val selectionString =
+            composeTestRule.getString(R.string.item_selection_title, numberOfItemsSelected)
         composeTestRule.waitOnAllNodesWithTag(selectionAppBarTestTag)
         composeTestRule.onNodeWithTag(selectionAppBarTestTag)
             .assert(hasAnyDescendant(hasText(selectionString)))
     }
 
-    fun assertRemoveAllFromWatchlistButtonDisplayed() = apply {
+    fun assertRemoveFromWatchlistButtonDisplayed() = apply {
         composeTestRule.onNodeWithTag(selectionAppBarTestTag)
-            .assert(hasAnyDescendant(hasTestTag(removeAllFromWatchlistButtonTestTag)))
+            .assert(hasAnyDescendant(hasTestTag(removeFromWatchlistButtonTestTag)))
     }
 
     fun clickMovie(movieId: Long) = apply {
@@ -112,14 +138,28 @@ class WatchlistScreenRobot(
 
     fun assertMovieSelected(movieId: Long, movieTitle: String) = apply {
         val movieSelectorTestTag = "$movieSelectedIndicatorTestTag$movieId"
-        val selectionString = composeTestRule.getString(R.string.movie_selected_description_format, movieTitle)
+        val selectionString =
+            composeTestRule.getString(R.string.movie_selected_description_format, movieTitle)
         composeTestRule.waitOnAllNodesWithTag(movieSelectorTestTag, useUnmergedTree = true)
-        composeTestRule.onNodeWithContentDescription(selectionString, useUnmergedTree = true).assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription(selectionString, useUnmergedTree = true)
+            .assertIsDisplayed()
     }
 
     fun clickRemoveAllFromWatchlistButton() = apply {
-        composeTestRule.waitOnAllNodesWithTag(removeAllFromWatchlistButtonTestTag)
-        composeTestRule.onNodeWithTag(removeAllFromWatchlistButtonTestTag)
+        composeTestRule.waitOnAllNodesWithTag(removeFromWatchlistButtonTestTag)
+        composeTestRule.onNodeWithTag(removeFromWatchlistButtonTestTag)
+            .performClick()
+    }
+
+    fun clickAddToWatchedListButton() = apply {
+        composeTestRule.waitOnAllNodesWithTag(addToWatchedListButtonTestTag)
+        composeTestRule.onNodeWithTag(addToWatchedListButtonTestTag)
+            .performClick()
+    }
+
+    fun clickRemoveFromWatchedListButton() = apply {
+        composeTestRule.waitOnAllNodesWithTag(removeFromWatchedListButtonTestTag)
+        composeTestRule.onNodeWithTag(removeFromWatchedListButtonTestTag)
             .performClick()
     }
 
@@ -134,10 +174,15 @@ class WatchlistScreenRobot(
     }
 
     fun assertMovieNotSelected(movieId: Long, movieTitle: String) = apply {
-        val movieSelectorTestTag = "$movieSelectedIndicatorTestTag$movieId"
-        val selectionString = composeTestRule.getString(R.string.movie_selected_description_format, movieTitle)
-        composeTestRule.onNodeWithTag(movieSelectorTestTag, useUnmergedTree = true).assertDoesNotExist()
-        composeTestRule.onNodeWithContentDescription(selectionString, useUnmergedTree = true).assertDoesNotExist()
+        val movieCardTag = "$movieCardTestTag$movieId"
+        val movieSelectorTag = "$movieSelectedIndicatorTestTag$movieId"
+        val selectionString =
+            composeTestRule.getString(R.string.movie_selected_description_format, movieTitle)
+        composeTestRule.onNodeWithTag(watchlistItemsTestTag).performScrollToKey(movieId)
+        composeTestRule.onNodeWithTag(movieCardTag, true).assertIsDisplayed()
+        composeTestRule.onNodeWithTag(movieSelectorTag, useUnmergedTree = true).assertDoesNotExist()
+        composeTestRule.onNodeWithContentDescription(selectionString, useUnmergedTree = true)
+            .assertDoesNotExist()
     }
 
     companion object {
@@ -147,7 +192,9 @@ class WatchlistScreenRobot(
         private const val selectionAppBarTestTag = "selectionAppBar"
         private const val mainAppBarTestTag = "mainAppBar"
         private const val closeButtonTestTag = "closeButton"
-        private const val removeAllFromWatchlistButtonTestTag = "removeAllFromWatchlistButton"
+        private const val removeFromWatchlistButtonTestTag = "removeFromWatchlistButton"
+        private const val removeFromWatchedListButtonTestTag = "removeFromWatchedListButton"
+        private const val addToWatchedListButtonTestTag = "addToWatchedListButton"
 
         sealed class ScreenAction {
             data class MovieClick(val id: Long) : ScreenAction()

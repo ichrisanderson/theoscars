@@ -16,8 +16,10 @@
 
 package com.chrisa.theoscars.features.watchlist.domain
 
+import com.chrisa.theoscars.core.data.db.nomination.MovieWatchlistSummary
 import com.chrisa.theoscars.core.util.coroutines.CoroutineDispatchers
 import com.chrisa.theoscars.features.watchlist.data.WatchlistDataRepository
+import com.chrisa.theoscars.features.watchlist.domain.models.WatchlistModel
 import com.chrisa.theoscars.features.watchlist.domain.models.WatchlistMovieModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
@@ -28,18 +30,22 @@ class WatchlistMoviesUseCase @Inject constructor(
     private val coroutineDispatchers: CoroutineDispatchers,
     private val repository: WatchlistDataRepository,
 ) {
-    fun execute(): Flow<List<WatchlistMovieModel>> =
+    fun execute(): Flow<WatchlistModel> =
         repository.watchlistMovies()
             .flowOn(coroutineDispatchers.io)
             .map { items ->
-                items.map {
-                    WatchlistMovieModel(
-                        id = it.id,
-                        movieId = it.movieId,
-                        title = it.title,
-                        posterImagePath = it.posterImagePath,
-                        year = it.year.toString(10),
-                    )
-                }
+                WatchlistModel(
+                    moviesToWatch = items.filter { !it.hasWatched }.map(::mapWatchlistMovie),
+                    moviesWatched = items.filter { it.hasWatched }.map(::mapWatchlistMovie),
+                )
             }
+
+    private fun mapWatchlistMovie(it: MovieWatchlistSummary) =
+        WatchlistMovieModel(
+            id = it.id,
+            movieId = it.movieId,
+            title = it.title,
+            posterImagePath = it.posterImagePath,
+            year = it.year.toString(10),
+        )
 }

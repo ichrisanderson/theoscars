@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "a4a6f0b7d50e38e95b9570df95790cc7",
+    "identityHash": "58bd2a589413134c01bea71a99bdd47a",
     "entities": [
       {
         "tableName": "categoryAlias",
@@ -381,7 +381,17 @@
             "id"
           ]
         },
-        "indices": [],
+        "indices": [
+          {
+            "name": "index_watchlist_movieId",
+            "unique": false,
+            "columnNames": [
+              "movieId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_watchlist_movieId` ON `${TABLE_NAME}` (`movieId`)"
+          }
+        ],
         "foreignKeys": [
           {
             "table": "movie",
@@ -400,7 +410,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a4a6f0b7d50e38e95b9570df95790cc7')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '58bd2a589413134c01bea71a99bdd47a')"
     ]
   }
 }

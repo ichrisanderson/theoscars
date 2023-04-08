@@ -18,6 +18,7 @@ package com.chrisa.theoscars.core.data.db.watchlist
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.chrisa.theoscars.core.data.db.movie.MovieEntity
 
@@ -29,6 +30,9 @@ import com.chrisa.theoscars.core.data.db.movie.MovieEntity
             parentColumns = ["id"],
             childColumns = ["movieId"],
         ),
+    ],
+    indices = [
+        Index("movieId"),
     ],
 )
 data class WatchlistEntity(

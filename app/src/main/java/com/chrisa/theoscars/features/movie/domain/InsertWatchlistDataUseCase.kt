@@ -19,7 +19,6 @@ package com.chrisa.theoscars.features.movie.domain
 import com.chrisa.theoscars.core.data.db.watchlist.WatchlistEntity
 import com.chrisa.theoscars.core.util.coroutines.CoroutineDispatchers
 import com.chrisa.theoscars.features.movie.data.MovieDataRepository
-import com.chrisa.theoscars.features.movie.domain.models.WatchlistDataModel
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -27,13 +26,13 @@ class InsertWatchlistDataUseCase @Inject constructor(
     private val coroutineDispatchers: CoroutineDispatchers,
     private val movieDataRepository: MovieDataRepository,
 ) {
-    suspend fun execute(watchlistDataModel: WatchlistDataModel) =
+    suspend fun execute(watchListId: Long?, movieId: Long, hasWatched: Boolean) =
         withContext(coroutineDispatchers.io) {
             movieDataRepository.insertWatchlistData(
                 WatchlistEntity(
-                    id = watchlistDataModel.id,
-                    movieId = watchlistDataModel.movieId,
-                    hasWatched = watchlistDataModel.hasWatched,
+                    id = watchListId ?: 0L,
+                    movieId = movieId,
+                    hasWatched = hasWatched,
                 ),
             )
         }

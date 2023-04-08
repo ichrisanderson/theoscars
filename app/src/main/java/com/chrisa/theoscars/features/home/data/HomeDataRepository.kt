@@ -21,16 +21,12 @@ import com.chrisa.theoscars.core.data.db.category.CategoryEntity
 import com.chrisa.theoscars.core.data.db.categoryalias.CategoryAliasEntity
 import com.chrisa.theoscars.core.data.db.genre.GenreEntity
 import com.chrisa.theoscars.core.data.db.nomination.MovieSummary
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class HomeDataRepository @Inject constructor(
     private val appDatabase: AppDatabase,
 ) {
-
-    fun allMoviesForCeremony(year: Int): List<MovieSummary> {
-        val dao = appDatabase.nominationDao()
-        return dao.allMoviesForCeremony(year)
-    }
 
     fun allMoviesForCeremonyWithFilter(
         startYear: Int,
@@ -38,7 +34,7 @@ class HomeDataRepository @Inject constructor(
         categoryAliasId: Long,
         genreId: Long,
         winner: Int,
-    ): List<MovieSummary> {
+    ): Flow<List<MovieSummary>> {
         val dao = appDatabase.nominationDao()
         return dao.allMoviesForCeremonyWithFilter(startYear, endYear, categoryAliasId, genreId, winner)
     }

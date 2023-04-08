@@ -21,35 +21,41 @@ import com.chrisa.theoscars.features.home.data.HomeDataRepository
 import com.chrisa.theoscars.features.home.domain.models.CategoryModel
 import com.chrisa.theoscars.features.home.domain.models.GenreModel
 import com.chrisa.theoscars.features.home.domain.models.MovieSummaryModel
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class FilterMoviesUseCase @Inject constructor(
     private val coroutineDispatchers: CoroutineDispatchers,
     private val homeDataRepository: HomeDataRepository,
 ) {
-    suspend fun execute(
+    fun execute(
         startYear: Int,
         endYear: Int,
         selectedCategory: CategoryModel,
         selectedGenre: GenreModel,
         winnersOnly: Boolean,
-    ): List<MovieSummaryModel> = withContext(coroutineDispatchers.io) {
-        return@withContext homeDataRepository.allMoviesForCeremonyWithFilter(
+    ): Flow<List<MovieSummaryModel>> =
+        homeDataRepository.allMoviesForCeremonyWithFilter(
             startYear = startYear,
             endYear = endYear,
             categoryAliasId = selectedCategory.id,
             genreId = selectedGenre.id,
             winner = if (winnersOnly) 1 else -1,
         )
-            .map {
-                MovieSummaryModel(
-                    id = it.id,
-                    backdropImagePath = it.backdropImagePath,
-                    title = it.title,
-                    overview = it.overview,
-                    year = it.year.toString(10),
-                )
+            .flowOn(coroutineDispatchers.io)
+            .map { items ->
+                items.map {
+                    MovieSummaryModel(
+                        id = it.id,
+                        backdropImagePath = it.backdropImagePath,
+                        title = it.title,
+                        overview = it.overview,
+                        year = it.year.toString(10),
+                        watchlistId = it.watchlistId,
+                        hasWatched = it.hasWatched ?: false,
+                    )
+                }
             }
-    }
 }

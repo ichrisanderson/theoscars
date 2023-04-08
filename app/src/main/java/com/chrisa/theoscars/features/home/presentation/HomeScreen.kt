@@ -41,10 +41,15 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -60,6 +65,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.testTag
@@ -100,6 +106,8 @@ fun HomeScreen(
             listState = lazyListState,
             movies = viewState.movies,
             onMovieClick = onMovieClick,
+            onWatchedClick = viewModel::setWatchedStatus,
+            onWatchlistClick = viewModel::toggleWatchlistStatus,
         )
     }
 }
@@ -110,6 +118,8 @@ private fun HomeContent(
     listState: LazyListState,
     movies: List<MovieSummaryModel>,
     onMovieClick: (Long) -> Unit,
+    onWatchedClick: (Long?, Long, Boolean) -> Unit,
+    onWatchlistClick: (Long?, Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
@@ -124,6 +134,8 @@ private fun HomeContent(
                     MovieCard(
                         movie = movie,
                         onMovieClick = onMovieClick,
+                        onWatchedClick = onWatchedClick,
+                        onWatchlistClick = onWatchlistClick,
                         modifier = Modifier
                             .testTag("movieCard_${movie.id}")
                             .animateItemPlacement(),
@@ -164,8 +176,14 @@ fun EmptyMovies(
 fun MovieCard(
     movie: MovieSummaryModel,
     onMovieClick: (Long) -> Unit,
+    onWatchedClick: (Long?, Long, Boolean) -> Unit,
+    onWatchlistClick: (Long?, Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val gradientBrush = remember {
+        Brush.verticalGradient(colors = listOf(Color.Black, Color.Transparent))
+    }
+
     Card(
         shape = MaterialTheme.shapes.small,
         modifier = modifier
@@ -175,31 +193,67 @@ fun MovieCard(
         Column(
             horizontalAlignment = Alignment.Start,
         ) {
-            if (movie.backdropImagePath == null) {
-                Image(
-                    painter = painterResource(R.drawable.show_reel),
-                    colorFilter = ColorFilter.tint(Color.LightGray),
-                    contentDescription = stringResource(
-                        id = R.string.movie_image_default_format,
-                        movie.title,
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color.LightGray.copy(alpha = 0.3f))
-                        .padding(32.dp)
-                        .aspectRatio(16 / 9.0f),
-                )
-            } else {
-                AsyncImage(
-                    model = "https://image.tmdb.org/t/p/w500/${movie.backdropImagePath}",
-                    contentDescription = stringResource(
-                        id = R.string.movie_image_description_format,
-                        movie.title,
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(16 / 9.0f),
-                )
+            Box {
+                if (movie.backdropImagePath == null) {
+                    Image(
+                        painter = painterResource(R.drawable.show_reel),
+                        colorFilter = ColorFilter.tint(Color.LightGray),
+                        contentDescription = stringResource(
+                            id = R.string.movie_image_default_format,
+                            movie.title,
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color.LightGray.copy(alpha = 0.3f))
+                            .padding(32.dp)
+                            .aspectRatio(16 / 9.0f),
+                    )
+                } else {
+                    AsyncImage(
+                        model = "https://image.tmdb.org/t/p/w500/${movie.backdropImagePath}",
+                        contentDescription = stringResource(
+                            id = R.string.movie_image_description_format,
+                            movie.title,
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(16 / 9.0f),
+                    )
+                }
+
+                Row(modifier = Modifier.background(brush = gradientBrush)) {
+                    val hasWatched = movie.hasWatched
+                    val isOnWatchlist = movie.watchlistId != null
+                    Spacer(modifier = Modifier.weight(1.0f))
+                    IconButton(
+                        onClick = { onWatchedClick(movie.watchlistId, movie.id, !hasWatched) },
+                        modifier = Modifier.testTag("watchedButton"),
+                    ) {
+                        val icon: Int =
+                            if (hasWatched) R.drawable.watched else R.drawable.unwatched
+                        val description: Int =
+                            if (hasWatched) R.string.mark_as_unwatched_icon_description else R.string.mark_as_watched_icon_description
+                        Icon(
+                            painter = painterResource(id = icon),
+                            contentDescription = stringResource(id = description),
+                            tint = MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
+                    IconButton(
+                        onClick = { onWatchlistClick(movie.watchlistId, movie.id) },
+                        modifier = Modifier.testTag("watchlistButton"),
+                    ) {
+                        val icon =
+                            if (isOnWatchlist) Icons.Filled.Bookmark else Icons.Default.BookmarkBorder
+                        val description: Int =
+                            if (isOnWatchlist) R.string.remove_from_watchlist_icon_description else R.string.add_to_watchlist_icon_description
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = stringResource(id = description),
+                            tint = MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
+                }
             }
             Text(
                 text = movie.title,
@@ -457,6 +511,8 @@ fun HomeContentPreview() {
                         overview = "Paul Baumer and his friends Albert and Muller, egged on by romantic dreams of heroism, voluntarily enlist in the German army. Full of excitement and patriotic fervour, the boys enthusiastically march into a war they believe in. But once on the Western Front, they discover the soul-destroying horror of World War I.",
                         title = "All Quiet on the Western Front",
                         year = "2023",
+                        watchlistId = null,
+                        hasWatched = false,
                     ),
                     MovieSummaryModel(
                         id = 1043141,
@@ -464,9 +520,13 @@ fun HomeContentPreview() {
                         overview = "A cold night in December. Ebba waits for the tram to go home after a party, but the ride takes an unexpected turn.",
                         title = "Night Ride",
                         year = "2023",
+                        watchlistId = null,
+                        hasWatched = false,
                     ),
                 ),
                 onMovieClick = { },
+                onWatchedClick = { _, _, _ -> },
+                onWatchlistClick = { _, _ -> },
             )
         }
     }
@@ -481,6 +541,8 @@ fun HomeContentEmptyMoviesPreview() {
                 listState = rememberLazyListState(),
                 movies = emptyList(),
                 onMovieClick = { },
+                onWatchedClick = { _, _, _ -> },
+                onWatchlistClick = { _, _ -> },
             )
         }
     }
@@ -498,8 +560,12 @@ fun MovieCardPreview() {
                     overview = "Paul Baumer and his friends Albert and Muller, egged on by romantic dreams of heroism, voluntarily enlist in the German army.",
                     title = "All Quiet on the Western Front",
                     year = "2023",
+                    watchlistId = null,
+                    hasWatched = false,
                 ),
                 onMovieClick = { },
+                onWatchedClick = { _, _, _ -> },
+                onWatchlistClick = { _, _ -> },
                 modifier = Modifier.padding(8.dp),
             )
         }

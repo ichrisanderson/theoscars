@@ -22,6 +22,8 @@ data class MovieSummaryModel(
     val overview: String,
     val title: String,
     val year: String,
+    val watchlistId: Long?,
+    val hasWatched: Boolean,
 )
 
 data class CategoryModel(

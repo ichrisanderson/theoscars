@@ -24,6 +24,7 @@ import com.chrisa.theoscars.core.data.db.AppDatabase
 import com.chrisa.theoscars.core.data.db.Bootstrapper
 import com.chrisa.theoscars.core.data.db.BootstrapperBuilder
 import com.chrisa.theoscars.core.data.db.FakeAssetFileManager
+import com.chrisa.theoscars.core.data.db.watchlist.WatchlistEntity
 import com.chrisa.theoscars.core.util.coroutines.CloseableCoroutineScope
 import com.chrisa.theoscars.core.util.coroutines.TestCoroutineDispatchersImpl
 import com.chrisa.theoscars.core.util.coroutines.TestExecutor
@@ -32,8 +33,9 @@ import com.chrisa.theoscars.features.home.domain.FilterMoviesUseCase
 import com.chrisa.theoscars.features.home.domain.InitializeDataUseCase
 import com.chrisa.theoscars.features.home.domain.LoadCategoriesUseCase
 import com.chrisa.theoscars.features.home.domain.LoadGenresUseCase
-import com.chrisa.theoscars.features.home.domain.LoadMoviesUseCase
-import com.chrisa.theoscars.features.home.domain.models.MovieSummaryModel
+import com.chrisa.theoscars.features.movie.data.MovieDataRepository
+import com.chrisa.theoscars.features.movie.domain.DeleteWatchlistDataUseCase
+import com.chrisa.theoscars.features.movie.domain.InsertWatchlistDataUseCase
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -81,16 +83,13 @@ class HomeViewModelTest {
 
     private fun homeViewModel(): HomeViewModel {
         val homeDataRepository = HomeDataRepository(appDatabase)
+        val movieDataRepository = MovieDataRepository(appDatabase)
         return HomeViewModel(
             dispatchers = dispatchers,
             coroutineScope = CloseableCoroutineScope(),
             initializeDataUseCase = InitializeDataUseCase(
                 dispatchers,
                 bootstrapper,
-            ),
-            loadMoviesUseCase = LoadMoviesUseCase(
-                dispatchers,
-                homeDataRepository,
             ),
             filterMoviesUseCase = FilterMoviesUseCase(
                 dispatchers,
@@ -103,6 +102,14 @@ class HomeViewModelTest {
             loadGenresUseCase = LoadGenresUseCase(
                 dispatchers,
                 homeDataRepository,
+            ),
+            insertWatchlistDataUseCase = InsertWatchlistDataUseCase(
+                dispatchers,
+                movieDataRepository,
+            ),
+            deleteWatchlistDataUseCase = DeleteWatchlistDataUseCase(
+                dispatchers,
+                movieDataRepository,
             ),
         )
     }
@@ -125,23 +132,11 @@ class HomeViewModelTest {
     fun `WHEN initialised THEN movies are displayed in default order`() {
         val sut = homeViewModel()
 
-        assertThat(sut.viewState.value.movies.first()).isEqualTo(
-            MovieSummaryModel(
-                id = 614934,
-                backdropImagePath = "/kaoTwHrJDmCPDLriN68pjlgx4R.jpg",
-                overview = "The life story of Elvis Presley as seen through the complicated relationship with his enigmatic manager, Colonel Tom Parker.",
-                title = "Elvis",
-                year = "2023",
-            ),
+        assertThat(sut.viewState.value.movies.map { it.title }.first()).isEqualTo(
+            "All Quiet on the Western Front",
         )
-        assertThat(sut.viewState.value.movies.last()).isEqualTo(
-            MovieSummaryModel(
-                id = 661374,
-                backdropImagePath = "/dKqa850uvbNSCaQCV4Im1XlzEtQ.jpg",
-                overview = "World-famous detective Benoit Blanc heads to Greece to peel back the layers of a mystery surrounding a tech billionaire and his eclectic crew of friends.",
-                title = "Glass Onion: A Knives Out Mystery",
-                year = "2023",
-            ),
+        assertThat(sut.viewState.value.movies.map { it.title }.last()).isEqualTo(
+            "Ivalu",
         )
     }
 
@@ -186,13 +181,11 @@ class HomeViewModelTest {
             ),
         )
 
-        assertThat(sut.viewState.value.movies.map { it.title }).isEqualTo(
-            listOf(
-                "Black Panther: Wakanda Forever",
-                "The Whale",
-                "The Banshees of Inisherin",
-                "Everything Everywhere All at Once",
-            ),
+        assertThat(sut.viewState.value.movies.map { it.title }).containsExactly(
+            "Black Panther: Wakanda Forever",
+            "The Whale",
+            "The Banshees of Inisherin",
+            "Everything Everywhere All at Once",
         )
     }
 
@@ -239,7 +232,8 @@ class HomeViewModelTest {
         val sut = homeViewModel()
         val selectedCategory = sut.viewState.value.filterModel.categories
             .first { it.name == "Best Picture" }
-        val selectedGenre = sut.viewState.value.filterModel.genres.first { it.name == "Science Fiction" }
+        val selectedGenre =
+            sut.viewState.value.filterModel.genres.first { it.name == "Science Fiction" }
 
         sut.updateFilter(
             sut.viewState.value.filterModel.copy(
@@ -275,5 +269,72 @@ class HomeViewModelTest {
                 "Belfast",
             ),
         )
+    }
+
+    @Test
+    fun `WHEN watchlist state toggled off THEN viewState updated`() {
+        val sut = homeViewModel()
+        val watchlistEntity = WatchlistEntity(
+            0L,
+            545611L,
+            false,
+        )
+        appDatabase.watchlistDao().insert(watchlistEntity)
+
+        sut.toggleWatchlistStatus(1L, watchlistEntity.movieId)
+
+        assertThat(
+            sut.viewState.value.movies.filter { it.id == watchlistEntity.movieId }
+                .filter { it.watchlistId != null }
+                .map { it.id },
+        ).isEmpty()
+    }
+
+    @Test
+    fun `WHEN watchlist state toggled on THEN viewState updated`() {
+        val movieId = 545611L
+        val sut = homeViewModel()
+
+        sut.toggleWatchlistStatus(null, movieId)
+
+        assertThat(
+            sut.viewState.value.movies.filter { it.id == movieId }
+                .filter { it.watchlistId != null }
+                .map { it.id },
+        ).isEqualTo(listOf(545611L))
+    }
+
+    @Test
+    fun `WHEN watched state toggled on THEN viewState updated`() {
+        val movieId = 545611L
+        val sut = homeViewModel()
+
+        sut.setWatchedStatus(null, movieId, true)
+
+        assertThat(
+            sut.viewState.value.movies.filter { it.id == movieId }
+                .filter { it.hasWatched }
+                .map { it.id },
+        ).isEqualTo(listOf(545611L))
+    }
+
+    @Test
+    fun `WHEN watched state toggled off THEN viewState updated`() {
+        val movieId = 545611L
+        val sut = homeViewModel()
+        val watchlistEntity = WatchlistEntity(
+            0L,
+            movieId,
+            true,
+        )
+        appDatabase.watchlistDao().insert(watchlistEntity)
+
+        sut.setWatchedStatus(null, movieId, false)
+
+        assertThat(
+            sut.viewState.value.movies.filter { it.id == movieId }
+                .filter { !it.hasWatched }
+                .map { it.id },
+        ).isEqualTo(listOf(545611L))
     }
 }

@@ -23,13 +23,18 @@ import com.chrisa.theoscars.features.home.domain.FilterMoviesUseCase
 import com.chrisa.theoscars.features.home.domain.InitializeDataUseCase
 import com.chrisa.theoscars.features.home.domain.LoadCategoriesUseCase
 import com.chrisa.theoscars.features.home.domain.LoadGenresUseCase
-import com.chrisa.theoscars.features.home.domain.LoadMoviesUseCase
 import com.chrisa.theoscars.features.home.domain.models.CategoryModel
 import com.chrisa.theoscars.features.home.domain.models.GenreModel
 import com.chrisa.theoscars.features.home.domain.models.MovieSummaryModel
+import com.chrisa.theoscars.features.movie.domain.DeleteWatchlistDataUseCase
+import com.chrisa.theoscars.features.movie.domain.InsertWatchlistDataUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -39,11 +44,14 @@ class HomeViewModel @Inject constructor(
     private val dispatchers: CoroutineDispatchers,
     private val coroutineScope: CloseableCoroutineScope,
     private val initializeDataUseCase: InitializeDataUseCase,
-    private val loadMoviesUseCase: LoadMoviesUseCase,
     private val filterMoviesUseCase: FilterMoviesUseCase,
     private val loadCategoriesUseCase: LoadCategoriesUseCase,
     private val loadGenresUseCase: LoadGenresUseCase,
+    private val insertWatchlistDataUseCase: InsertWatchlistDataUseCase,
+    private val deleteWatchlistDataUseCase: DeleteWatchlistDataUseCase,
 ) : ViewModel(coroutineScope) {
+
+    private var filterMoviesJob: Job? = null
 
     private val _viewState = MutableStateFlow(ViewState.default())
     val viewState: StateFlow<ViewState> = _viewState
@@ -57,40 +65,51 @@ class HomeViewModel @Inject constructor(
     }
 
     private suspend fun loadMovies() {
-        val movies = loadMoviesUseCase.execute()
         val categories = loadCategoriesUseCase.execute()
         val genres = loadGenresUseCase.execute()
-        _viewState.update {
-            it.copy(
-                isLoading = false,
-                movies = movies,
-                filterModel = FilterModel(
-                    categories = categories,
-                    selectedCategory = categories.first(),
-                    genres = genres,
-                    selectedGenre = genres.first(),
-                    startYear = 2023,
-                    endYear = 2023,
-                    winnersOnly = false,
-                ),
-            )
+        val filterModel = FilterModel(
+            categories = categories,
+            selectedCategory = categories.first(),
+            genres = genres,
+            selectedGenre = genres.first(),
+            startYear = 2023,
+            endYear = 2023,
+            winnersOnly = false,
+        )
+        updateFilter(filterModel)
+    }
+    fun updateFilter(filterModel: FilterModel) {
+        _viewState.update { vs -> vs.copy(filterModel = filterModel) }
+        filterMoviesJob?.cancel()
+        filterMoviesJob = filterMoviesUseCase.execute(
+            startYear = filterModel.startYear,
+            endYear = filterModel.endYear,
+            selectedCategory = filterModel.selectedCategory,
+            selectedGenre = filterModel.selectedGenre,
+            winnersOnly = filterModel.winnersOnly,
+        )
+            .distinctUntilChanged()
+            .onEach(::updateMovies)
+            .launchIn(coroutineScope)
+    }
+
+    private fun updateMovies(movies: List<MovieSummaryModel>) {
+        _viewState.update { it.copy(isLoading = false, movies = movies) }
+    }
+
+    fun toggleWatchlistStatus(watchListId: Long?, movieId: Long) {
+        coroutineScope.launch(dispatchers.io) {
+            if (watchListId == null) {
+                insertWatchlistDataUseCase.execute(watchListId = null, movieId = movieId, hasWatched = false)
+            } else {
+                deleteWatchlistDataUseCase.execute(watchListId)
+            }
         }
     }
 
-    fun updateFilter(filterModel: FilterModel) {
-        _viewState.update { vs -> vs.copy(filterModel = filterModel) }
-
+    fun setWatchedStatus(watchListId: Long?, movieId: Long, hasWatched: Boolean) {
         coroutineScope.launch(dispatchers.io) {
-            _viewState.update { vs ->
-                val filteredMovies = filterMoviesUseCase.execute(
-                    startYear = filterModel.startYear,
-                    endYear = filterModel.endYear,
-                    selectedCategory = filterModel.selectedCategory,
-                    selectedGenre = filterModel.selectedGenre,
-                    winnersOnly = filterModel.winnersOnly,
-                )
-                vs.copy(movies = filteredMovies)
-            }
+            insertWatchlistDataUseCase.execute(watchListId, movieId, hasWatched)
         }
     }
 }

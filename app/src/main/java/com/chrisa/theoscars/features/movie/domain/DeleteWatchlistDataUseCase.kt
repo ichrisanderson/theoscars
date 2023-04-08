@@ -25,8 +25,8 @@ class DeleteWatchlistDataUseCase @Inject constructor(
     private val coroutineDispatchers: CoroutineDispatchers,
     private val movieDataRepository: MovieDataRepository,
 ) {
-    suspend fun execute(id: Long) =
+    suspend fun execute(watchListId: Long) =
         withContext(coroutineDispatchers.io) {
-            movieDataRepository.deleteWatchlistData(id)
+            movieDataRepository.deleteWatchlistData(watchListId)
         }
 }

@@ -263,7 +263,7 @@ private fun SelectionAppBar(
                 modifier = Modifier.testTag("removeFromWatchedListButton"),
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.watch_off),
+                    painter = painterResource(id = R.drawable.unwatch),
                     contentDescription = stringResource(id = R.string.remove_from_watched_list_icon_description),
                     tint = MaterialTheme.colorScheme.onSurface,
                 )

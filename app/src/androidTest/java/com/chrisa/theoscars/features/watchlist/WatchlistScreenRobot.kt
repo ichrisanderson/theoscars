@@ -109,7 +109,7 @@ class WatchlistScreenRobot(
     }
 
     fun longPressMovie(movieId: Long) = apply {
-        composeTestRule.waitOnAllNodesWithTag(watchlistItemsTestTag)
+        composeTestRule.waitOnAllNodesWithTag(watchlistMovieDataTestTag, useUnmergedTree = true)
         composeTestRule.onNodeWithTag(watchlistItemsTestTag).performScrollToKey(movieId)
         val tag = "$movieCardTestTag$movieId"
         composeTestRule.onNodeWithTag(tag)
@@ -188,6 +188,7 @@ class WatchlistScreenRobot(
     companion object {
         private const val watchlistItemsTestTag = "watchlistItems"
         private const val movieCardTestTag = "watchListMovieCard_"
+        private const val watchlistMovieDataTestTag = "watchlistMovieData"
         private const val movieSelectedIndicatorTestTag = "movieSelectedIndicator_"
         private const val selectionAppBarTestTag = "selectionAppBar"
         private const val mainAppBarTestTag = "mainAppBar"

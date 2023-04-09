@@ -61,12 +61,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.chrisa.theoscars.R
-import com.chrisa.theoscars.core.ui.common.TextUtil.prefixWithCeremonyEmoji
 import com.chrisa.theoscars.core.ui.theme.OscarsTheme
 import com.chrisa.theoscars.features.movie.domain.models.MovieDetailModel
 import com.chrisa.theoscars.features.movie.domain.models.NominationModel
@@ -193,8 +193,10 @@ private fun MovieContent(
                         modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp),
                     )
                     Text(
-                        text = movie.year.prefixWithCeremonyEmoji(),
-                        style = MaterialTheme.typography.bodyMedium,
+                        text = movie.year,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.Light,
+                        ),
                         modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp),
                     )
                     Text(

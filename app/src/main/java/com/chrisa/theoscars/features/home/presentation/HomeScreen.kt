@@ -72,6 +72,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -79,7 +80,6 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.chrisa.theoscars.R
 import com.chrisa.theoscars.core.ui.common.FilterList
-import com.chrisa.theoscars.core.ui.common.TextUtil.prefixWithCeremonyEmoji
 import com.chrisa.theoscars.core.ui.theme.OscarsTheme
 import com.chrisa.theoscars.core.util.YearValidator
 import com.chrisa.theoscars.features.home.domain.models.CategoryModel
@@ -262,8 +262,10 @@ fun MovieCard(
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp),
             )
             Text(
-                text = movie.year.prefixWithCeremonyEmoji(),
-                style = MaterialTheme.typography.titleSmall,
+                text = movie.year,
+                style = MaterialTheme.typography.titleSmall.copy(
+                    fontWeight = FontWeight.Light,
+                ),
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp),
             )
             Text(

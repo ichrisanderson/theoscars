@@ -31,7 +31,6 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.chrisa.theoscars.MainActivity
 import com.chrisa.theoscars.R
-import com.chrisa.theoscars.core.ui.common.TextUtil.prefixWithCeremonyEmoji
 import com.chrisa.theoscars.core.ui.theme.OscarsTheme
 import com.chrisa.theoscars.features.movie.domain.models.MovieDetailModel
 import com.chrisa.theoscars.features.movie.domain.models.NominationModel
@@ -109,9 +108,7 @@ class MovieScreenRobot(
         composeTestRule.onNodeWithTag(tag)
             .assert(hasAnyDescendant(hasText(movie.title)))
         composeTestRule.onNodeWithTag(tag)
-            .assert(hasAnyDescendant(hasText(movie.year.prefixWithCeremonyEmoji())))
-        composeTestRule.onNodeWithTag(tag)
-            .assert(hasAnyDescendant(hasText(movie.year.prefixWithCeremonyEmoji())))
+            .assert(hasAnyDescendant(hasText(movie.year)))
         composeTestRule.onNodeWithTag(tag)
             .assert(hasAnyDescendant(hasText(movie.overview)))
     }

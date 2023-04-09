@@ -18,6 +18,7 @@ package com.chrisa.theoscars.util
 
 import androidx.activity.ComponentActivity
 import androidx.annotation.StringRes
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.SemanticsNodeInteractionCollection
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
@@ -97,4 +98,15 @@ fun <A : ComponentActivity> AndroidComposeTestRule<ActivityScenarioRule<A>, A>.a
         this.onAllNodesWithText(text = activity.getString(id), useUnmergedTree = useUnmergedTree)
             .fetchSemanticsNodes()
             .isEmpty()
+    }
+
+fun <A : ComponentActivity> AndroidComposeTestRule<ActivityScenarioRule<A>, A>.waitOnAllNodesWithMatcher(
+    matcher: SemanticsMatcher,
+    useUnmergedTree: Boolean = false,
+    timeoutMillis: Long = defaultTimeoutMillis,
+) =
+    this.waitUntil(timeoutMillis = timeoutMillis) {
+        this.onAllNodes(matcher = matcher, useUnmergedTree = useUnmergedTree)
+            .fetchSemanticsNodes()
+            .isNotEmpty()
     }

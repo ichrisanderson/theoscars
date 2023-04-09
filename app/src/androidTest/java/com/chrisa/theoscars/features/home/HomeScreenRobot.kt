@@ -23,6 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -39,8 +41,10 @@ import com.chrisa.theoscars.MainScreen
 import com.chrisa.theoscars.R
 import com.chrisa.theoscars.core.ui.theme.OscarsTheme
 import com.chrisa.theoscars.util.KeyboardHelper
+import com.chrisa.theoscars.util.getString
 import com.chrisa.theoscars.util.onAllNodesWithStringResId
 import com.chrisa.theoscars.util.onNodeWithStringResId
+import com.chrisa.theoscars.util.waitOnAllNodesWithMatcher
 import com.chrisa.theoscars.util.waitOnAllNodesWithTag
 import com.chrisa.theoscars.util.waitOnAllNodesWithText
 import com.google.common.truth.Truth.assertThat
@@ -161,6 +165,11 @@ class HomeScreenRobot(
         assertThat(screenAction).isEqualTo(ScreenAction.Search)
     }
 
+    fun scrollToMovie(movieId: Long) = apply {
+        composeTestRule.waitOnAllNodesWithTag(movieListTestTag)
+        composeTestRule.onNodeWithTag(movieListTestTag).performScrollToKey(movieId)
+    }
+
     fun clickMovie(movieId: Long) = apply {
         composeTestRule.waitOnAllNodesWithTag(movieListTestTag)
         composeTestRule.onNodeWithTag(movieListTestTag).performScrollToKey(movieId)
@@ -172,6 +181,147 @@ class HomeScreenRobot(
         assertThat(screenAction).isEqualTo(ScreenAction.MovieClick(movieId))
     }
 
+    fun assertRemovedFromWatchlistIconDisplayed(movieId: Long) = apply {
+        val addDescription = composeTestRule.getString(R.string.add_to_watchlist_icon_description)
+        val removeDescription =
+            composeTestRule.getString(R.string.remove_from_watchlist_icon_description)
+
+        val tag = "${movieId}$watchActionsTestTag"
+        composeTestRule.waitOnAllNodesWithTag(tag, useUnmergedTree = true)
+
+        composeTestRule.onNode(
+            matcher = hasAnyAncestor(hasTestTag(tag)) and hasContentDescription(addDescription),
+            useUnmergedTree = true,
+        ).assertIsDisplayed()
+
+        composeTestRule.onNode(
+            matcher = hasAnyAncestor(hasTestTag(tag)) and hasContentDescription(removeDescription),
+            useUnmergedTree = true,
+        ).assertDoesNotExist()
+    }
+
+    fun clickAddToWatchlist(movieId: Long) = apply {
+        val description = composeTestRule.getString(R.string.add_to_watchlist_icon_description)
+
+        val tag = "${movieId}$watchActionsTestTag"
+        composeTestRule.waitOnAllNodesWithMatcher(
+            matcher = hasAnyAncestor(hasTestTag(tag)) and hasContentDescription(description),
+            useUnmergedTree = true,
+        )
+
+        composeTestRule.onNode(
+            matcher = hasAnyAncestor(hasTestTag(tag)) and hasContentDescription(description),
+            useUnmergedTree = true,
+        ).performClick()
+    }
+
+    fun assertAddedToWatchlistIconDislayed(movieId: Long) = apply {
+        val addDescription = composeTestRule.getString(R.string.add_to_watchlist_icon_description)
+        val removeDescription =
+            composeTestRule.getString(R.string.remove_from_watchlist_icon_description)
+
+        val tag = "${movieId}$watchActionsTestTag"
+        composeTestRule.waitOnAllNodesWithTag(tag = tag, useUnmergedTree = true)
+
+        composeTestRule.onNode(
+            matcher = hasAnyAncestor(hasTestTag(tag)) and hasContentDescription(removeDescription),
+            useUnmergedTree = true,
+        ).assertIsDisplayed()
+        composeTestRule.onNode(
+            matcher = hasAnyAncestor(hasTestTag(tag)) and hasContentDescription(addDescription),
+            useUnmergedTree = true,
+        ).assertDoesNotExist()
+    }
+
+    fun clickRemoveFromWatchlist(movieId: Long) = apply {
+        val description = composeTestRule.getString(R.string.remove_from_watchlist_icon_description)
+        val tag = "${movieId}$watchActionsTestTag"
+
+        composeTestRule.waitOnAllNodesWithMatcher(
+            matcher = hasAnyAncestor(hasTestTag(tag)) and hasContentDescription(description),
+            useUnmergedTree = true,
+        )
+
+        composeTestRule.onNode(
+            matcher = hasAnyAncestor(hasTestTag(tag)) and hasContentDescription(description),
+            useUnmergedTree = true,
+        ).performClick()
+    }
+
+    fun assertUnwatchedIconDisplayed(movieId: Long) = apply {
+        val markAsWatchedDescription =
+            composeTestRule.getString(R.string.mark_as_watched_icon_description)
+        val markAsUnwatchedDescription =
+            composeTestRule.getString(R.string.mark_as_unwatched_icon_description)
+
+        val tag = "${movieId}$watchActionsTestTag"
+        composeTestRule.waitOnAllNodesWithTag(tag, useUnmergedTree = true)
+
+        composeTestRule.onNode(
+            matcher = hasAnyAncestor(hasTestTag(tag)) and hasContentDescription(
+                markAsWatchedDescription,
+            ),
+            useUnmergedTree = true,
+        ).assertIsDisplayed()
+
+        composeTestRule.onNode(
+            matcher = hasAnyAncestor(hasTestTag(tag)) and hasContentDescription(
+                markAsUnwatchedDescription,
+            ),
+            useUnmergedTree = true,
+        ).assertDoesNotExist()
+    }
+
+    fun clickMarkAsWatched(movieId: Long) = apply {
+        val description = composeTestRule.getString(R.string.mark_as_watched_icon_description)
+        val tag = "${movieId}$watchActionsTestTag"
+
+        composeTestRule.waitOnAllNodesWithMatcher(
+            matcher = hasAnyAncestor(hasTestTag(tag)) and hasContentDescription(description),
+            useUnmergedTree = true,
+        )
+
+        composeTestRule.onNode(
+            matcher = hasAnyAncestor(hasTestTag(tag)) and hasContentDescription(description),
+            useUnmergedTree = true,
+        ).performClick()
+    }
+
+    fun assertWatchedIconDisplayed(movieId: Long) = apply {
+        val markAsWatchedDescription =
+            composeTestRule.getString(R.string.mark_as_watched_icon_description)
+        val markAsUnwatchedDescription =
+            composeTestRule.getString(R.string.mark_as_unwatched_icon_description)
+
+        val tag = "${movieId}$watchActionsTestTag"
+        composeTestRule.waitOnAllNodesWithTag(tag, useUnmergedTree = true)
+
+        composeTestRule.onNode(
+            matcher = hasAnyAncestor(hasTestTag(tag)) and hasContentDescription(markAsUnwatchedDescription),
+            useUnmergedTree = true,
+        ).assertIsDisplayed()
+
+        composeTestRule.onNode(
+            matcher = hasAnyAncestor(hasTestTag(tag)) and hasContentDescription(markAsWatchedDescription),
+            useUnmergedTree = true,
+        ).assertDoesNotExist()
+    }
+
+    fun clickMarkAsUnwatched(movieId: Long) = apply {
+        val description = composeTestRule.getString(R.string.mark_as_unwatched_icon_description)
+        val tag = "${movieId}$watchActionsTestTag"
+
+        composeTestRule.waitOnAllNodesWithMatcher(
+            matcher = hasAnyAncestor(hasTestTag(tag)) and hasContentDescription(description),
+            useUnmergedTree = true,
+        )
+
+        composeTestRule.onNode(
+            matcher = hasAnyAncestor(hasTestTag(tag)) and hasContentDescription(description),
+            useUnmergedTree = true,
+        ).performClick()
+    }
+
     companion object {
         private const val startYearTestTag = "startYear"
         private const val endYearTestTag = "endYear"
@@ -180,6 +330,7 @@ class HomeScreenRobot(
         private const val searchButtonTestTag = "searchButton"
         private const val movieListTestTag = "movieList"
         private const val movieCardTestTag = "movieCard_"
+        private const val watchActionsTestTag = "_watchActions"
         private const val categoriesItemListTestTag = "filterList_Categories"
         private const val genresItemListTestTag = "filterList_Genres"
         private const val winnersOnlyRowTestTag = "winnersOnlyRow"

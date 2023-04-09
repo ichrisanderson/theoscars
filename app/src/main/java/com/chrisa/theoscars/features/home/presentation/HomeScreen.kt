@@ -221,7 +221,8 @@ fun MovieCard(
                     )
                 }
 
-                Row(modifier = Modifier.background(brush = gradientBrush)) {
+                val watchActionsTestTag = "${movie.id}_watchActions"
+                Row(modifier = Modifier.testTag(watchActionsTestTag).background(brush = gradientBrush)) {
                     val hasWatched = movie.hasWatched
                     val isOnWatchlist = movie.watchlistId != null
                     Spacer(modifier = Modifier.weight(1.0f))

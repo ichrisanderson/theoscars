@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assert
-import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
@@ -40,9 +39,7 @@ import com.chrisa.theoscars.features.movie.presentation.MovieScreen
 import com.chrisa.theoscars.features.movie.presentation.MovieViewModel
 import com.chrisa.theoscars.util.KeyboardHelper
 import com.chrisa.theoscars.util.getString
-import com.chrisa.theoscars.util.onNodeWithStringResId
 import com.chrisa.theoscars.util.waitOnAllNodesWithContentDescription
-import com.chrisa.theoscars.util.waitOnAllNodesWithStringResId
 import com.chrisa.theoscars.util.waitOnAllNodesWithTag
 import com.google.common.truth.Truth.assertThat
 
@@ -161,12 +158,6 @@ class MovieScreenRobot(
     fun clickRemoveFromWatchlist() = apply {
         composeTestRule.onNodeWithContentDescription(composeTestRule.getString(R.string.remove_from_watchlist_icon_description))
             .performClick()
-    }
-
-    fun assertAddedToWatchlistMessageDisplayed() = apply {
-        composeTestRule.waitOnAllNodesWithStringResId(R.string.added_to_watchlist_message)
-        composeTestRule.onNodeWithStringResId(R.string.added_to_watchlist_message)
-            .assertIsDisplayed()
     }
 
     fun assertUnwatchedIconDisplayed() = apply {

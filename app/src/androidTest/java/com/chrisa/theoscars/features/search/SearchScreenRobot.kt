@@ -35,7 +35,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.chrisa.theoscars.MainActivity
 import com.chrisa.theoscars.R
-import com.chrisa.theoscars.core.ui.common.TextUtil.prefixWithCeremonyEmoji
 import com.chrisa.theoscars.core.ui.theme.OscarsTheme
 import com.chrisa.theoscars.features.search.presentation.SearchScreen
 import com.chrisa.theoscars.util.KeyboardHelper
@@ -121,7 +120,7 @@ class SearchScreenRobot(
         composeTestRule.onNodeWithTag(tag, useUnmergedTree = true)
             .assert(hasAnyDescendant(hasText(title)))
         composeTestRule.onNodeWithTag(tag, useUnmergedTree = true)
-            .assert(hasAnyDescendant(hasText(year.prefixWithCeremonyEmoji())))
+            .assert(hasAnyDescendant(hasText(year)))
     }
 
     fun clickClearSearchButton() = apply {

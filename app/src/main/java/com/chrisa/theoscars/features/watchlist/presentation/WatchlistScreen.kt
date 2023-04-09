@@ -306,7 +306,8 @@ fun WatchlistResultCard(
             Column(
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
-                    .padding(vertical = 16.dp),
+                    .padding(vertical = 16.dp)
+                    .testTag("watchlistMovieData"),
             ) {
                 Text(
                     text = movieModel.title,

@@ -34,7 +34,7 @@ class MovieDataRepository @Inject constructor(
 
     fun loadNominations(movieId: Long): List<NominationCategory> {
         val dao = appDatabase.nominationDao()
-        return dao.allNominationsCategoriesForMovie(movieId)
+        return dao.allNominationCategoriesForMovie(movieId)
     }
 
     fun loadWatchlistData(id: Long): Flow<WatchlistEntity?> {
@@ -47,8 +47,8 @@ class MovieDataRepository @Inject constructor(
         return dao.insert(watchlistEntity)
     }
 
-    fun deleteWatchlistData(id: Long) {
+    fun deleteWatchlistData(watchListId: Long) {
         val dao = appDatabase.watchlistDao()
-        return dao.delete(id)
+        return dao.delete(watchListId)
     }
 }

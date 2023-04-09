@@ -110,6 +110,8 @@ class HomeScreenTest {
             .clickFilterButton()
             .clearStartYear()
             .enterStartYear("2022")
+            .clearEndYear()
+            .enterEndYear("2022")
             .hideKeyboard()
             .clickWinnersOnlyRow()
             .clickApplyButton()
@@ -123,6 +125,8 @@ class HomeScreenTest {
             .clickFilterButton()
             .clearStartYear()
             .enterStartYear("2022")
+            .clearEndYear()
+            .enterEndYear("2022")
             .hideKeyboard()
             .clickWinnersOnlySwitch()
             .clickApplyButton()
@@ -144,5 +148,31 @@ class HomeScreenTest {
             .setContent()
             .clickMovie(movieId)
             .assertMovieClickAction(movieId)
+    }
+
+    @Test
+    fun assertWatchListToggle() {
+        val movieId = 614934L
+        HomeScreenRobot(composeTestRule)
+            .setContent()
+            .scrollToMovie(movieId)
+            .assertRemovedFromWatchlistIconDisplayed(movieId)
+            .clickAddToWatchlist(movieId)
+            .assertAddedToWatchlistIconDislayed(movieId)
+            .clickRemoveFromWatchlist(movieId)
+            .assertRemovedFromWatchlistIconDisplayed(movieId)
+    }
+
+    @Test
+    fun assertWatchedToggle() {
+        val movieId = 614934L
+        HomeScreenRobot(composeTestRule)
+            .setContent()
+            .scrollToMovie(movieId)
+            .assertUnwatchedIconDisplayed(movieId)
+            .clickMarkAsWatched(movieId)
+            .assertWatchedIconDisplayed(movieId)
+            .clickMarkAsUnwatched(movieId)
+            .assertUnwatchedIconDisplayed(movieId)
     }
 }

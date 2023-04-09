@@ -89,7 +89,7 @@ class MovieViewModel @Inject constructor(
             if (watchlistData.isOnWatchlist) {
                 deleteWatchlistDataUseCase.execute(watchlistData.id)
             } else {
-                insertWatchlistDataUseCase.execute(watchlistData)
+                insertWatchlistDataUseCase.execute(watchlistData.id, watchlistData.movieId, false)
             }
         }
     }
@@ -97,9 +97,7 @@ class MovieViewModel @Inject constructor(
     fun toggleWatched() {
         coroutineScope.launch(dispatchers.io) {
             val watchlistData = _viewState.value.watchlistData
-            val updatedWatchlistData =
-                watchlistData.copy(hasWatched = !watchlistData.hasWatched)
-            insertWatchlistDataUseCase.execute(updatedWatchlistData)
+            insertWatchlistDataUseCase.execute(watchlistData.id, watchlistData.movieId, !watchlistData.hasWatched)
         }
     }
 }

@@ -37,25 +37,17 @@ interface NominationDao {
             "INNER JOIN category ON category.id = nomination.categoryId " +
             "WHERE movieId = :movieId",
     )
-    fun allNominationsCategoriesForMovie(
+    fun allNominationCategoriesForMovie(
         movieId: Long,
     ): List<NominationCategory>
 
     @Query(
-        "SELECT DISTINCT movie.id, movie.backdropImagePath, movie.title, movie.overview, nomination.year FROM nomination " +
-            "INNER JOIN movie ON movie.id = nomination.movieId " +
-            "WHERE nomination.year = :year",
-    )
-    fun allMoviesForCeremony(
-        year: Int,
-    ): List<MovieSummary>
-
-    @Query(
-        "SELECT DISTINCT movie.id, movie.backdropImagePath, movie.title, movie.overview, nomination.year FROM nomination " +
+        "SELECT DISTINCT movie.id, movie.backdropImagePath, movie.title, movie.overview, nomination.year, watchlist.id as watchlistId, watchlist.hasWatched FROM nomination " +
             "INNER JOIN movie ON movie.id = nomination.movieId " +
             "INNER JOIN category ON category.id = nomination.categoryId " +
             "INNER JOIN categoryAlias ON category.categoryAliasId = categoryAlias.id " +
             "LEFT OUTER JOIN movieGenre ON movieGenre.movieId = movie.id " +
+            "LEFT OUTER JOIN watchlist ON watchlist.movieId = movie.id " +
             "WHERE (nomination.year >= :startYear AND nomination.year <= :endYear) AND (:categoryAliasId = 0 OR categoryAlias.id = :categoryAliasId) AND (:genreId = 0 OR movieGenre.genreId = :genreId) AND (:winner = -1 OR nomination.winner = :winner)",
     )
     fun allMoviesForCeremonyWithFilter(
@@ -64,7 +56,7 @@ interface NominationDao {
         categoryAliasId: Long,
         genreId: Long,
         winner: Int,
-    ): List<MovieSummary>
+    ): Flow<List<MovieSummary>>
 
     @Query(
         "SELECT DISTINCT movie.id, movie.posterImagePath, movie.title, movie.overview, nomination.year FROM nomination " +
@@ -96,6 +88,8 @@ data class MovieSummary(
     val title: String,
     val overview: String,
     val year: Int,
+    val watchlistId: Long?,
+    val hasWatched: Boolean?,
 )
 
 data class MovieSearchSummary(

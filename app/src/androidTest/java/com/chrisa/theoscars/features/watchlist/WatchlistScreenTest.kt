@@ -21,7 +21,6 @@ import com.chrisa.theoscars.MainActivity
 import com.chrisa.theoscars.features.home.domain.InitializeDataUseCase
 import com.chrisa.theoscars.features.movie.domain.DeleteWatchlistDataUseCase
 import com.chrisa.theoscars.features.movie.domain.InsertWatchlistDataUseCase
-import com.chrisa.theoscars.features.movie.domain.models.WatchlistDataModel
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import kotlinx.coroutines.runBlocking
@@ -59,11 +58,9 @@ class WatchlistScreenTest {
     private fun insertWatchlistItem(movieId: Long, hasWatched: Boolean = false) {
         runBlocking {
             insertWatchlistDataUseCase.execute(
-                WatchlistDataModel(
-                    id = 0L,
-                    movieId = movieId,
-                    hasWatched = hasWatched,
-                ),
+                watchListId = null,
+                movieId = movieId,
+                hasWatched = hasWatched,
             )
         }
     }
@@ -264,6 +261,7 @@ class WatchlistScreenTest {
             .clickMovie(595586)
             .clickCloseButton()
             .assertMainAppBarDisplayed()
+            .scrollToWatchedListTitle()
             .assertEmptyWatchedListTextDisplayed()
             .assertMovieNotSelected(674324, "The Banshees of Inisherin")
     }

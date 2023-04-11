@@ -65,4 +65,5 @@
     <string name="mark_as_unwatched_icon_description">Mark as unwatched</string>
     <string name="dismiss_label">Dismiss</string>
     <string name="movie_selected_description_format">%1$s Selected</string>
+    <string name="winners_label">Winners</string>
 </resources>

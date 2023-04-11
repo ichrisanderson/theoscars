@@ -100,6 +100,7 @@ class HomeScreenTest {
             .clickCategory("Best Picture")
             .clickGenre("Comedy")
             .clickApplyButton()
+            .scrollToMovie(674324)
             .assertMovieTitleDisplayed("The Banshees of Inisherin")
     }
 

@@ -16,6 +16,7 @@
 
 package com.chrisa.theoscars.features.home.presentation
 
+import android.content.res.Resources
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.LocalIndication
@@ -36,6 +37,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
@@ -44,10 +46,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -68,6 +73,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -89,6 +95,7 @@ import com.chrisa.theoscars.features.home.domain.models.MovieSummaryModel
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
+    onFilterClick: () -> Unit,
     onMovieClick: (Long) -> Unit,
 ) {
     val viewState by viewModel.viewState.collectAsState()
@@ -104,7 +111,9 @@ fun HomeScreen(
     } else {
         HomeContent(
             listState = lazyListState,
+            filter = viewState.filterModel,
             movies = viewState.movies,
+            onFilterClick = onFilterClick,
             onMovieClick = onMovieClick,
             onWatchedClick = viewModel::setWatchedStatus,
             onWatchlistClick = viewModel::toggleWatchlistStatus,
@@ -116,7 +125,9 @@ fun HomeScreen(
 @Composable
 private fun HomeContent(
     listState: LazyListState,
+    filter: FilterModel,
     movies: List<MovieSummaryModel>,
+    onFilterClick: () -> Unit,
     onMovieClick: (Long) -> Unit,
     onWatchedClick: (Long?, Long, Boolean) -> Unit,
     onWatchlistClick: (Long?, Long) -> Unit,
@@ -124,12 +135,21 @@ private fun HomeContent(
 ) {
     Column(modifier = modifier) {
         if (movies.isEmpty()) {
-            EmptyMovies()
+            EmptyMovies(
+                filter = filter,
+                onFilterClick = onFilterClick,
+            )
         } else {
             LazyColumn(
                 state = listState,
                 modifier = Modifier.testTag("movieList"),
             ) {
+                stickyHeader {
+                    FilterBar(
+                        filter = filter,
+                        onFilterClick = onFilterClick,
+                    )
+                }
                 items(items = movies, key = { it.id }) { movie ->
                     MovieCard(
                         movie = movie,
@@ -146,30 +166,109 @@ private fun HomeContent(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun FilterBar(
+    filter: FilterModel,
+    onFilterClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.background.copy(alpha = 0.66f)),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        IconButton(
+            onClick = onFilterClick,
+            modifier = Modifier.testTag("filterButton"),
+        ) {
+            Icon(
+                imageVector = Icons.Default.Tune,
+                contentDescription = stringResource(id = R.string.filter_icon_description),
+                tint = MaterialTheme.colorScheme.onSurface,
+            )
+        }
+
+        val resources = LocalContext.current.resources
+
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            for (selectedFilterItem in selectedFilterItems(resources, filter)) {
+                item {
+                    FilterChip(
+                        selected = true,
+                        onClick = onFilterClick,
+                        label = {
+                            Text(
+                                text = selectedFilterItem,
+                                maxLines = 1,
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        },
+                    )
+                }
+            }
+        }
+    }
+}
+
 @Composable
 fun EmptyMovies(
+    filter: FilterModel,
+    onFilterClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(
-            modifier = Modifier.padding(8.dp),
-            text = stringResource(id = R.string.empty_movies_results_title),
-            style = MaterialTheme.typography.titleLarge,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.primary,
+        FilterBar(
+            filter = filter,
+            onFilterClick = onFilterClick,
         )
-        Text(
-            modifier = Modifier.padding(horizontal = 8.dp),
-            text = stringResource(id = R.string.empty_movies_results_subtitle),
-            style = MaterialTheme.typography.bodySmall,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.outline,
-        )
+        Column(
+            modifier = modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                modifier = Modifier.padding(8.dp),
+                text = stringResource(id = R.string.empty_movies_results_title),
+                style = MaterialTheme.typography.titleLarge,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Text(
+                modifier = Modifier.padding(horizontal = 8.dp),
+                text = stringResource(id = R.string.empty_movies_results_subtitle),
+                style = MaterialTheme.typography.bodySmall,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.outline,
+            )
+        }
     }
+}
+
+private fun selectedFilterItems(resources: Resources, filter: FilterModel): List<String> {
+    val items = mutableListOf<String>()
+    if (filter.startYear == filter.endYear) {
+        items.add(filter.startYearString)
+    } else {
+        items.add(filter.startYearString + " - " + filter.endYearString)
+    }
+    if (filter.selectedCategory.id > 0L) {
+        items.add(filter.selectedCategory.name)
+    }
+    if (filter.selectedGenre.id > 0L) {
+        items.add(filter.selectedGenre.name)
+    }
+    if (filter.winnersOnly) {
+        items.add(resources.getString(R.string.winners_label))
+    }
+    return items
 }
 
 @Composable
@@ -222,7 +321,11 @@ fun MovieCard(
                 }
 
                 val watchActionsTestTag = "${movie.id}_watchActions"
-                Row(modifier = Modifier.testTag(watchActionsTestTag).background(brush = gradientBrush)) {
+                Row(
+                    modifier = Modifier
+                        .testTag(watchActionsTestTag)
+                        .background(brush = gradientBrush),
+                ) {
                     val hasWatched = movie.hasWatched
                     val isOnWatchlist = movie.watchlistId != null
                     Spacer(modifier = Modifier.weight(1.0f))
@@ -507,6 +610,7 @@ fun HomeContentPreview() {
         Surface {
             HomeContent(
                 listState = rememberLazyListState(),
+                filter = FilterModel.default(),
                 movies = listOf(
                     MovieSummaryModel(
                         id = 49046,
@@ -527,6 +631,7 @@ fun HomeContentPreview() {
                         hasWatched = false,
                     ),
                 ),
+                onFilterClick = { },
                 onMovieClick = { },
                 onWatchedClick = { _, _, _ -> },
                 onWatchlistClick = { _, _ -> },
@@ -542,7 +647,9 @@ fun HomeContentEmptyMoviesPreview() {
         Surface {
             HomeContent(
                 listState = rememberLazyListState(),
+                filter = FilterModel.default(),
                 movies = emptyList(),
+                onFilterClick = { },
                 onMovieClick = { },
                 onWatchedClick = { _, _, _ -> },
                 onWatchlistClick = { _, _ -> },

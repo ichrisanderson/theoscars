@@ -28,7 +28,6 @@ import androidx.compose.material.icons.filled.CollectionsBookmark
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -69,7 +68,7 @@ import com.chrisa.theoscars.features.watchlist.presentation.WatchlistScreen
 import com.chrisa.theoscars.features.watchlist.presentation.WatchlistViewModel
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     onMovieClick: (Long) -> Unit,
@@ -130,13 +129,7 @@ fun MainScreen(
                     )
                 } else {
                     AppBar(
-                        isFilterVisible = currentTabDestination?.route == MainDestinations.HOME,
                         onSearchClick = onSearchClick,
-                        onFilterClick = {
-                            coroutineScope.launch {
-                                modalSheetState.show()
-                            }
-                        },
                     )
                     LaunchedEffect(watchlistViewModel) {
                         watchlistViewModel.clearItemSelection()
@@ -155,6 +148,11 @@ fun MainScreen(
                 composable(MainDestinations.HOME) {
                     HomeScreen(
                         viewModel = homeViewModel,
+                        onFilterClick = {
+                            coroutineScope.launch {
+                                modalSheetState.show()
+                            }
+                        },
                         onMovieClick = onMovieClick,
                     )
                 }
@@ -172,9 +170,7 @@ fun MainScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AppBar(
-    isFilterVisible: Boolean,
     onSearchClick: () -> Unit,
-    onFilterClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     TopAppBar(
@@ -204,18 +200,6 @@ private fun AppBar(
                     contentDescription = stringResource(id = R.string.search_icon_description),
                     tint = MaterialTheme.colorScheme.onSurface,
                 )
-            }
-            if (isFilterVisible) {
-                IconButton(
-                    onClick = onFilterClick,
-                    modifier = Modifier.testTag("filterButton"),
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Tune,
-                        contentDescription = stringResource(id = R.string.filter_icon_description),
-                        tint = MaterialTheme.colorScheme.onSurface,
-                    )
-                }
             }
         },
     )

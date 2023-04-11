@@ -16,10 +16,12 @@
 
 package com.chrisa.theoscars.features.home
 
+import android.content.res.Resources
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -32,6 +34,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToKey
 import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -166,8 +169,11 @@ class HomeScreenRobot(
     }
 
     fun scrollToMovie(movieId: Long) = apply {
+        val offsetHeight = 48 * Resources.getSystem().displayMetrics.density // Extra scroll to avoid being covered by filter bar
         composeTestRule.waitOnAllNodesWithTag(movieListTestTag)
         composeTestRule.onNodeWithTag(movieListTestTag).performScrollToKey(movieId)
+        composeTestRule.onNodeWithTag(movieListTestTag)
+            .performSemanticsAction(SemanticsActions.ScrollBy) { it.invoke(0f, -offsetHeight) }
     }
 
     fun clickMovie(movieId: Long) = apply {
@@ -297,12 +303,16 @@ class HomeScreenRobot(
         composeTestRule.waitOnAllNodesWithTag(tag, useUnmergedTree = true)
 
         composeTestRule.onNode(
-            matcher = hasAnyAncestor(hasTestTag(tag)) and hasContentDescription(markAsUnwatchedDescription),
+            matcher = hasAnyAncestor(hasTestTag(tag)) and hasContentDescription(
+                markAsUnwatchedDescription,
+            ),
             useUnmergedTree = true,
         ).assertIsDisplayed()
 
         composeTestRule.onNode(
-            matcher = hasAnyAncestor(hasTestTag(tag)) and hasContentDescription(markAsWatchedDescription),
+            matcher = hasAnyAncestor(hasTestTag(tag)) and hasContentDescription(
+                markAsWatchedDescription,
+            ),
             useUnmergedTree = true,
         ).assertDoesNotExist()
     }

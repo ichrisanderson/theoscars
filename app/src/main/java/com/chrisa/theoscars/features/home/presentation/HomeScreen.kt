@@ -58,7 +58,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -88,6 +87,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.chrisa.theoscars.R
 import com.chrisa.theoscars.core.ui.common.FilterList
+import com.chrisa.theoscars.core.ui.common.RadioButtonWithLabel
 import com.chrisa.theoscars.core.ui.theme.OscarsTheme
 import com.chrisa.theoscars.core.util.YearValidator
 import com.chrisa.theoscars.features.home.domain.models.CategoryModel
@@ -732,35 +732,6 @@ fun FilterDialogPreview() {
                 onApplySelection = { },
             )
         }
-    }
-}
-
-@Composable
-fun RadioButtonWithLabel(
-    isSelected: Boolean,
-    label: String,
-    onSelected: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier.clickable(
-            interactionSource = interactionSource,
-            indication = LocalIndication.current,
-            role = Role.RadioButton,
-            onClick = onSelected,
-        ),
-    ) {
-        RadioButton(
-            selected = isSelected,
-            onClick = onSelected,
-        )
-        Text(
-            text = label,
-            modifier = Modifier.fillMaxWidth(),
-        )
     }
 }
 

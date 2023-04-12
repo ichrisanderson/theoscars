@@ -99,6 +99,7 @@ class HomeScreenTest {
             .waitForText("Actor in a Leading Role")
             .clickCategory("Best Picture")
             .clickGenre("Comedy")
+            .scrollToApplyButton()
             .clickApplyButton()
             .scrollToMovie(674324)
             .assertMovieTitleDisplayed("The Banshees of Inisherin")
@@ -115,6 +116,7 @@ class HomeScreenTest {
             .enterEndYear("2022")
             .hideKeyboard()
             .clickWinnersOnlyRow()
+            .scrollToApplyButton()
             .clickApplyButton()
             .assertMovieTitleDisplayed("CODA")
     }
@@ -130,6 +132,7 @@ class HomeScreenTest {
             .enterEndYear("2022")
             .hideKeyboard()
             .clickWinnersOnlySwitch()
+            .scrollToApplyButton()
             .clickApplyButton()
             .assertMovieTitleDisplayed("CODA")
     }
@@ -175,5 +178,44 @@ class HomeScreenTest {
             .assertWatchedIconDisplayed(movieId)
             .clickMarkAsUnwatched(movieId)
             .assertUnwatchedIconDisplayed(movieId)
+    }
+
+    @Test
+    fun titleSortOrderApplied() {
+        HomeScreenRobot(composeTestRule)
+            .setContent()
+            .clickSortButton()
+            .clickTitleText()
+            .clickDescendingText()
+            .clickApplyButton()
+            .assertMovieTitleDisplayedAtPosition(0, "Women Talking")
+            .clickSortButton()
+            .clickTitleText()
+            .clickAscendingText()
+            .clickApplyButton()
+            .assertMovieTitleDisplayedAtPosition(0, "A House Made of Splinters")
+    }
+
+    @Test
+    fun yearSortOrderApplied() {
+        HomeScreenRobot(composeTestRule)
+            .setContent()
+            .assertMovieTitleDisplayedAtPosition(0, "A House Made of Splinters")
+            .clickFilterButton()
+            .clearStartYear()
+            .enterStartYear("1960")
+            .hideKeyboard()
+            .scrollToApplyButton()
+            .clickApplyButton()
+            .clickSortButton()
+            .clickYearText()
+            .clickAscendingText()
+            .clickApplyButton()
+            .assertMovieTitleDisplayedAtPosition(0, "The Sound of Music")
+            .clickSortButton()
+            .clickYearText()
+            .clickDescendingText()
+            .clickApplyButton()
+            .assertMovieTitleDisplayedAtPosition(0, "A House Made of Splinters")
     }
 }

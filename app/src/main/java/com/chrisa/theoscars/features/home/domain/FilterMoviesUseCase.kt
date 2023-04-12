@@ -16,11 +16,14 @@
 
 package com.chrisa.theoscars.features.home.domain
 
+import com.chrisa.theoscars.core.data.db.nomination.MovieSummary
 import com.chrisa.theoscars.core.util.coroutines.CoroutineDispatchers
 import com.chrisa.theoscars.features.home.data.HomeDataRepository
 import com.chrisa.theoscars.features.home.domain.models.CategoryModel
 import com.chrisa.theoscars.features.home.domain.models.GenreModel
 import com.chrisa.theoscars.features.home.domain.models.MovieSummaryModel
+import com.chrisa.theoscars.features.home.domain.models.SortDirection
+import com.chrisa.theoscars.features.home.domain.models.SortOrder
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -36,6 +39,8 @@ class FilterMoviesUseCase @Inject constructor(
         selectedCategory: CategoryModel,
         selectedGenre: GenreModel,
         winnersOnly: Boolean,
+        sortOrder: SortOrder,
+        sortDirection: SortDirection,
     ): Flow<List<MovieSummaryModel>> =
         homeDataRepository.allMoviesForCeremonyWithFilter(
             startYear = startYear,
@@ -46,16 +51,27 @@ class FilterMoviesUseCase @Inject constructor(
         )
             .flowOn(coroutineDispatchers.io)
             .map { items ->
-                items.map {
-                    MovieSummaryModel(
-                        id = it.id,
-                        backdropImagePath = it.backdropImagePath,
-                        title = it.title,
-                        overview = it.overview,
-                        year = it.year.toString(10),
-                        watchlistId = it.watchlistId,
-                        hasWatched = it.hasWatched ?: false,
-                    )
-                }
+                items.applySortOrder(sortOrder, sortDirection)
+                    .map {
+                        MovieSummaryModel(
+                            id = it.id,
+                            backdropImagePath = it.backdropImagePath,
+                            title = it.title,
+                            overview = it.overview,
+                            year = it.year.toString(10),
+                            watchlistId = it.watchlistId,
+                            hasWatched = it.hasWatched ?: false,
+                        )
+                    }
             }
+
+    private fun List<MovieSummary>.applySortOrder(sortOrder: SortOrder, sortDirection: SortDirection): List<MovieSummary> {
+        return when {
+            sortOrder == SortOrder.TITLE && sortDirection == SortDirection.ASCENDING -> this.sortedBy { it.title }
+            sortOrder == SortOrder.TITLE && sortDirection == SortDirection.DESCENDING -> this.sortedByDescending { it.title }
+            sortOrder == SortOrder.YEAR && sortDirection == SortDirection.ASCENDING -> this.sortedBy { it.year }
+            sortOrder == SortOrder.YEAR && sortDirection == SortDirection.DESCENDING -> this.sortedByDescending { it.year }
+            else -> this
+        }
+    }
 }

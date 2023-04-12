@@ -33,6 +33,8 @@ import com.chrisa.theoscars.features.home.domain.FilterMoviesUseCase
 import com.chrisa.theoscars.features.home.domain.InitializeDataUseCase
 import com.chrisa.theoscars.features.home.domain.LoadCategoriesUseCase
 import com.chrisa.theoscars.features.home.domain.LoadGenresUseCase
+import com.chrisa.theoscars.features.home.domain.models.SortDirection
+import com.chrisa.theoscars.features.home.domain.models.SortOrder
 import com.chrisa.theoscars.features.movie.data.MovieDataRepository
 import com.chrisa.theoscars.features.movie.domain.DeleteWatchlistDataUseCase
 import com.chrisa.theoscars.features.movie.domain.InsertWatchlistDataUseCase
@@ -133,10 +135,10 @@ class HomeViewModelTest {
         val sut = homeViewModel()
 
         assertThat(sut.viewState.value.movies.map { it.title }.first()).isEqualTo(
-            "All Quiet on the Western Front",
+            "A House Made of Splinters",
         )
         assertThat(sut.viewState.value.movies.map { it.title }.last()).isEqualTo(
-            "Ivalu",
+            "Women Talking",
         )
     }
 
@@ -336,5 +338,101 @@ class HomeViewModelTest {
                 .filter { !it.hasWatched }
                 .map { it.id },
         ).isEqualTo(listOf(545611L))
+    }
+
+    @Test
+    fun `WHEN descending year sort order applied THEN viewState updated with correct movies`() {
+        val sut = homeViewModel()
+
+        sut.updateFilter(
+            sut.viewState.value.filterModel.copy(
+                startYear = 1960,
+                endYear = 2023,
+            ),
+        )
+        sut.updateSort(
+            SortModel(
+                sortOrder = SortOrder.YEAR,
+                sortDirection = SortDirection.DESCENDING,
+            ),
+        )
+
+        assertThat(sut.viewState.value.movies.map { it.title }.first())
+            .isEqualTo("A House Made of Splinters")
+
+        assertThat(sut.viewState.value.movies.map { it.title }.last())
+            .isEqualTo("The Sound of Music")
+    }
+
+    @Test
+    fun `WHEN ascending year sort order applied THEN viewState updated with correct movies`() {
+        val sut = homeViewModel()
+
+        sut.updateFilter(
+            sut.viewState.value.filterModel.copy(
+                startYear = 1960,
+                endYear = 2023,
+            ),
+        )
+        sut.updateSort(
+            SortModel(
+                sortOrder = SortOrder.YEAR,
+                sortDirection = SortDirection.ASCENDING,
+            ),
+        )
+
+        assertThat(sut.viewState.value.movies.map { it.title }.first())
+            .isEqualTo("The Sound of Music")
+
+        assertThat(sut.viewState.value.movies.map { it.title }.last())
+            .isEqualTo("Women Talking")
+    }
+
+    @Test
+    fun `WHEN descending title sort order applied THEN viewState updated with correct movies`() {
+        val sut = homeViewModel()
+
+        sut.updateFilter(
+            sut.viewState.value.filterModel.copy(
+                startYear = 1960,
+                endYear = 2023,
+            ),
+        )
+        sut.updateSort(
+            SortModel(
+                sortOrder = SortOrder.TITLE,
+                sortDirection = SortDirection.DESCENDING,
+            ),
+        )
+
+        assertThat(sut.viewState.value.movies.map { it.title }.first())
+            .isEqualTo("Women Talking")
+
+        assertThat(sut.viewState.value.movies.map { it.title }.last())
+            .isEqualTo("A House Made of Splinters")
+    }
+
+    @Test
+    fun `WHEN ascending title sort order applied THEN viewState updated with correct movies`() {
+        val sut = homeViewModel()
+
+        sut.updateFilter(
+            sut.viewState.value.filterModel.copy(
+                startYear = 1960,
+                endYear = 2023,
+            ),
+        )
+        sut.updateSort(
+            SortModel(
+                sortOrder = SortOrder.TITLE,
+                sortDirection = SortDirection.ASCENDING,
+            ),
+        )
+
+        assertThat(sut.viewState.value.movies.map { it.title }.first())
+            .isEqualTo("A House Made of Splinters")
+
+        assertThat(sut.viewState.value.movies.map { it.title }.last())
+            .isEqualTo("Women Talking")
     }
 }

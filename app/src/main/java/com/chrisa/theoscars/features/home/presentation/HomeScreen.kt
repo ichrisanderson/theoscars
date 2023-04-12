@@ -46,6 +46,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -57,6 +58,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -91,11 +93,14 @@ import com.chrisa.theoscars.core.util.YearValidator
 import com.chrisa.theoscars.features.home.domain.models.CategoryModel
 import com.chrisa.theoscars.features.home.domain.models.GenreModel
 import com.chrisa.theoscars.features.home.domain.models.MovieSummaryModel
+import com.chrisa.theoscars.features.home.domain.models.SortDirection
+import com.chrisa.theoscars.features.home.domain.models.SortOrder
 
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
     onFilterClick: () -> Unit,
+    onSortClick: () -> Unit,
     onMovieClick: (Long) -> Unit,
 ) {
     val viewState by viewModel.viewState.collectAsState()
@@ -114,6 +119,7 @@ fun HomeScreen(
             filter = viewState.filterModel,
             movies = viewState.movies,
             onFilterClick = onFilterClick,
+            onSortClick = onSortClick,
             onMovieClick = onMovieClick,
             onWatchedClick = viewModel::setWatchedStatus,
             onWatchlistClick = viewModel::toggleWatchlistStatus,
@@ -128,6 +134,7 @@ private fun HomeContent(
     filter: FilterModel,
     movies: List<MovieSummaryModel>,
     onFilterClick: () -> Unit,
+    onSortClick: () -> Unit,
     onMovieClick: (Long) -> Unit,
     onWatchedClick: (Long?, Long, Boolean) -> Unit,
     onWatchlistClick: (Long?, Long) -> Unit,
@@ -138,6 +145,7 @@ private fun HomeContent(
             EmptyMovies(
                 filter = filter,
                 onFilterClick = onFilterClick,
+                onSortClick = onSortClick,
             )
         } else {
             LazyColumn(
@@ -148,6 +156,7 @@ private fun HomeContent(
                     FilterBar(
                         filter = filter,
                         onFilterClick = onFilterClick,
+                        onSortClick = onSortClick,
                     )
                 }
                 items(items = movies, key = { it.id }) { movie ->
@@ -171,6 +180,7 @@ private fun HomeContent(
 private fun FilterBar(
     filter: FilterModel,
     onFilterClick: () -> Unit,
+    onSortClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -195,7 +205,7 @@ private fun FilterBar(
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier
-                .fillMaxWidth(),
+                .weight(1f),
         ) {
             for (selectedFilterItem in selectedFilterItems(resources, filter)) {
                 item {
@@ -213,6 +223,16 @@ private fun FilterBar(
                 }
             }
         }
+        IconButton(
+            onClick = onSortClick,
+            modifier = Modifier.testTag("sortButton"),
+        ) {
+            Icon(
+                imageVector = Icons.Default.Sort,
+                contentDescription = stringResource(id = R.string.sort_icon_description),
+                tint = MaterialTheme.colorScheme.onSurface,
+            )
+        }
     }
 }
 
@@ -220,6 +240,7 @@ private fun FilterBar(
 fun EmptyMovies(
     filter: FilterModel,
     onFilterClick: () -> Unit,
+    onSortClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -228,6 +249,7 @@ fun EmptyMovies(
         FilterBar(
             filter = filter,
             onFilterClick = onFilterClick,
+            onSortClick = onSortClick,
         )
         Column(
             modifier = modifier.fillMaxSize(),
@@ -632,6 +654,7 @@ fun HomeContentPreview() {
                     ),
                 ),
                 onFilterClick = { },
+                onSortClick = { },
                 onMovieClick = { },
                 onWatchedClick = { _, _, _ -> },
                 onWatchlistClick = { _, _ -> },
@@ -650,6 +673,7 @@ fun HomeContentEmptyMoviesPreview() {
                 filter = FilterModel.default(),
                 movies = emptyList(),
                 onFilterClick = { },
+                onSortClick = { },
                 onMovieClick = { },
                 onWatchedClick = { _, _, _ -> },
                 onWatchlistClick = { _, _ -> },
@@ -706,6 +730,142 @@ fun FilterDialogPreview() {
                 currentEndYear = "2023",
                 winnersOnly = false,
                 onApplySelection = { },
+            )
+        }
+    }
+}
+
+@Composable
+fun RadioButtonWithLabel(
+    isSelected: Boolean,
+    label: String,
+    onSelected: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier.clickable(
+            interactionSource = interactionSource,
+            indication = LocalIndication.current,
+            role = Role.RadioButton,
+            onClick = onSelected,
+        ),
+    ) {
+        RadioButton(
+            selected = isSelected,
+            onClick = onSelected,
+        )
+        Text(
+            text = label,
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
+}
+
+@Composable
+fun SortContent(
+    sortOrder: SortOrder,
+    sortDirection: SortDirection,
+    onApply: (SortModel) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var selectedSortOrder by remember { mutableStateOf(sortOrder) }
+    var selectedSortDirection by remember { mutableStateOf(sortDirection) }
+
+    Column(
+        modifier = modifier
+            .navigationBarsPadding(),
+    ) {
+        Text(
+            text = stringResource(id = R.string.sort_title),
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .padding(vertical = 8.dp),
+        )
+        Divider(
+            modifier = Modifier
+                .padding(bottom = 8.dp),
+        )
+        Text(
+            text = stringResource(id = R.string.sort_by),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier
+                .padding(start = 16.dp, top = 8.dp, bottom = 8.dp),
+        )
+        RadioButtonWithLabel(
+            isSelected = selectedSortOrder == SortOrder.YEAR,
+            label = stringResource(id = R.string.year_label),
+            onSelected = { selectedSortOrder = SortOrder.YEAR },
+            modifier = Modifier.padding(horizontal = 16.dp),
+        )
+        RadioButtonWithLabel(
+            isSelected = selectedSortOrder == SortOrder.TITLE,
+            label = stringResource(id = R.string.title_label),
+            onSelected = { selectedSortOrder = SortOrder.TITLE },
+            modifier = Modifier.padding(horizontal = 16.dp),
+        )
+        Divider(
+            modifier = Modifier
+                .padding(bottom = 8.dp),
+        )
+        Text(
+            text = stringResource(id = R.string.sort_direction),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier
+                .padding(start = 16.dp, top = 8.dp, bottom = 8.dp),
+        )
+        RadioButtonWithLabel(
+            isSelected = selectedSortDirection == SortDirection.ASCENDING,
+            label = stringResource(id = R.string.ascending_label),
+            onSelected = { selectedSortDirection = SortDirection.ASCENDING },
+            modifier = Modifier.padding(horizontal = 16.dp),
+        )
+        RadioButtonWithLabel(
+            isSelected = selectedSortDirection == SortDirection.DESCENDING,
+            label = stringResource(id = R.string.descending_label),
+            onSelected = { selectedSortDirection = SortDirection.DESCENDING },
+            modifier = Modifier.padding(horizontal = 16.dp),
+        )
+        Divider(
+            modifier = Modifier
+                .padding(bottom = 8.dp),
+        )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("sortContent"),
+        ) {
+            Button(
+                onClick = {
+                    onApply(SortModel(selectedSortOrder, selectedSortDirection))
+                },
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .widthIn(128.dp)
+                    .padding(vertical = 16.dp)
+                    .testTag("applyButton"),
+            ) {
+                Text(
+                    text = stringResource(id = R.string.apply_filter_cta),
+                    style = MaterialTheme.typography.labelLarge,
+                )
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+fun SortDialogPreview() {
+    OscarsTheme {
+        Surface {
+            SortContent(
+                sortOrder = SortOrder.YEAR,
+                sortDirection = SortDirection.DESCENDING,
+                onApply = { _ -> },
             )
         }
     }

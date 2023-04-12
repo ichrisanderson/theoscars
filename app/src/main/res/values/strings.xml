@@ -34,6 +34,16 @@
     <string name="winners_filter_title">Winners Only</string>
     <string name="empty_movies_results_title">No movies found</string>
     <string name="empty_movies_results_subtitle">Please try a different filter…</string>
+    <string name="winners_label">Winners</string>
+
+    <!-- Sort -->
+    <string name="sort_title">Sort Order</string>
+    <string name="sort_by">Sort By</string>
+    <string name="sort_direction">Sort Direction</string>
+    <string name="year_label">Year</string>
+    <string name="title_label">Title</string>
+    <string name="ascending_label">Ascending</string>
+    <string name="descending_label">Descending</string>
 
     <!-- Search -->
     <string name="search_placeholder">Search for movies</string>
@@ -65,5 +75,5 @@
     <string name="mark_as_unwatched_icon_description">Mark as unwatched</string>
     <string name="dismiss_label">Dismiss</string>
     <string name="movie_selected_description_format">%1$s Selected</string>
-    <string name="winners_label">Winners</string>
+    <string name="sort_icon_description">Change sort order</string>
 </resources>

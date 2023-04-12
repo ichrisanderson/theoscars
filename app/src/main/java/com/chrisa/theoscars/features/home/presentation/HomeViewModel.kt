@@ -26,6 +26,8 @@ import com.chrisa.theoscars.features.home.domain.LoadGenresUseCase
 import com.chrisa.theoscars.features.home.domain.models.CategoryModel
 import com.chrisa.theoscars.features.home.domain.models.GenreModel
 import com.chrisa.theoscars.features.home.domain.models.MovieSummaryModel
+import com.chrisa.theoscars.features.home.domain.models.SortDirection
+import com.chrisa.theoscars.features.home.domain.models.SortOrder
 import com.chrisa.theoscars.features.movie.domain.DeleteWatchlistDataUseCase
 import com.chrisa.theoscars.features.movie.domain.InsertWatchlistDataUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -78,8 +80,24 @@ class HomeViewModel @Inject constructor(
         )
         updateFilter(filterModel)
     }
+
     fun updateFilter(filterModel: FilterModel) {
         _viewState.update { vs -> vs.copy(filterModel = filterModel) }
+        updateFilterQuery()
+    }
+
+    fun updateSort(sortModel: SortModel) {
+        _viewState.update { vs -> vs.copy(sortModel = sortModel) }
+        updateFilterQuery()
+    }
+
+    private fun updateMovies(movies: List<MovieSummaryModel>) {
+        _viewState.update { it.copy(isLoading = false, movies = movies) }
+    }
+
+    private fun updateFilterQuery() {
+        val filterModel = _viewState.value.filterModel
+        val sortModel = _viewState.value.sortModel
         filterMoviesJob?.cancel()
         filterMoviesJob = filterMoviesUseCase.execute(
             startYear = filterModel.startYear,
@@ -87,20 +105,22 @@ class HomeViewModel @Inject constructor(
             selectedCategory = filterModel.selectedCategory,
             selectedGenre = filterModel.selectedGenre,
             winnersOnly = filterModel.winnersOnly,
+            sortOrder = sortModel.sortOrder,
+            sortDirection = sortModel.sortDirection,
         )
             .distinctUntilChanged()
             .onEach(::updateMovies)
             .launchIn(coroutineScope)
     }
 
-    private fun updateMovies(movies: List<MovieSummaryModel>) {
-        _viewState.update { it.copy(isLoading = false, movies = movies) }
-    }
-
     fun toggleWatchlistStatus(watchListId: Long?, movieId: Long) {
         coroutineScope.launch(dispatchers.io) {
             if (watchListId == null) {
-                insertWatchlistDataUseCase.execute(watchListId = null, movieId = movieId, hasWatched = false)
+                insertWatchlistDataUseCase.execute(
+                    watchListId = null,
+                    movieId = movieId,
+                    hasWatched = false,
+                )
             } else {
                 deleteWatchlistDataUseCase.execute(watchListId)
             }
@@ -118,6 +138,7 @@ data class ViewState(
     val isLoading: Boolean,
     val movies: List<MovieSummaryModel>,
     val filterModel: FilterModel,
+    val sortModel: SortModel,
 ) {
 
     companion object {
@@ -125,6 +146,7 @@ data class ViewState(
             isLoading = true,
             movies = emptyList(),
             filterModel = FilterModel.default(),
+            sortModel = SortModel.default(),
         )
     }
 }
@@ -150,6 +172,18 @@ data class FilterModel(
             startYear = 0,
             endYear = 0,
             winnersOnly = false,
+        )
+    }
+}
+
+data class SortModel(
+    val sortOrder: SortOrder,
+    val sortDirection: SortDirection,
+) {
+    companion object {
+        fun default() = SortModel(
+            sortOrder = SortOrder.YEAR,
+            sortDirection = SortDirection.DESCENDING,
         )
     }
 }

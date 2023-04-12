@@ -22,16 +22,20 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
+import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performScrollToKey
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performSemanticsAction
@@ -130,9 +134,12 @@ class HomeScreenRobot(
         composeTestRule.onNodeWithTag(applyButtonTestTag).assertIsNotEnabled()
     }
 
-    fun clickApplyButton() = apply {
+    fun scrollToApplyButton() = apply {
         composeTestRule.onNodeWithTag(filterContentListTestTag)
             .performScrollToNode(hasTestTag(applyButtonTestTag))
+    }
+
+    fun clickApplyButton() = apply {
         composeTestRule.onNodeWithTag(applyButtonTestTag).performClick()
     }
 
@@ -146,9 +153,16 @@ class HomeScreenRobot(
         composeTestRule.onNodeWithText(genreText).performClick()
     }
 
-    fun assertMovieTitleDisplayed(movieTitle: String) {
+    fun assertMovieTitleDisplayed(movieTitle: String) = apply {
         composeTestRule.waitOnAllNodesWithText(movieTitle)
         composeTestRule.onNodeWithText(movieTitle).assertIsDisplayed()
+    }
+
+    fun assertMovieTitleDisplayedAtPosition(index: Int, movieTitle: String) = apply {
+        composeTestRule.onNodeWithTag(movieListTestTag).performScrollToIndex(0)
+        composeTestRule.onNodeWithTag(movieListTestTag)
+            .onChildAt(index)
+            .assert(hasText(movieTitle))
     }
 
     fun clickWinnersOnlyRow() = apply {
@@ -332,11 +346,38 @@ class HomeScreenRobot(
         ).performClick()
     }
 
+    fun clickSortButton() = apply {
+        composeTestRule.waitOnAllNodesWithTag(sortButtonTestTag, useUnmergedTree = true)
+        composeTestRule.onNodeWithTag(sortButtonTestTag).performClick()
+        composeTestRule.waitUntil(timeoutMillis = 5000L) {
+            composeTestRule
+                .onAllNodesWithStringResId(R.string.sort_title)
+                .fetchSemanticsNodes().size == 1
+        }
+    }
+
+    fun clickTitleText() = apply {
+        composeTestRule.onNodeWithStringResId(R.string.title_label).performClick()
+    }
+
+    fun clickYearText() = apply {
+        composeTestRule.onNodeWithStringResId(R.string.year_label).performClick()
+    }
+
+    fun clickDescendingText() = apply {
+        composeTestRule.onNodeWithStringResId(R.string.descending_label).performClick()
+    }
+
+    fun clickAscendingText() = apply {
+        composeTestRule.onNodeWithStringResId(R.string.ascending_label).performClick()
+    }
+
     companion object {
         private const val startYearTestTag = "startYear"
         private const val endYearTestTag = "endYear"
         private const val applyButtonTestTag = "applyButton"
         private const val filterButtonTestTag = "filterButton"
+        private const val sortButtonTestTag = "sortButton"
         private const val searchButtonTestTag = "searchButton"
         private const val movieListTestTag = "movieList"
         private const val movieCardTestTag = "movieCard_"

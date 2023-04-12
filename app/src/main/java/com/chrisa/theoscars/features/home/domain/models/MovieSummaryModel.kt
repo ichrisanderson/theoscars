@@ -35,3 +35,13 @@ data class GenreModel(
     val name: String,
     val id: Long,
 )
+
+enum class SortOrder {
+    YEAR,
+    TITLE,
+}
+
+enum class SortDirection {
+    ASCENDING,
+    DESCENDING,
+}

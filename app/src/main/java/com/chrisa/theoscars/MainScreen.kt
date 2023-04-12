@@ -64,6 +64,7 @@ import androidx.navigation.compose.rememberNavController
 import com.chrisa.theoscars.features.home.presentation.FilterContent
 import com.chrisa.theoscars.features.home.presentation.HomeScreen
 import com.chrisa.theoscars.features.home.presentation.HomeViewModel
+import com.chrisa.theoscars.features.home.presentation.SortContent
 import com.chrisa.theoscars.features.watchlist.presentation.WatchlistScreen
 import com.chrisa.theoscars.features.watchlist.presentation.WatchlistViewModel
 import kotlinx.coroutines.launch
@@ -91,28 +92,46 @@ fun MainScreen(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentTabDestination = navBackStackEntry?.destination
     val isWatchlistTab = currentTabDestination?.route == MainDestinations.WATCHLIST
+    var modalSheetContent = remember { ModalSheetContent.FILTER }
 
     ModalBottomSheetLayout(
         sheetState = modalSheetState,
         sheetContent = {
             if (modalSheetState.isVisible) {
                 val filterModel = homeViewState.filterModel
+                val sortModel = homeViewState.sortModel
                 Surface {
-                    FilterContent(
-                        categories = filterModel.categories,
-                        selectedCategory = filterModel.selectedCategory,
-                        genres = filterModel.genres,
-                        selectedGenre = filterModel.selectedGenre,
-                        currentStartYear = filterModel.startYearString,
-                        currentEndYear = filterModel.endYearString,
-                        winnersOnly = filterModel.winnersOnly,
-                        onApplySelection = { newFilter ->
-                            homeViewModel.updateFilter(newFilter)
-                            coroutineScope.launch {
-                                modalSheetState.hide()
-                            }
-                        },
-                    )
+                    when (modalSheetContent) {
+                        ModalSheetContent.FILTER -> {
+                            FilterContent(
+                                categories = filterModel.categories,
+                                selectedCategory = filterModel.selectedCategory,
+                                genres = filterModel.genres,
+                                selectedGenre = filterModel.selectedGenre,
+                                currentStartYear = filterModel.startYearString,
+                                currentEndYear = filterModel.endYearString,
+                                winnersOnly = filterModel.winnersOnly,
+                                onApplySelection = { newFilter ->
+                                    homeViewModel.updateFilter(newFilter)
+                                    coroutineScope.launch {
+                                        modalSheetState.hide()
+                                    }
+                                },
+                            )
+                        }
+                        ModalSheetContent.SORT -> {
+                            SortContent(
+                                sortOrder = sortModel.sortOrder,
+                                sortDirection = sortModel.sortDirection,
+                                onApply = { newSortModel ->
+                                    homeViewModel.updateSort(newSortModel)
+                                    coroutineScope.launch {
+                                        modalSheetState.hide()
+                                    }
+                                },
+                            )
+                        }
+                    }
                 }
             }
         },
@@ -150,6 +169,13 @@ fun MainScreen(
                         viewModel = homeViewModel,
                         onFilterClick = {
                             coroutineScope.launch {
+                                modalSheetContent = ModalSheetContent.FILTER
+                                modalSheetState.show()
+                            }
+                        },
+                        onSortClick = {
+                            coroutineScope.launch {
+                                modalSheetContent = ModalSheetContent.SORT
                                 modalSheetState.show()
                             }
                         },
@@ -331,4 +357,9 @@ private enum class MainTabs(
         Icons.Default.CollectionsBookmark,
         MainDestinations.WATCHLIST,
     ),
+}
+
+private enum class ModalSheetContent {
+    FILTER,
+    SORT,
 }

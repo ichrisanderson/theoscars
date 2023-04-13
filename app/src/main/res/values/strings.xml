@@ -54,6 +54,8 @@
     <string name="empty_watch_list_title">To add movies you want to watch, tap the watchlist icon.</string>
     <string name="empty_watched_list_title">To record movies as watched, tap the watch icon.</string>
     <string name="item_selection_title">%1$d Selected</string>
+    <string name="to_watch_format">To Watch (%1$d)</string>
+    <string name="watched_format">Watched (%1$d)</string>
 
     <!-- Content Descriptions -->
     <string name="app_logo_description">The Oscars App Logo</string>

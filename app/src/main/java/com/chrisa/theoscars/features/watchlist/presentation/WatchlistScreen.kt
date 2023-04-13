@@ -100,7 +100,7 @@ private fun WatchlistScreenContent(
         item(key = "toWatchListTitle") {
             Text(
                 modifier = Modifier.padding(top = 8.dp),
-                text = "To Watch",
+                text = stringResource(id = R.string.to_watch_format, moviesToWatch.size),
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onSurface,
             )
@@ -130,7 +130,7 @@ private fun WatchlistScreenContent(
             Text(
                 modifier = Modifier
                     .padding(top = 32.dp),
-                text = "Watched",
+                text = stringResource(id = R.string.watched_format, moviesWatched.size),
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onSurface,
             )

@@ -140,6 +140,8 @@ data class ViewState(
     val filterModel: FilterModel,
     val sortModel: SortModel,
 ) {
+    val percentageWatched =
+        (100.0f * (movies.filter { it.hasWatched }.size / movies.size.toFloat()))
 
     companion object {
         fun default() = ViewState(

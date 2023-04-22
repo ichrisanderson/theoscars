@@ -56,6 +56,7 @@
     <string name="item_selection_title">%1$d Selected</string>
     <string name="to_watch_format">To Watch (%1$d)</string>
     <string name="watched_format">Watched (%1$d)</string>
+    <string name="watch_percentage_format">%1$.1f%% Watched</string>
 
     <!-- Content Descriptions -->
     <string name="app_logo_description">The Oscars App Logo</string>
@@ -75,7 +76,7 @@
     <string name="add_to_watched_list_icon_description">Add to watched list</string>
     <string name="mark_as_watched_icon_description">Mark as watched</string>
     <string name="mark_as_unwatched_icon_description">Mark as unwatched</string>
-    <string name="dismiss_label">Dismiss</string>
     <string name="movie_selected_description_format">%1$s Selected</string>
     <string name="sort_icon_description">Change sort order</string>
+    <string name="watched_progress_icon_description">Watched Progress Icon</string>
 </resources>

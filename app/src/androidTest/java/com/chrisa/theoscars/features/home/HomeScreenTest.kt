@@ -170,14 +170,18 @@ class HomeScreenTest {
     @Test
     fun assertWatchedToggle() {
         val movieId = 614934L
+        val expectedPercentageWatched = 1.9f // 1 movie / 54
         HomeScreenRobot(composeTestRule)
             .setContent()
             .scrollToMovie(movieId)
             .assertUnwatchedIconDisplayed(movieId)
+            .assertWatchlistPercentageValue(0f)
             .clickMarkAsWatched(movieId)
             .assertWatchedIconDisplayed(movieId)
+            .assertWatchlistPercentageValue(expectedPercentageWatched)
             .clickMarkAsUnwatched(movieId)
             .assertUnwatchedIconDisplayed(movieId)
+            .assertWatchlistPercentageValue(0f)
     }
 
     @Test

@@ -253,6 +253,12 @@ class HomeScreenRobot(
         ).assertDoesNotExist()
     }
 
+    fun assertWatchlistPercentageValue(percentage: Float) = apply {
+        val label = composeTestRule.getString(R.string.watch_percentage_format, percentage)
+        composeTestRule.onNodeWithText(label)
+            .assertIsDisplayed()
+    }
+
     fun clickRemoveFromWatchlist(movieId: Long) = apply {
         val description = composeTestRule.getString(R.string.remove_from_watchlist_icon_description)
         val tag = "${movieId}$watchActionsTestTag"

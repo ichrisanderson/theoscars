@@ -36,7 +36,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -47,9 +46,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Sort
+import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -104,7 +105,6 @@ fun HomeScreen(
     onMovieClick: (Long) -> Unit,
 ) {
     val viewState by viewModel.viewState.collectAsState()
-    val lazyListState = rememberLazyListState()
 
     if (viewState.isLoading) {
         Box(Modifier.fillMaxSize()) {
@@ -115,9 +115,9 @@ fun HomeScreen(
         }
     } else {
         HomeContent(
-            listState = lazyListState,
             filter = viewState.filterModel,
             movies = viewState.movies,
+            percentageWatched = viewState.percentageWatched,
             onFilterClick = onFilterClick,
             onSortClick = onSortClick,
             onMovieClick = onMovieClick,
@@ -130,9 +130,9 @@ fun HomeScreen(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun HomeContent(
-    listState: LazyListState,
     filter: FilterModel,
     movies: List<MovieSummaryModel>,
+    percentageWatched: Float,
     onFilterClick: () -> Unit,
     onSortClick: () -> Unit,
     onMovieClick: (Long) -> Unit,
@@ -148,29 +148,73 @@ private fun HomeContent(
                 onSortClick = onSortClick,
             )
         } else {
-            LazyColumn(
-                state = listState,
-                modifier = Modifier.testTag("movieList"),
-            ) {
-                stickyHeader {
-                    FilterBar(
-                        filter = filter,
-                        onFilterClick = onFilterClick,
-                        onSortClick = onSortClick,
-                    )
+            Box {
+                val lazyListState = rememberLazyListState()
+
+                LazyColumn(
+                    state = lazyListState,
+                    modifier = Modifier.testTag("movieList"),
+                ) {
+                    stickyHeader {
+                        FilterBar(
+                            filter = filter,
+                            onFilterClick = onFilterClick,
+                            onSortClick = onSortClick,
+                        )
+                    }
+                    items(items = movies, key = { it.id }) { movie ->
+                        MovieCard(
+                            movie = movie,
+                            onMovieClick = onMovieClick,
+                            onWatchedClick = onWatchedClick,
+                            onWatchlistClick = onWatchlistClick,
+                            modifier = Modifier
+                                .testTag("movieCard_${movie.id}")
+                                .animateItemPlacement(),
+                        )
+                    }
                 }
-                items(items = movies, key = { it.id }) { movie ->
-                    MovieCard(
-                        movie = movie,
-                        onMovieClick = onMovieClick,
-                        onWatchedClick = onWatchedClick,
-                        onWatchlistClick = onWatchlistClick,
-                        modifier = Modifier
-                            .testTag("movieCard_${movie.id}")
-                            .animateItemPlacement(),
-                    )
-                }
+                WatchedProgressOverlay(
+                    percentageWatched,
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(bottom = 12.dp),
+                )
             }
+        }
+    }
+}
+
+@Composable
+private fun WatchedProgressOverlay(
+    percentageWatched: Float,
+    modifier: Modifier = Modifier,
+) {
+    Card(
+        shape = MaterialTheme.shapes.small,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+            contentColor = MaterialTheme.colorScheme.primary,
+        ),
+        modifier = modifier,
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(12.dp),
+        ) {
+            Icon(
+                imageVector = Icons.Default.TrendingUp,
+                contentDescription = stringResource(id = R.string.watched_progress_icon_description),
+            )
+            Text(
+                text = stringResource(
+                    id = R.string.watch_percentage_format,
+                    percentageWatched,
+                ),
+                maxLines = 1,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(start = 12.dp),
+            )
         }
     }
 }
@@ -631,7 +675,6 @@ fun HomeContentPreview() {
     OscarsTheme {
         Surface {
             HomeContent(
-                listState = rememberLazyListState(),
                 filter = FilterModel.default(),
                 movies = listOf(
                     MovieSummaryModel(
@@ -649,10 +692,11 @@ fun HomeContentPreview() {
                         overview = "A cold night in December. Ebba waits for the tram to go home after a party, but the ride takes an unexpected turn.",
                         title = "Night Ride",
                         year = "2023",
-                        watchlistId = null,
-                        hasWatched = false,
+                        watchlistId = 123,
+                        hasWatched = true,
                     ),
                 ),
+                percentageWatched = 50f,
                 onFilterClick = { },
                 onSortClick = { },
                 onMovieClick = { },
@@ -669,9 +713,9 @@ fun HomeContentEmptyMoviesPreview() {
     OscarsTheme {
         Surface {
             HomeContent(
-                listState = rememberLazyListState(),
                 filter = FilterModel.default(),
                 movies = emptyList(),
+                percentageWatched = 0f,
                 onFilterClick = { },
                 onSortClick = { },
                 onMovieClick = { },

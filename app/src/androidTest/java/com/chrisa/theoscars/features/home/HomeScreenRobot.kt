@@ -159,6 +159,7 @@ class HomeScreenRobot(
     }
 
     fun assertMovieTitleDisplayedAtPosition(index: Int, movieTitle: String) = apply {
+        composeTestRule.waitOnAllNodesWithTag(movieListTestTag)
         composeTestRule.onNodeWithTag(movieListTestTag).performScrollToIndex(0)
         composeTestRule.onNodeWithTag(movieListTestTag)
             .onChildAt(index)

@@ -83,7 +83,7 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ env.CACHE_VERSION }}
 
       - name: Gradle cache
-        uses: gradle/gradle-build-action@v2.4.0
+        uses: gradle/gradle-build-action@v2.4.2
 
       - name: AVD cache
         uses: actions/cache@v3
